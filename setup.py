@@ -7,4 +7,4 @@ setup(name='neuronal-network-analyzer',
       author='Conrad Burchert and Moritz Schneider',
       author_email='bconrad@student.ethz.ch, scmoritz@student.ethz.ch',
       py_modules='analyzer'
-     )
+      )
