@@ -7,8 +7,7 @@ class Loader(object):
 
     def __init__(self, path):
         """Constructor, which opens the specified path in
-        implementations"""
-
+        implementations."""
         raise NotImplemented
 
     @classmethod

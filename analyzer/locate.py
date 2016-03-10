@@ -1,16 +1,17 @@
 """ Base class for a localisation algorithm """
 
 
-class locate(object):
+class Locate(object):
     """ Base class for an algorithm, that locates neurons in a frame.
     Implementations must overwrite"""
+
     def __init__(self):
         """ Constructor. Possible initialization of the implementation
         is calculated here."""
 
         raise NotImplemented
 
-    def analyze_frame(cls, frame):
+    def analyze_frame(self, frame):
         """ Analyze new frame
         @param frame: Numpy array of a new frame
 
