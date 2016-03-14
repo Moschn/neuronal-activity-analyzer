@@ -18,7 +18,7 @@ class Smooth_locator(Locate):
         # smooth the image
         img = self._smooth(img, 5)
         # threshold to cut off all connections between neurons
-        threshold = self._calcThreshold(img, 0.1)
+        threshold = self._calcThreshold(img, 0.05)
         img_thresholded = img > threshold
 
         # If wanted the cleaned image can be displayed
@@ -65,9 +65,9 @@ class Smooth_locator(Locate):
         while pixels_to_check:
             index = pixels_to_check.pop()
 
-            if (index[0] < 0 and
-                    index[1] < 0 and
-                    index[0] >= img.shape[0] and
+            if (index[0] < 0 or
+                    index[1] < 0 or
+                    index[0] >= img.shape[0] or
                     index[1] >= img.shape[1]):
                 continue
             if not img[index[0], index[1]]:

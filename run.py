@@ -2,6 +2,7 @@
 import numpy
 import analyzer
 from matplotlib import pyplot
+from matplotlib import gridspec
 import matplotlib.cm as cm
 from analyzer.smooth_locate import Smooth_locator
 from analyzer.integrator_sum import Integrator_sum
@@ -29,18 +30,18 @@ while True:
         print('finished')
         break
 
-print(activities)
-
-for neuron_activity in activities.T:
-    pyplot.plot(neuron_activity)
-
-pyplot.show()
-
-print(activities)
+grid = gridspec.GridSpec(2, 2)
 
 pyplot.figure(1)
-pyplot.subplot(211)
+pyplot.subplot(grid[0, 0])
 pyplot.imshow(frame,  cmap=cm.Greys_r)
-pyplot.subplot(212)
-pyplot.imshow(roi,  cmap=cm.Greys_r)
+pyplot.subplot(grid[0, 1])
+pyplot.imshow(roi)
+for i in range(0, numpy.amax(roi)+1):
+    coordinates_neuron = numpy.where(roi == i)
+    pyplot.text(coordinates_neuron[1][0]+10,
+                coordinates_neuron[0][0]+10, i, fontsize=20, color='white')
+pyplot.subplot(grid[1, :])
+for neuron_activity in activities.T:
+    pyplot.plot(neuron_activity)
 pyplot.show()
