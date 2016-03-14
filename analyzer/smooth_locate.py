@@ -16,94 +16,71 @@ class Smooth_locator(Locate):
         img = numpy.copy(frame)
 
         # smooth the image
-        img = self.smooth(img, 5)
+        img = self._smooth(img, 5)
         # threshold to cut off all connections between neurons
-        threshold = self.calcThreshold(img, 0.05)
-        self.threshold(img, threshold)
+        threshold = self._calcThreshold(img, 0.1)
+        img_thresholded = img > threshold
 
         # If wanted the cleaned image can be displayed
-        # pyplot.imshow(img,  cmap=cm.Greys_r)
+        # pyplot.imshow(img_thresholded,  cmap=cm.Greys_r)
         # pyplot.show()
 
-        # Flood fill algorithm for finding the connected spots (neurons)
-        threshold = self.calcThreshold(img, 0.05)
-        result = self.findNeurons(img, threshold)
+        result = self._findNeurons(img_thresholded)
 
         return result
 
-    def calcThreshold(self, frame, percent):
-        threshold = numpy.amax(frame) - numpy.amin(frame)
-        threshold = numpy.amin(frame) + threshold*percent
+    def _calcThreshold(self, frame, percentage):
+        color_range = numpy.amax(frame) - numpy.amin(frame)
+        threshold = numpy.amin(frame) + percentage*color_range
         return threshold
 
-    def smooth(self, frame, radius):
+    def _smooth(self, frame, radius):
         return scipy.ndimage.filters.gaussian_filter(
             frame, radius, mode='nearest')
 
-    def threshold(self, frame, threshold):
-        lowIndices = frame < threshold
-        frame[lowIndices] = 0
-        return frame
-
-    def countNeurons(self, frame, threshold):
-        img = numpy.copy(frame)
-        counter = 0
-        l = []
-        while(numpy.any(img > threshold)):
-            highindices = numpy.where(img > numpy.amax(img)-10)
-            l.append((highindices[0][0], highindices[1][0]))
-            self.forkDestroy(
-                img, highindices[0][0], highindices[1][0], threshold)
+    def _findNeurons(self, img):
+        neuron_map = numpy.zeros(numpy.shape(img), dtype=numpy.int8)
+        counter = 1
+        while numpy.any(img):
+            # Get one pixel belonging to a neuron and label its region
+            indices = numpy.where(img)
+            self._findRegion(
+                img, neuron_map, indices[0][0], indices[1][0], counter)
             counter += 1
-            print(counter)
-            # pyplot.imshow(img,  cmap=cm.Greys_r)
-            # pyplot.show()
+        print("Number of ROI: {}".format(counter-1))
+        return neuron_map
 
-        for (x, y) in l:
-            img[x, y] = 0xffff
-            print((x, y))
-        return counter
+    def _findRegion(self, img, target, x, y, label):
+        """ Finds a region of True values in img, and writes index to all
+        pixels of that area in target
 
-    def findNeurons(self, img, threshold):
-        result = numpy.zeros(numpy.shape(img), dtype=numpy.int8)
-        counter = 0
-        l = []
-        while(numpy.any(img > threshold)):
-            highindices = numpy.where(img > numpy.amax(img)-10)
-            l.append((highindices[0][0], highindices[1][0]))
-            self.forkCount(
-                img, highindices[0][0], highindices[1][0], threshold,
-                result, counter)
-            counter += 1
-        print("Number of ROI: {}".format(counter))
-        return result
+        Args:
+          img: Array to find ROIs in
+          target: Array to write ROI to
+          x, y: Starting point to fill the ROI
+          label: Label of the ROI
+        """
 
-    def forkDestroy(self, frame, x, y, threshold):
-        """ This function deletes the current pixel and then calls itself width
-        all neighbour white pixels """
-        # print(frame[max(0, x-1):x+2, max(y-1, 0):y+2])
-        if not numpy.any(frame[max(0, x-1):x+2, max(0, y-1):y+2]) > 0:
-            return
-        for x2 in range(max(0, x-2), min(x+3, frame.shape[0])):
-            for y2 in range(max(0, y-2), min(y+3, frame.shape[1])):
-                frame[x2][y2] = 0
-        for x2 in range(max(0, x-3), min(x+4, frame.shape[0]), 3):
-            for y2 in range(max(0, y-3), min(y+4, frame.shape[1]), 3):
-                if frame[x2][y2] > threshold:
-                    self.forkDestroy(frame, x2, y2, threshold)
+        pixels_to_check = [(x, y)]
+        while pixels_to_check:
+            index = pixels_to_check.pop()
 
-    def forkCount(self, frame, x, y, threshold, result, counter):
-        """ This function sets the counter at the current pixel in the result
-        arrayand then calls itself with all neighbour pixels above the
-        threshold """
-        # print(frame[max(0, x-1):x+2, max(y-1, 0):y+2])
-        if not numpy.any(frame[max(0, x-1):x+2, max(0, y-1):y+2]) > 0:
-            return
-        for x2 in range(max(0, x-2), min(x+3, frame.shape[0])):
-            for y2 in range(max(0, y-2), min(y+3, frame.shape[1])):
-                frame[x2][y2] = 0
-                result[x2][y2] = counter
-        for x2 in range(max(0, x-3), min(x+4, frame.shape[0]), 3):
-            for y2 in range(max(0, y-3), min(y+4, frame.shape[1]), 3):
-                if frame[x2][y2] > threshold:
-                    self.forkCount(frame, x2, y2, threshold, result, counter)
+            if (index[0] < 0 and
+                    index[1] < 0 and
+                    index[0] >= img.shape[0] and
+                    index[1] >= img.shape[1]):
+                continue
+            if not img[index[0], index[1]]:
+                continue
+
+            img[index[0], index[1]] = False
+            target[index[0], index[1]] = label
+
+            pixels_to_check.append((index[0] - 1, index[1] - 1))
+            pixels_to_check.append((index[0] - 1, index[1]))
+            pixels_to_check.append((index[0] - 1, index[1] + 1))
+            pixels_to_check.append((index[0], index[1] - 1))
+            pixels_to_check.append((index[0], index[1] + 1))
+            pixels_to_check.append((index[0] + 1, index[1] - 1))
+            pixels_to_check.append((index[0] + 1, index[1]))
+            pixels_to_check.append((index[0] + 1, index[1] + 1))
