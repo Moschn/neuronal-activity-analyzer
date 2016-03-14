@@ -66,7 +66,7 @@ class Smooth_locator(Locate):
 
     def findNeurons(self, img, threshold):
         result = numpy.zeros(numpy.shape(img), dtype=numpy.int8)
-        counter = 0
+        counter = 1
         l = []
         while(numpy.any(img > threshold)):
             highindices = numpy.where(img > numpy.amax(img)-10)
@@ -75,7 +75,7 @@ class Smooth_locator(Locate):
                 img, highindices[0][0], highindices[1][0], threshold,
                 result, counter)
             counter += 1
-        print("Number of ROI: {}".format(counter))
+        print("Number of ROI: {}".format(counter-1))
         return result
 
     def forkDestroy(self, frame, x, y, threshold):
