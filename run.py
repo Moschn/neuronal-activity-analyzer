@@ -1,12 +1,10 @@
 #!/usr/bin/env python
+import numpy
 import analyzer
 from matplotlib import pyplot
 import matplotlib.cm as cm
 from analyzer.smooth_locate import Smooth_locator
 from analyzer.integrator_sum import Integrator_sum
-
-from PIL import Image
-import numpy
 
 loader = analyzer.Loader.open('test/testfile.tif')
 
