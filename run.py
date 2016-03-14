@@ -37,11 +37,14 @@ pyplot.subplot(grid[0, 0])
 pyplot.imshow(frame,  cmap=cm.Greys_r)
 pyplot.subplot(grid[0, 1])
 pyplot.imshow(roi)
-for i in range(0, numpy.amax(roi)+1):
+for i in range(1, numpy.amax(roi)+1):
     coordinates_neuron = numpy.where(roi == i)
     pyplot.text(coordinates_neuron[1][0]+10,
                 coordinates_neuron[0][0]+10, i, fontsize=20, color='white')
 pyplot.subplot(grid[1, :])
+neuron_nr = 1
 for neuron_activity in activities.T:
-    pyplot.plot(neuron_activity)
+    pyplot.plot(neuron_activity, label='neuron {}'.format(neuron_nr))
+    neuron_nr += 1
+pyplot.legend()
 pyplot.show()
