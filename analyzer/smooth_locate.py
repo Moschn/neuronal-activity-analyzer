@@ -8,7 +8,12 @@ class Smooth_locator(Locate):
     def __init__(self, smooth=5, threshold=0.05):
         self.smooth = smooth
         self.threshold = threshold
-        pass
+
+    def set_threshold(self, threshold):
+	self.threshold = threshold
+
+    def set_smooth(self, smooth):
+	self.smooth = smooth
 
     def analyze_frame(self, frame):
         # copy numpy array, so it still stay intact for analysis
@@ -16,20 +21,22 @@ class Smooth_locator(Locate):
 
         # smooth the image
         if self.smooth > 0:
-            img = self._smooth(img, self.smooth)
+            self.img_smoothed = self._smooth(img, self.smooth)
+	else:
+	    self.img_smoothed = img
 
         # global threshold
         if self.threshold > 0:
             threshold = self._calcThreshold(img, self.threshold)
-            img_thresholded = img > threshold
+            self.img_thresholded = self.img_smoothed > threshold
         else:
-            img_thresholded = img
+            self.img_thresholded = self.img_smoothed
 
         # If wanted the cleaned image can be displayed
         # pyplot.imshow(img_thresholded,  cmap=cm.Greys_r)
         # pyplot.show()
 
-        result = self._findNeurons(img_thresholded)
+        result = self._findNeurons(self.img_thresholded)
 
         return result
 
