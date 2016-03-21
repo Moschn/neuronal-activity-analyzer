@@ -4,14 +4,21 @@ import analyzer
 from matplotlib import pyplot
 from matplotlib import gridspec
 import matplotlib.cm as cm
-from analyzer.smooth_locate import Smooth_locator
+# from analyzer.smooth_locate import Smooth_locator
+from analyzer.watershed_locate import Watershed_locate
 from analyzer.integrator_sum import Integrator_sum
 
 loader = analyzer.Loader.open('test/testfile.tif')
 
-frame = loader.next_frame()
+frame = loader.next_frame()/1000
 
-segment = Smooth_locator()
+# avarage first 50 frames
+for i in range(1, 1000):
+    frame += loader.next_frame()/1000
+
+loader = analyzer.Loader.open('test/testfile.tif')
+
+segment = Watershed_locate(1, 1)
 roi = segment.analyze_frame(frame)
 
 sum_roi = Integrator_sum(roi)

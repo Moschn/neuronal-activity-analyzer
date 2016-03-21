@@ -2,3 +2,4 @@ numpy
 pillow
 matplotlib
 wxpython
+scikit-image
