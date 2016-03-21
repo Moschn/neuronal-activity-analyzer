@@ -44,3 +44,13 @@ class Loader(object):
         """
 
         raise NotImplemented
+
+    def get_frame(self, index):
+        """ Overwritten in implementation
+
+        @returns: numpy array [height][width] containing pixel data
+
+        @throws: EndOfFile if frame is not available
+        """
+
+        raise NotImplemented

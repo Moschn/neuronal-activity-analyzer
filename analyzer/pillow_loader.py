@@ -24,3 +24,9 @@ class PILLoader(Loader):
         self.im.seek(self.current_frame)
 
         return numpy.array(self.im)
+
+    def get_frame(self, index):
+        self.current_frame = index
+        self.im.seek(index)
+
+        return numpy.array(self.im)
