@@ -184,7 +184,7 @@ class MainWindow(wx.Frame):
     def setFile(self, path):
         self.path = path
 
-        self.loader = analyzer.Loader.open(path)
+        self.loader = analyzer.loader.open(path)
         self.update()
 
     def onThresholdSliderScroll(self, event):

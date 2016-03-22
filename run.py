@@ -11,7 +11,7 @@ from analyzer.kmeans_locate import K_means_locate
 from analyzer.integrator_sum import Integrator_sum
 from sys import argv
 
-loader = analyzer.Loader.open(argv[1])
+loader = analyzer.loader.open(argv[1])
 
 frame = loader.next_frame()
 
