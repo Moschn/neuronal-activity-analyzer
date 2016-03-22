@@ -10,10 +10,10 @@ class Smooth_locator(Locate):
         self.threshold = threshold
 
     def set_threshold(self, threshold):
-	self.threshold = threshold
+        self.threshold = threshold
 
     def set_smooth(self, smooth):
-	self.smooth = smooth
+        self.smooth = smooth
 
     def analyze_frame(self, frame):
         # copy numpy array, so it still stay intact for analysis
@@ -22,8 +22,8 @@ class Smooth_locator(Locate):
         # smooth the image
         if self.smooth > 0:
             self.img_smoothed = self._smooth(img, self.smooth)
-	else:
-	    self.img_smoothed = img
+        else:
+            self.img_smoothed = img
 
         # global threshold
         if self.threshold > 0:
