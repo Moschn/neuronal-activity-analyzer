@@ -10,11 +10,11 @@ from analyzer.integrator_sum import Integrator_sum
 
 loader = analyzer.Loader.open('test/testfile.tif')
 
-frame = loader.next_frame()/1000
+frame = loader.next_frame()
 
 # avarage first 50 frames
-for i in range(1, 1000):
-    frame += loader.next_frame()/1000
+#for i in range(1, 1000):
+#    frame += loader.next_frame()/1000
 
 loader = analyzer.Loader.open('test/testfile.tif')
 
