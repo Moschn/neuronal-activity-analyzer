@@ -7,8 +7,9 @@ import matplotlib.cm as cm
 # from analyzer.smooth_locate import Smooth_locator
 from analyzer.watershed_locate import Watershed_locate
 from analyzer.integrator_sum import Integrator_sum
+from sys import argv
 
-loader = analyzer.Loader.open('test/testfile.tif')
+loader = analyzer.Loader.open(argv[1])
 
 frame = loader.next_frame()
 
@@ -16,7 +17,7 @@ frame = loader.next_frame()
 #for i in range(1, 1000):
 #    frame += loader.next_frame()/1000
 
-loader = analyzer.Loader.open('test/testfile.tif')
+loader = analyzer.Loader.open(argv[1])
 
 segment = Watershed_locate(1, 1)
 roi = segment.analyze_frame(frame)
