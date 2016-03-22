@@ -2,18 +2,14 @@ from analyzer.locate import Locate
 import numpy
 import scipy.ndimage
 import skimage
-from skimage.morphology import watershed
 from skimage.feature import peak_local_max
-
 from matplotlib import pyplot
-from matplotlib import gridspec
-import matplotlib.cm as cm
 
 
-class Watershed_locate(Locate):
+class Random_walker_locate(Locate):
 
-    def __init__(self, watershed=1, threshold=1):
-        self.watershed = watershed
+    def __init__(self, random_walker=1, threshold=1):
+        self.random_walker = random_walker
         self.threshold = threshold
         pass
 
@@ -21,15 +17,15 @@ class Watershed_locate(Locate):
         # copy numpy array, so it still stay intact for analysis
         img = numpy.copy(frame)
 
-        # img = scipy.ndimage.filters.gaussian_filter(img, 1)
+        img = scipy.ndimage.filters.gaussian_filter(img, 1)
         # li threshold
         if self.threshold > 0:
             threshold = skimage.filters.threshold_li(img)
             img = img > threshold
 
-        # watershed
-        if self.watershed > 0:
-            result = self._watershed(img)
+        # random walker
+        if self.random_walker > 0:
+            result = self._random_walker(img)
 
         # If wanted the cleaned image can be displayed
         pyplot.imshow(result)
@@ -48,7 +44,7 @@ class Watershed_locate(Locate):
         return scipy.ndimage.filters.gaussian_filter(
             frame, radius, mode='nearest')
 
-    def _watershed(self, frame):
+    def _random_walker(self, frame):
         # from http://www.scipy-lectures.org/packages/scikit-image/
         distance = scipy.ndimage.distance_transform_edt(frame)
         # print(distance)
@@ -58,21 +54,12 @@ class Watershed_locate(Locate):
         # print(local_maxi)
         markers = skimage.morphology.label(local_maxi)
         # markers = scipy.ndimage.label(local_maxi)[0]
-        # print(markers)
-        labels = watershed(-distance, markers, mask=frame)
-        # for i in range(0, 512, 10):
-        #    for j in range(0, 512, 10):
-        #        print(labels[i][j], end=" ")
-        #    print("")
-        # pyplot.imshow(labels)
-        # pyplot.show()
 
         from skimage import segmentation
         # Transform markers image so that 0-valued pixels are to
         # be labelled, and -1-valued pixels represent background
         markers[~frame] = -1
-        # return segmentation.random_walker(frame, markers)
-        return labels
+        return segmentation.random_walker(frame, markers)
 
     def _findNeurons(self, img):
         neuron_map = numpy.zeros(numpy.shape(img), dtype=numpy.int8)

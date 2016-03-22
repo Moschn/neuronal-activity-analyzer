@@ -4,22 +4,25 @@ import analyzer
 from matplotlib import pyplot
 from matplotlib import gridspec
 import matplotlib.cm as cm
-# from analyzer.smooth_locate import Smooth_locator
+from analyzer.smooth_locate import Smooth_locator
 from analyzer.watershed_locate import Watershed_locate
+from analyzer.random_walker_locate import Random_walker_locate
 from analyzer.integrator_sum import Integrator_sum
 from sys import argv
 
 loader = analyzer.loader.open(argv[1])
 
-frame = loader.next_frame()/1000
+frame = loader.next_frame()
 
 # avarage first 50 frames
-for i in range(1, 1000):
-    frame += loader.next_frame()/1000
+# for i in range(1, 1000):
+#    frame += loader.next_frame()/1000
 
-loader = analyzer.loader.open(argv[1])
+# if the frame is avaraged we need to reset the frame counter in the loader
+# frame = loader.get_frame(0)
 
-segment = Watershed_locate(1, 1)
+# segment = Watershed_locate(1, 1)
+segment = Random_walker_locate()
 roi = segment.analyze_frame(frame)
 
 sum_roi = Integrator_sum(roi)
