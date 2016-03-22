@@ -1,6 +1,7 @@
 from analyzer.locate import Locate
 import numpy
 import scipy.ndimage
+from skimage.morphology import label
 
 
 class Smooth_locator(Locate):
@@ -36,9 +37,10 @@ class Smooth_locator(Locate):
         # pyplot.imshow(img_thresholded,  cmap=cm.Greys_r)
         # pyplot.show()
 
-        result = self._findNeurons(self.img_thresholded)
+        # labels = self._findNeurons(self.img_thresholded)
+        labels = label(self.img_thresholded, neighbors=8, background=0)
 
-        return result
+        return labels
 
     def _calcThreshold(self, frame, percentage):
         color_range = numpy.amax(frame) - numpy.amin(frame)
