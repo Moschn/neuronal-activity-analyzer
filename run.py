@@ -7,6 +7,7 @@ import matplotlib.cm as cm
 from analyzer.smooth_locate import Smooth_locator
 from analyzer.watershed_locate import Watershed_locate
 from analyzer.random_walker_locate import Random_walker_locate
+from analyzer.kmeans_locate import K_means_locate
 from analyzer.integrator_sum import Integrator_sum
 from sys import argv
 
@@ -21,8 +22,10 @@ frame = loader.next_frame()
 # if the frame is avaraged we need to reset the frame counter in the loader
 # frame = loader.get_frame(0)
 
+segment = Smooth_locator()
 # segment = Watershed_locate(1, 1)
-segment = Random_walker_locate()
+# segment = Random_walker_locate()
+# segment = K_means_locate()
 roi = segment.analyze_frame(frame)
 
 sum_roi = Integrator_sum(roi)
