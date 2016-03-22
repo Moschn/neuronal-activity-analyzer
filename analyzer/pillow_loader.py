@@ -15,7 +15,7 @@ class PILLoader(Loader):
     def can_open(cls, path):
         try:
             Image.open(path)
-        except OSError:
+        except:
             return False
         return True
 
