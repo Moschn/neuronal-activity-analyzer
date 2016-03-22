@@ -30,3 +30,6 @@ class PILLoader(Loader):
         self.im.seek(index)
 
         return numpy.array(self.im)
+
+    def frame_count(self):
+        return self.im.n_frames
