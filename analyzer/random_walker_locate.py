@@ -31,14 +31,7 @@ class Random_walker_locate(Locate):
         pyplot.imshow(result)
         pyplot.show()
 
-        # result = self._findNeurons(img_thresholded)
-
         return result
-
-    def _calcThreshold(self, frame, percentage):
-        color_range = numpy.amax(frame) - numpy.amin(frame)
-        threshold = numpy.amin(frame) + percentage*color_range
-        return threshold
 
     def _smooth(self, frame, radius):
         return scipy.ndimage.filters.gaussian_filter(
@@ -47,16 +40,11 @@ class Random_walker_locate(Locate):
     def _random_walker(self, frame):
         # from http://www.scipy-lectures.org/packages/scikit-image/
         distance = scipy.ndimage.distance_transform_edt(frame)
-        # print(distance)
         local_maxi = peak_local_max(distance, indices=False,
                                     footprint=numpy.ones((10, 10)),
                                     labels=frame)
-        # print(local_maxi)
         markers = skimage.morphology.label(local_maxi)
-        # markers = scipy.ndimage.label(local_maxi)[0]
 
         from skimage import segmentation
-        # Transform markers image so that 0-valued pixels are to
-        # be labelled, and -1-valued pixels represent background
         markers[~frame] = -1
         return segmentation.random_walker(frame, markers)

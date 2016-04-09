@@ -2,11 +2,5 @@ TODO:
 
 * howto load all possible locate/integrator classes automaticly?
 
-
-Watershed
 Mean/std deviation
-otsu threshold
-auto threshold
-Milestones
 parametrisieren
-cxd: https://pypi.python.org/pypi/fabio

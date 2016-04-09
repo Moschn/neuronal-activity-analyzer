@@ -22,8 +22,8 @@ frame = loader.next_frame()
 # if the frame is avaraged we need to reset the frame counter in the loader
 # frame = loader.get_frame(0)
 
-segment = Smooth_locator()
-# segment = Watershed_locate(1, 1)
+# segment = Smooth_locator()
+segment = Watershed_locate(1, 1)
 # segment = Random_walker_locate()
 # segment = K_means_locate()
 roi = segment.analyze_frame(frame)
