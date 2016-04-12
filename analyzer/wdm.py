@@ -2,9 +2,10 @@
 "Spike Detection Using the Continuous Wavelet Transform"
 Authors: Nenadic, Zoran and Burdick, Joel W"""
 from analyzer.spike_detection import Spike_detection
-from math import floor, ceil, log, sqrt, exp, pi
+from math import floor, ceil, log, sqrt, exp, pi, fabs
 import numpy
 from skimage.feature import peak_local_max
+
 
 class WDM(Spike_detection):
 
@@ -18,20 +19,62 @@ class WDM(Spike_detection):
     def detect_spikes(self, dataset):
         wavelet_transform = self._wavelet_transform(dataset,
                                                     self.wavelet_difference_of_gauss)
-
+        
         # remove noise
         wavelet_transform_threshold = self._wavelet_remove_noise(
             wavelet_transform)
-        
+
+        #maxima = self._find_spikes(wavelet_transform_threshold)
+
         maxima = numpy.zeros(len(dataset))
         for i in range(0, len(wavelet_transform_threshold)):
             wavelet_row = wavelet_transform_threshold[i]
             local_maxima = self._find_local_maxima1D(wavelet_row, 1)
             maxima = numpy.add(maxima, local_maxima)
+
+        # threshold mean/2
+        # mean = numpy.mean(maxima)
+        # lowindices = maxima < mean
+        # maxima[lowindices] = 0
+            
+        time = []
+        i = 0
+        while i < len(maxima)-1:
+            j = i
+            while maxima[j] <= 0 and j < len(maxima)-1:
+                j += 1
+            while maxima[j] > 0 and j < len(maxima)-1:
+                j += 1
+            if j != len(maxima)-1:
+                time.append(numpy.argmax(maxima[i:j]) + i)
+            i = j
+
+        return (maxima, time)
+
+    def _find_spikes(self, wavelet_transform):
+        maxima = numpy.zeros(len(wavelet_transform[0]))
+        for i in range(0, len(wavelet_transform)):
+            avg = numpy.mean(wavelet_transform[i])
+            var = numpy.median(numpy.fabs(wavelet_transform[i]-avg))/0.6745
+            mean = numpy.mean(wavelet_transform[i])
+            l = 0.188
+            l_m = 36.7368
+            gamma = self.noise_probability[i]
+
+            if gamma == 0:
+                gamma = 1/len(wavelet_transform[i])
+
+            if mean != 0:
+                threshold = mean/2 + var**2 / mean * (l * l_m + log(gamma))
+            else:
+                threshold = mean/2
+
+            maxima = numpy.add(maxima, wavelet_transform[i] > threshold)
+
         return maxima
 
     def _find_local_maxima1D(self, dataset, size):
-        """ This function finds local maxima in a 1D array. The size is 
+        """ This function finds local maxima in a 1D array. The size is
         specified in datapoints. I think this only works for size=1"""
         # input_abs = numpy.absolute(dataset)
         input_abs = dataset
@@ -39,9 +82,9 @@ class WDM(Spike_detection):
         for i in range(0, len(input_abs)-size):
             cur_cluster = numpy.sum(input_abs[i:i+size])
             bigger_cluster = False
-            for j in range(max(0, i-size//2), min(len(dataset)-size, i+size//2)):
-                if cur_cluster > numpy.sum(input_abs[j:j+size]):
-                    bigger_cluster = True
+            # for j in range(max(0, i-size//2), min(len(dataset)-size, i+size//2)):
+            #    if cur_cluster > numpy.sum(input_abs[j:j+size]):
+            #        bigger_cluster = True
 
             if bigger_cluster is False:
                 if i < size:
@@ -60,16 +103,29 @@ class WDM(Spike_detection):
 
     def _wavelet_remove_noise(self, wavelet_transform):
         wavelet_transform_threshold = numpy.copy(wavelet_transform)
+        self.noise_probability = []
         for i in range(0, len(wavelet_transform)):
+            wavelet_row = wavelet_transform[i][self.min_spike_width:
+                                               (len(wavelet_transform) -
+                                                self.min_spike_width)]
             # estimate variance
             # according to the papaer this is accurate
-            avg_wavelet_transform = numpy.average(wavelet_transform[i])
-            variance = numpy.median(wavelet_transform[i]-avg_wavelet_transform)
+            avg = numpy.mean(wavelet_row)
+            variance = numpy.median(numpy.fabs(wavelet_row-avg))
             threshold = variance/0.6745*sqrt(2*log(len(wavelet_transform[i])))
-
+            
             # hard threshold the values below this threshold
-            lowindices = wavelet_transform[i] < threshold
+            lowindices = wavelet_transform_threshold[i] < threshold
             wavelet_transform_threshold[i][lowindices] = 0
+            
+            # append probability to threshold_probability
+            # used in probabilistic test for spikes
+            probability = numpy.sum(lowindices)/(len(wavelet_transform[i]) -
+                                                 numpy.sum(lowindices)+1)
+            print("{}: nr of cut values: {}, percent: {}".format(threshold,
+                                                                 numpy.sum(lowindices),
+                                                                 probability))
+            self.noise_probability.append(probability)
 
         return wavelet_transform_threshold
 
@@ -78,7 +134,8 @@ class WDM(Spike_detection):
                           len(dataset)))
         for j in range(self.min_spike_width, self.max_spike_width):
             wavelet = gen_wavelet(j)
-            wt[j-self.min_spike_width] = numpy.convolve(dataset, wavelet, 'same')
+            conv = numpy.convolve(dataset, wavelet, 'valid')
+            wt[j-self.min_spike_width] = numpy.lib.pad(conv, ((j-1)//2, (j)//2), 'constant', constant_values=0)
         return wt
 
     def wavelet_difference_of_gauss(self, number_of_points):
@@ -90,9 +147,7 @@ class WDM(Spike_detection):
         sq2pi = sqrt(2*numpy.pi)
         for i in range(0, number_of_points):
             x = i / number_of_points - 0.5
-            print(x)
             g1 = 1 / (sq2pi * sigma1) * exp(-0.5*x*x/(sigma1*sigma1))
-            print(g1)
             g2 = 1 / (sq2pi * sigma2) * exp(-0.5*x*x/(sigma2*sigma2))
             wavelet[i] = g1 - g2
         energy = numpy.dot(wavelet, wavelet)

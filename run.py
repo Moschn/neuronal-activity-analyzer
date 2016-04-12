@@ -63,25 +63,34 @@ for neuron_activity in activities.T:
 pyplot.legend()
 pyplot.show()
 
-import pywt
+# import pywt
 
-(cA, cD) = pywt.dwt(activities.T[10], 'bior1.5')
+# (cA, cD) = pywt.dwt(activities.T[1], 'bior1.5')
 
-pyplot.figure(2)
-pyplot.subplot(311)
-pyplot.plot(activities.T[10])
-pyplot.subplot(312)
-pyplot.plot(cA)
-pyplot.subplot(313)
-pyplot.plot(cD)
-pyplot.show()
+# pyplot.figure(2)
+# pyplot.subplot(311)
+# pyplot.plot(activities.T[1])
+# pyplot.subplot(312)
+# pyplot.plot(cA)
+# pyplot.subplot(313)
+# pyplot.plot(cD)
+# pyplot.show()
 
 from analyzer.wdm import WDM
-t = WDM(60, 150)
-maxima = t.detect_spikes(activities.T[10])
+t = WDM(60, 350)
+(maxima, time) = t.detect_spikes(activities.T[1])
 pyplot.figure(1)
-pyplot.subplot(211)
-pyplot.plot(activities.T[10])
-pyplot.subplot(212)
+pyplot.subplot(311)
+pyplot.plot(activities.T[1])
+pyplot.subplot(312)
 pyplot.plot(maxima)
+time_filled = numpy.zeros(len(maxima))
+for t in time:
+    time_filled[t] = 1
+pyplot.subplot(313)
+pyplot.plot(time_filled)
+
+print(numpy.mean(maxima))
+print(numpy.var(maxima))
+
 pyplot.show()
