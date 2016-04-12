@@ -2,7 +2,7 @@
 "Spike Detection Using the Continuous Wavelet Transform"
 Authors: Nenadic, Zoran and Burdick, Joel W"""
 from analyzer.spike_detection import Spike_detection
-from math import floor, ceil, log, sqrt
+from math import floor, ceil, log, sqrt, exp, pi
 import numpy
 from skimage.feature import peak_local_max
 
@@ -17,7 +17,7 @@ class WDM(Spike_detection):
 
     def detect_spikes(self, dataset):
         wavelet_transform = self._wavelet_transform(dataset,
-                                                    self.wavelet_sym6)
+                                                    self.wavelet_difference_of_gauss)
 
         # remove noise
         wavelet_transform_threshold = self._wavelet_remove_noise(
@@ -80,6 +80,23 @@ class WDM(Spike_detection):
             wavelet = gen_wavelet(j)
             wt[j-self.min_spike_width] = numpy.convolve(dataset, wavelet, 'same')
         return wt
+
+    def wavelet_difference_of_gauss(self, number_of_points):
+        """ This function returns a wavelet created by a difference of two gauss
+        functions"""
+        sigma1 = 0.1
+        sigma2 = 0.4
+        wavelet = numpy.zeros((number_of_points))
+        sq2pi = sqrt(2*numpy.pi)
+        for i in range(0, number_of_points):
+            x = i / number_of_points - 0.5
+            print(x)
+            g1 = 1 / (sq2pi * sigma1) * exp(-0.5*x*x/(sigma1*sigma1))
+            print(g1)
+            g2 = 1 / (sq2pi * sigma2) * exp(-0.5*x*x/(sigma2*sigma2))
+            wavelet[i] = g1 - g2
+        energy = numpy.dot(wavelet, wavelet)
+        return wavelet / sqrt(energy)
 
     def wavelet_sym6(self, number_of_points):
         """ This function returns a sym6 wavelet with number_of_points """
