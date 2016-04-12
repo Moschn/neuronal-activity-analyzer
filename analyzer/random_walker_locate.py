@@ -21,8 +21,10 @@ class Random_walker_locate(Locate):
         # li threshold
         if self.threshold > 0:
             threshold = skimage.filters.threshold_li(img)
-            img = img > threshold
-
+            #img = img > threshold
+            lowindices = img < threshold
+            img[lowindices] = 0
+            
         # random walker
         if self.random_walker > 0:
             result = self._random_walker(img)
@@ -38,13 +40,23 @@ class Random_walker_locate(Locate):
             frame, radius, mode='nearest')
 
     def _random_walker(self, frame):
+        geometric_frame = frame > 1
         # from http://www.scipy-lectures.org/packages/scikit-image/
-        distance = scipy.ndimage.distance_transform_edt(frame)
+        distance = scipy.ndimage.distance_transform_edt(geometric_frame)
         local_maxi = peak_local_max(distance, indices=False,
-                                    footprint=numpy.ones((10, 10)),
-                                    labels=frame)
+                                    footprint=numpy.ones((3, 3)),
+                                    labels=geometric_frame)
+        local_maxi_brightness = peak_local_max(frame, indices=False,
+                                               footprint=numpy.ones((3,3)),
+                                               labels=frame)
         markers = skimage.morphology.label(local_maxi)
+        markers_brightness = skimage.morphology.label(local_maxi_brightness)
 
         from skimage import segmentation
-        markers[~frame] = -1
+        markers[~geometric_frame] = -1
+        markers_brightness[~geometric_frame] = 1
+        # issue to solve
+        # https://github.com/scikit-image/scikit-image/issues/1875
+        
+        #return segmentation.random_walker(geometric_frame, markers)
         return segmentation.random_walker(frame, markers)

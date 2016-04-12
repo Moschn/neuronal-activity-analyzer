@@ -62,3 +62,26 @@ for neuron_activity in activities.T:
     neuron_nr += 1
 pyplot.legend()
 pyplot.show()
+
+import pywt
+
+(cA, cD) = pywt.dwt(activities.T[10], 'bior1.5')
+
+pyplot.figure(2)
+pyplot.subplot(311)
+pyplot.plot(activities.T[10])
+pyplot.subplot(312)
+pyplot.plot(cA)
+pyplot.subplot(313)
+pyplot.plot(cD)
+pyplot.show()
+
+from analyzer.wdm import WDM
+t = WDM(60, 150)
+maxima = t.detect_spikes(activities.T[10])
+pyplot.figure(1)
+pyplot.subplot(211)
+pyplot.plot(activities.T[10])
+pyplot.subplot(212)
+pyplot.plot(maxima)
+pyplot.show()
