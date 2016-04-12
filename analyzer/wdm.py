@@ -113,10 +113,12 @@ class WDM(Spike_detection):
 
     def _scale_wavelet(self, number_of_points, skeleton):
         wavelet = []
+        scaling_factor = 1/sqrt(number_of_points)
         for i in range(0, number_of_points):
             pos = i / (number_of_points-1) * (len(skeleton)-1)
             interpol = pos - floor(pos)
             datapoint = (skeleton[floor(pos)] + interpol *
-                         (skeleton[ceil(pos)] - skeleton[floor(pos)]))
+                         (skeleton[ceil(pos)] - skeleton[floor(pos)]) *
+                         scaling_factor)
             wavelet.append(datapoint)
         return wavelet
