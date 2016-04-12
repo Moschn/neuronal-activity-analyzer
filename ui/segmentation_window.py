@@ -5,7 +5,7 @@ from ui.image_conv import *
 import analyzer.segmentation
 
 sourceMethods = ['first_frame', 'mean', 'variance']
-separationMethods = ['watershed', 'randomwalk', 'correlation']
+separationMethods = ['watershed', 'randomwalk', 'kmeans', 'correlation']
 
 class SegmentationWindow(wx.Frame):
     def __init__(self, parent):
@@ -150,7 +150,9 @@ class SegmentationWindow(wx.Frame):
         if self.separationMethod == 'watershed':
             segmented = analyzer.segmentation.watershed(thresholded)
         elif self.separationMethod == 'randomwalk':
-            segmented = numpy.zeros(thresholded.shape)
+            segmented = analyzer.segmentation.random_walker(thresholded)
+        elif self.separationMethod == 'kmeans':
+            segmented = analyzer.segmentation.k_means(thresholded)
 
         self.separatedImage.SetBitmap(
             numpyToBitmap(greyscale16ToNormRGB(segmented)))
