@@ -80,10 +80,10 @@ pyplot.show()
 
 from analyzer.wdm import WDM
 t = WDM(60, 350)
-(maxima, time) = t.detect_spikes(activities.T[3])
+(maxima, time) = t.detect_spikes(activities.T[52])
 pyplot.figure(1)
 pyplot.subplot(311)
-pyplot.plot(activities.T[3])
+pyplot.plot(activities.T[52])
 pyplot.subplot(312)
 pyplot.plot(maxima)
 time_filled = numpy.zeros(len(maxima))

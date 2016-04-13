@@ -1,6 +1,7 @@
 TODO:
 
-* howto load all possible locate/integrator classes automaticly?
-
-Mean/std deviation
-parametrisieren
+Config file
+windows?
+batch processing
+spike detection std deviation
+more spike detection?
