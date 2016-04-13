@@ -4,12 +4,10 @@ import analyzer
 from matplotlib import pyplot
 from matplotlib import gridspec
 import matplotlib.cm as cm
-from analyzer.smooth_locate import Smooth_locator
-from analyzer.watershed_locate import Watershed_locate
-from analyzer.random_walker_locate import Random_walker_locate
-from analyzer.kmeans_locate import K_means_locate
 from analyzer.integrator_sum import Integrator_sum
 from sys import argv
+import analyzer.segmentation
+import analyzer.filters
 
 loader = analyzer.loader.open(argv[1])
 
@@ -22,11 +20,15 @@ frame = loader.next_frame()
 # if the frame is avaraged we need to reset the frame counter in the loader
 # frame = loader.get_frame(0)
 
+# frame = analyzer.filters.gauss_filter(frame, 5)
+frame_thresh = analyzer.filters.threshold_li(frame)
+
+
 # segment = Smooth_locator()
-segment = Watershed_locate(1, 1)
+roi = analyzer.segmentation.watershed(frame_thresh)
 # segment = Random_walker_locate()
 # segment = K_means_locate()
-roi = segment.analyze_frame(frame)
+
 
 sum_roi = Integrator_sum(roi)
 frame_activity = sum_roi.process_frame(frame)
@@ -78,10 +80,10 @@ pyplot.show()
 
 from analyzer.wdm import WDM
 t = WDM(60, 350)
-(maxima, time) = t.detect_spikes(activities.T[1])
+(maxima, time) = t.detect_spikes(activities.T[3])
 pyplot.figure(1)
 pyplot.subplot(311)
-pyplot.plot(activities.T[1])
+pyplot.plot(activities.T[3])
 pyplot.subplot(312)
 pyplot.plot(maxima)
 time_filled = numpy.zeros(len(maxima))
