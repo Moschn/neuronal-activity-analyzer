@@ -8,12 +8,13 @@ sourceMethods = ['first_frame', 'mean', 'variance']
 separationMethods = ['watershed', 'randomwalk', 'kmeans', 'correlation']
 
 class SegmentationWindow(wx.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, nextFrame):
         wx.Frame.__init__(self, parent,
                           title="Neural Activity Analyzer - Segmentation")
 
+        self.nextFrame = nextFrame
         self.panel = wx.Panel(self, style=wx.SUNKEN_BORDER)
-        self.sizer = wx.GridSizer(cols=2, rows=2, vgap=10, hgap=10)
+        self.gridSizer = wx.GridSizer(cols=2, rows=2, vgap=10, hgap=10)
 
         # Empty image if no file is loaded
         emptyImage = wx.EmptyImage(400, 400)
@@ -27,15 +28,15 @@ class SegmentationWindow(wx.Frame):
                                            size=wx.Size(400,400))
         self.sourceSizer.Add(self.sourceImage, 1, wx.SHAPED)
 
-        self.sourceMethodSizer = wx.BoxSizer(wx.VERTICAL)
+        self.sourceControlSizer = wx.BoxSizer(wx.VERTICAL)
+        self.sourceSizer.Add(self.sourceControlSizer, 0, wx.EXPAND)
         self.sourceMethodChooser = wx.RadioBox(self.panel, choices=sourceMethods,
-                                               size=wx.Size(200, 60),
                                                style=wx.VERTICAL)
         self.sourceMethodChooser.Bind(wx.EVT_RADIOBOX, self.onSourceMethodChanged)
-        self.sourceMethodSizer.Add(self.sourceMethodChooser)
-        self.sourceSizer.Add(self.sourceMethodSizer)
+        self.sourceControlSizer.Add(self.sourceMethodChooser,
+                                    0, wx.EXPAND)
         
-        self.sizer.Add(self.sourceSizer, 1, wx.EXPAND)
+        self.gridSizer.Add(self.sourceSizer, 1, wx.EXPAND)
 
         #
         # Second step: Gauss filtering
@@ -54,11 +55,12 @@ class SegmentationWindow(wx.Frame):
                                             maxValue=50, size=wx.Size(200, 20))
         self.gaussRadiusSlider.SetTickFreq(5)
         self.gaussRadiusSlider.Bind(wx.EVT_SCROLL_CHANGED, self.onGaussRadiusChanged)
-        self.filterControlSizer.Add(self.gaussRadiusSliderLabel)
-        self.filterControlSizer.Add(self.gaussRadiusSlider)
-        self.filterSizer.Add(self.filterControlSizer)
+        self.filterControlSizer.Add(self.gaussRadiusSliderLabel, 0,
+                                    wx.FIXED_MINSIZE | wx.ALIGN_LEFT)
+        self.filterControlSizer.Add(self.gaussRadiusSlider, 1, wx.EXPAND)
+        self.filterSizer.Add(self.filterControlSizer, 0, wx.ALIGN_TOP)
 
-        self.sizer.Add(self.filterSizer, 1, wx.EXPAND)
+        self.gridSizer.Add(self.filterSizer, 1, wx.EXPAND)
 
         #
         # Third step: Thresholding
@@ -67,7 +69,7 @@ class SegmentationWindow(wx.Frame):
         self.thresholdingSizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self.thresholdedImage = wx.StaticBitmap(self.panel, bitmap=wx.BitmapFromImage(emptyImage))
-        self.thresholdingSizer.Add(self.thresholdedImage)
+        self.thresholdingSizer.Add(self.thresholdedImage, 1, wx.SHAPED)
 
         self.thresholdingControlSizer = wx.GridSizer(cols=2)
         self.thresholdSliderLabel = wx.StaticText(self.panel,
@@ -75,11 +77,14 @@ class SegmentationWindow(wx.Frame):
         self.thresholdSlider = wx.Slider(self.panel, value=50, minValue=0,
                                          maxValue=200, size=wx.Size(200,20))
         self.thresholdSlider.Bind(wx.EVT_SCROLL_CHANGED, self.onThresholdChanged)
-        self.thresholdingControlSizer.Add(self.thresholdSliderLabel)
-        self.thresholdingControlSizer.Add(self.thresholdSlider)
-        self.thresholdingSizer.Add(self.thresholdingControlSizer)
+        self.thresholdingControlSizer.Add(self.thresholdSliderLabel,
+                                          0, wx.ALIGN_LEFT)
+        self.thresholdingControlSizer.Add(self.thresholdSlider,
+                                          0, wx.EXPAND)
+        self.thresholdingSizer.Add(self.thresholdingControlSizer,
+                                   0, wx.ALIGN_TOP)
 
-        self.sizer.Add(self.thresholdingSizer, 1, wx.EXPAND)
+        self.gridSizer.Add(self.thresholdingSizer, 1, wx.EXPAND)
 
         #
         # Fourth step: Separation
@@ -98,13 +103,30 @@ class SegmentationWindow(wx.Frame):
         self.separationMethodSizer.Add(self.separationMethodChooser)
         self.separationSizer.Add(self.separationMethodSizer)
 
-        self.sizer.Add(self.separationSizer, 1, wx.EXPAND)
+        self.gridSizer.Add(self.separationSizer, 1, wx.EXPAND)
+
+        #
+        # Control buttons to proceed to next step
+        #
+
+        self.controlSizer = wx.BoxSizer(wx.HORIZONTAL)
+       
+        self.nextButton = wx.Button(self.panel, -1, 'Proceed to ROI editor',
+                                    size=wx.Size(200, 40))
+        self.nextButton.Bind(wx.EVT_BUTTON, self.onNextClicked)
+        self.controlSizer.AddMany([
+            (wx.StaticText(self, -1, ''), 5, wx.EXPAND),
+            (self.nextButton, 1, wx.EXPAND)
+        ])
         
         #
         # finalize window
         #
+        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.mainSizer.Add(self.gridSizer, 1, wx.EXPAND)
+        self.mainSizer.Add(self.controlSizer, 0, wx.EXPAND)
         
-        self.panel.SetSizer(self.sizer)
+        self.panel.SetSizer(self.mainSizer)
         self.panel.Fit()
         self.SetAutoLayout(True)
         self.Layout()
@@ -148,16 +170,16 @@ class SegmentationWindow(wx.Frame):
             numpyToBitmap(greyscale16ToNormRGB(thresholded)))
 
         if self.separationMethod == 'watershed':
-            segmented = analyzer.segmentation.watershed(thresholded)
+            self.segmented = analyzer.segmentation.watershed(thresholded)
         elif self.separationMethod == 'randomwalk':
-            segmented = analyzer.segmentation.random_walker(thresholded)
+            self.segmented = analyzer.segmentation.random_walker(thresholded)
         elif self.separationMethod == 'kmeans':
-            segmented = analyzer.segmentation.k_means(thresholded)
+            self.segmented = analyzer.segmentation.k_means(thresholded)
 
         self.separatedImage.SetBitmap(
-            numpyToBitmap(greyscale16ToNormRGB(segmented)))
+            numpyToBitmap(greyscale16ToNormRGB(self.segmented)))
         
-        self.sizer.Fit(self)
+        self.panel.Fit()
 
     def setSegmenter(self, segmenter):
         self.segmenter = segmenter
@@ -174,6 +196,11 @@ class SegmentationWindow(wx.Frame):
         self.separatedImage.SetSize(wx.Size(frame.shape[0], frame.shape[1]))
         
         self.update()
+
+    def onNextClicked(self, event):
+        self.Hide()
+        self.nextFrame.setSegmentedImage(self.segmented)
+        self.nextFrame.Show()
 
     def onSourceMethodChanged(self, event):
         self.sourceMethod = event.GetString()
