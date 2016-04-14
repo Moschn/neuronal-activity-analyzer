@@ -31,17 +31,19 @@ labelColors = [
     (0xc0, 0xc0, 0x00)
 ]
 
+
 def getLabelColor(index):
     if index == 0:
         return (0, 0, 0)
     return labelColors[(index - 1) % len(labelColors)]
+
 
 def roiImage(roi):
     """ Convert a ROI matrix to an image, where each pixel is colored in a
     different color according to its segment"""
     image_data = numpy.zeros((roi.shape[0], roi.shape[1], 3),
                              dtype=numpy.uint8)
-    
+
     roi_count = numpy.amax(roi)
     for i in range(1, roi_count):
         image_data[roi == i] = getLabelColor(i)

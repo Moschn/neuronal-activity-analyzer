@@ -5,6 +5,7 @@ import numpy
 # Number of frames used to calculate average frame and pixel's variance
 statistics_frame_count = 100
 
+
 class Loader(object):
     """ Base class for a file loader. Implementations must overwrite
     __init__, can_open, next_frame and get_frame methods"""
@@ -77,16 +78,18 @@ class Loader(object):
         step_size = int(self.frame_count() / steps)
 
         for i in range(step_size, steps, step_size):
-            frames[i,:,:] = self.get_frame(i)
+            frames[i, :, :] = self.get_frame(i)
 
         self.mean = numpy.mean(frames, 0)
         self.variance = numpy.var(frames, 0)
 
 loader_types = []
 
+
 def register_loader_class(cls):
     """ Register a loader class to automatically use for correct filetypes"""
     loader_types.append(cls)
+
 
 def open(path, type=None):
     """ Open a video from a path(file/directory)

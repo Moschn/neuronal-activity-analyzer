@@ -29,4 +29,4 @@ def threshold_otsu_local(image, radius=3):
 
 def gauss_filter(image, radius=5):
     return scipy.ndimage.filters.gaussian_filter(image, radius,
-                                                   mode='nearest')
+                                                 mode='nearest')

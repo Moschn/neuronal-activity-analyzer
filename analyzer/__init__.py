@@ -4,6 +4,3 @@ import analyzer.bioformat_loader
 
 register_loader_class(analyzer.pillow_loader.PILLoader)
 register_loader_class(analyzer.bioformat_loader.BioFormatLoader)
-
-from analyzer.locate import Locate
-from analyzer.integrator import Integrator
