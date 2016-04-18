@@ -20,8 +20,8 @@ frame = loader.next_frame()
 # if the frame is avaraged we need to reset the frame counter in the loader
 # frame = loader.get_frame(0)
 
-# frame = analyzer.filters.gauss_filter(frame, 5)
-frame_thresh = analyzer.filters.threshold_li(frame)
+frame = analyzer.filters.gauss_filter(frame, 3)
+frame_thresh = analyzer.filters.threshold_otsu(frame)
 
 
 # segment = Smooth_locator()
@@ -48,7 +48,7 @@ while True:
 
 grid = gridspec.GridSpec(2, 2)
 
-pyplot.figure(1)
+pyplot.figure(2)
 pyplot.subplot(grid[0, 0])
 pyplot.imshow(frame,  cmap=cm.Greys_r)
 pyplot.subplot(grid[0, 1])
@@ -79,11 +79,11 @@ pyplot.show()
 # pyplot.show()
 
 from analyzer.wdm import WDM
-t = WDM(60, 350)
-(maxima, time) = t.detect_spikes(activities.T[52])
+t = WDM(200, 350)
+(maxima, time) = t.detect_spikes(activities.T[2])
 pyplot.figure(1)
 pyplot.subplot(311)
-pyplot.plot(activities.T[52])
+pyplot.plot(activities.T[2])
 pyplot.subplot(312)
 pyplot.plot(maxima)
 time_filled = numpy.zeros(len(maxima))
@@ -91,6 +91,7 @@ for t in time:
     time_filled[t] = 1
 pyplot.subplot(313)
 pyplot.plot(time_filled)
+
 
 print(numpy.mean(maxima))
 print(numpy.var(maxima))

@@ -1,16 +1,16 @@
-""" Wavelet Detection Method (WDM) from 
+""" Wavelet Detection Method (WDM) from
 "Spike Detection Using the Continuous Wavelet Transform"
 Authors: Nenadic, Zoran and Burdick, Joel W"""
 from analyzer.spike_detection import Spike_detection
-from math import floor, ceil, log, sqrt, exp, pi, fabs
+from math import floor, ceil, log, sqrt, exp
 import numpy
-from skimage.feature import peak_local_max
+from scipy.signal import argrelextrema
 
 
 class WDM(Spike_detection):
 
     def __init__(self, min_spike_width, max_spike_width):
-        """ Constructor 
+        """ Constructor
         @min_spike_width minimum spike width in data points
         @max_spike_width maximum spike width in data points"""
         self.min_spike_width = min_spike_width
@@ -18,25 +18,35 @@ class WDM(Spike_detection):
 
     def detect_spikes(self, dataset):
         wavelet_transform = self._wavelet_transform(dataset,
-                                                    self.wavelet_difference_of_gauss)
-        
+                                                    self.wavelet_diff_of_gauss)
+
         # remove noise
         wavelet_transform_threshold = self._wavelet_remove_noise(
             wavelet_transform)
 
-        #maxima = self._find_spikes(wavelet_transform_threshold)
+        # maxima = self._find_spikes(wavelet_transform_threshold)
 
         maxima = numpy.zeros(len(dataset))
         for i in range(0, len(wavelet_transform_threshold)):
             wavelet_row = wavelet_transform_threshold[i]
-            local_maxima = self._find_local_maxima1D(wavelet_row, 1)
-            maxima = numpy.add(maxima, local_maxima)
+            #local_maxima = self._find_local_maxima1D(wavelet_row, 1)
+            local_maxima_fast = self._local_maxima_fast(wavelet_row)
+            #from matplotlib import pyplot
+            #pyplot.figure()
+            #pyplot.subplot(311)
+            #pyplot.plot(wavelet_row)
+            #pyplot.subplot(312)
+            #pyplot.plot(local_maxima)
+            #pyplot.subplot(313)
+            #pyplot.plot(local_maxima_fast)
+            #pyplot.show()
+            maxima = numpy.add(maxima, local_maxima_fast)
 
         # threshold mean/2
         # mean = numpy.mean(maxima)
         # lowindices = maxima < mean
         # maxima[lowindices] = 0
-            
+
         time = []
         i = 0
         while i < len(maxima)-1:
@@ -101,23 +111,30 @@ class WDM(Spike_detection):
                     maxima[i] = 1
         return maxima
 
+    def _local_maxima_fast(self, dataset):
+        maxima = numpy.zeros(len(dataset))
+        maxima[argrelextrema(dataset, numpy.greater)] = 1
+        return maxima
+
+    
+
     def _wavelet_remove_noise(self, wavelet_transform):
         wavelet_transform_threshold = numpy.copy(wavelet_transform)
         self.noise_probability = []
         for i in range(0, len(wavelet_transform)):
-            wavelet_row = wavelet_transform[i][self.min_spike_width:
-                                               (len(wavelet_transform) -
-                                                self.min_spike_width)]
+            wavelet_row = wavelet_transform[i][self.min_spike_width+i:
+                                               (len(wavelet_transform[i]) -
+                                                self.min_spike_width-i)]
             # estimate variance
-            # according to the papaer this is accurate
+            # according to the paper this is accurate
             avg = numpy.mean(wavelet_row)
-            variance = numpy.median(numpy.fabs(wavelet_row-avg))
-            threshold = variance/0.6745*sqrt(2*log(len(wavelet_transform[i])))
-            
+            variance = numpy.median(numpy.fabs(wavelet_row - avg))
+            threshold = variance/0.6745*sqrt(2*log(len(wavelet_row)))
+
             # hard threshold the values below this threshold
             lowindices = wavelet_transform_threshold[i] < threshold
             wavelet_transform_threshold[i][lowindices] = 0
-            
+
             # append probability to threshold_probability
             # used in probabilistic test for spikes
             probability = numpy.sum(lowindices)/(len(wavelet_transform[i]) -
@@ -138,7 +155,7 @@ class WDM(Spike_detection):
             wt[j-self.min_spike_width] = numpy.lib.pad(conv, ((j-1)//2, (j)//2), 'constant', constant_values=0)
         return wt
 
-    def wavelet_difference_of_gauss(self, number_of_points):
+    def wavelet_diff_of_gauss(self, number_of_points):
         """ This function returns a wavelet created by a difference of two gauss
         functions"""
         sigma1 = 0.1
