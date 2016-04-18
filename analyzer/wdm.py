@@ -29,23 +29,8 @@ class WDM(Spike_detection):
         maxima = numpy.zeros(len(dataset))
         for i in range(0, len(wavelet_transform_threshold)):
             wavelet_row = wavelet_transform_threshold[i]
-            #local_maxima = self._find_local_maxima1D(wavelet_row, 1)
             local_maxima_fast = self._local_maxima_fast(wavelet_row)
-            #from matplotlib import pyplot
-            #pyplot.figure()
-            #pyplot.subplot(311)
-            #pyplot.plot(wavelet_row)
-            #pyplot.subplot(312)
-            #pyplot.plot(local_maxima)
-            #pyplot.subplot(313)
-            #pyplot.plot(local_maxima_fast)
-            #pyplot.show()
             maxima = numpy.add(maxima, local_maxima_fast)
-
-        # threshold mean/2
-        # mean = numpy.mean(maxima)
-        # lowindices = maxima < mean
-        # maxima[lowindices] = 0
 
         time = []
         i = 0
@@ -59,8 +44,38 @@ class WDM(Spike_detection):
                 time.append(numpy.argmax(maxima[i:j]) + i)
             i = j
 
-        return (maxima, time)
+        maxima_time = []
+        # filter out false positives
+        i = 0
+        while i < len(time):
+            curr_max = time[i]
+            close_maxima = [curr_max]
+            j = i+1
+            while j < len(time):
+                next_max = time[j]
+                if next_max < time[j-1]+self.min_spike_width:
+                    close_maxima.append(next_max)
+                else:
+                    break
+                j += 1
+            # get maximum in dataset for these close peaks
+            biggest = -1000
+            selected_max = curr_max
+            for m in close_maxima:
+                if dataset[m] > biggest:
+                    biggest = dataset[m]
+                    selected_max = m
+            maxima_time.append(selected_max)
+            i = j
 
+        # cut off first and last peak if too close to edge
+        if len(maxima_time) > 0 and maxima_time[0] < self.min_spike_width:
+            del maxima_time[0]
+        if len(maxima_time) > 0 and maxima_time[-1] > len(dataset) - self.min_spike_width:
+            del maxima_time[-1]
+                
+        return (maxima, maxima_time)
+    
     def _find_spikes(self, wavelet_transform):
         maxima = numpy.zeros(len(wavelet_transform[0]))
         for i in range(0, len(wavelet_transform)):
@@ -139,9 +154,9 @@ class WDM(Spike_detection):
             # used in probabilistic test for spikes
             probability = numpy.sum(lowindices)/(len(wavelet_transform[i]) -
                                                  numpy.sum(lowindices)+1)
-            print("{}: nr of cut values: {}, percent: {}".format(threshold,
-                                                                 numpy.sum(lowindices),
-                                                                 probability))
+            # print("{}: nr of cut values: {}, percent: {}".format(threshold,
+            #                                                     numpy.sum(lowindices),
+            #                                                     probability))
             self.noise_probability.append(probability)
 
         return wavelet_transform_threshold
@@ -211,3 +226,4 @@ class WDM(Spike_detection):
                          scaling_factor)
             wavelet.append(datapoint)
         return wavelet
+        

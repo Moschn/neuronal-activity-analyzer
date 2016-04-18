@@ -79,7 +79,7 @@ pyplot.show()
 # pyplot.show()
 
 from analyzer.wdm import WDM
-t = WDM(200, 350)
+t = WDM(60, 350)
 (maxima, time) = t.detect_spikes(activities.T[2])
 pyplot.figure(1)
 pyplot.subplot(311)
