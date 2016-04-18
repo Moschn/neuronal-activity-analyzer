@@ -10,8 +10,10 @@ from analyzer.integrator_sum import Integrator_sum
 import csv
 from matplotlib import pyplot
 from matplotlib import gridspec
+import time
 
 def analyze_file(filename, directory):
+    start_time = time.clock()
     print("analyzing file {}/{}".format(directory, filename))
     loader = analyzer.loader.open("{}/{}".format(directory, filename))
     frame = loader.next_frame()
@@ -54,27 +56,37 @@ def analyze_file(filename, directory):
             writer.writerow(neuron_activity)
 
     print("\tdetecting spikes...")
+    summary_peaks = []
     with open('{}/{}_activity_spikes.csv'.format(root, filename), 'w') as csvfile:
         writer = csv.writer(csvfile)
         idx = 1
         for neuron_activity in activities.T:
             spike_det = WDM(40, 150)
-            (maxima, time) = spike_det.detect_spikes(neuron_activity)
+            (maxima, maxima_time) = spike_det.detect_spikes(neuron_activity)
             fig = pyplot.figure()
             pyplot.subplot(311)
             pyplot.plot(neuron_activity)
             pyplot.subplot(312)
             pyplot.plot(maxima)
             time_filled = numpy.zeros(len(maxima))
-            for t in time:
+            for t in maxima_time:
                 time_filled[t] = 1
             pyplot.subplot(313)
             pyplot.plot(time_filled)
             pyplot.savefig('{}/{}_neuron_{}.png'.format(root, filename, idx),
                            bbox_inches='tight')
             pyplot.close(fig)
+            writer.writerow(maxima_time)
+            summary_peaks.append("Neuron {}: \t{} peaks".format(idx, len(maxima_time)))
             idx += 1
-            writer.writerow(time)
+            
+    with open('{}/{}_summary.txt'.format(directory, filename), 'w') as summary:
+        summary.write("Summary of analysis of {}\n".format(filename))
+        summary.write("Number of neurons found: {}\n".format(numpy.max(roi)))
+        for line in summary_peaks:
+            summary.write(line + "\n")
+        elapsed_time = time.clock() - start_time
+        summary.write("\ntime used for analysis: {}".format(elapsed_time))
 
         
     
