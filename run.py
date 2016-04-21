@@ -20,7 +20,7 @@ frame = loader.next_frame()
 # if the frame is avaraged we need to reset the frame counter in the loader
 # frame = loader.get_frame(0)
 
-frame = analyzer.filters.gauss_filter(frame, 3)
+#frame = analyzer.filters.gauss_filter(frame, 3)
 frame_thresh = analyzer.filters.threshold_otsu(frame)
 
 
@@ -31,20 +31,24 @@ roi = analyzer.segmentation.watershed(frame_thresh)
 
 
 sum_roi = Integrator_sum(roi)
-frame_activity = sum_roi.process_frame(frame)
-activities = numpy.array(frame_activity)
 
-frame_counter = 1
-while True:
-    try:
-        print(frame_counter)
-        frame_counter += 1
-        frame = loader.next_frame()
-        activities = numpy.vstack((activities, sum_roi.process_frame(frame)))
+activities = sum_roi.process_parallel_frames(loader)
+
+#frame_activity = sum_roi.process_frame(frame)
+#activities = numpy.array(frame_activity)
+
+#frame_counter = 1
+#while True:
+#    try:
+#        print(frame_counter)
+#        frame_counter += 1
+#        frame = loader.next_frame()
+#        activities = numpy.vstack((activities, sum_roi.process_frame(frame)))
         # activities.append(sum_roi.process_frame(frame))
-    except EOFError:
-        print('finished')
-        break
+#    except EOFError:
+#        print('finished')
+#        break
+
 
 grid = gridspec.GridSpec(2, 2)
 
@@ -80,10 +84,10 @@ pyplot.show()
 
 from analyzer.wdm import WDM
 t = WDM(60, 350)
-(maxima, time) = t.detect_spikes(activities.T[2])
+(maxima, time) = t.detect_spikes(activities.T[14])
 pyplot.figure(1)
 pyplot.subplot(311)
-pyplot.plot(activities.T[2])
+pyplot.plot(activities.T[14])
 pyplot.subplot(312)
 pyplot.plot(maxima)
 time_filled = numpy.zeros(len(maxima))

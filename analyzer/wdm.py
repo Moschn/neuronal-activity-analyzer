@@ -4,7 +4,7 @@ Authors: Nenadic, Zoran and Burdick, Joel W"""
 from analyzer.spike_detection import Spike_detection
 from math import floor, ceil, log, sqrt, exp
 import numpy
-from scipy.signal import argrelextrema
+from scipy.signal import ricker
 
 
 class WDM(Spike_detection):
@@ -17,32 +17,12 @@ class WDM(Spike_detection):
         self.max_spike_width = max_spike_width
 
     def detect_spikes(self, dataset):
-        wavelet_transform = self._wavelet_transform(dataset,
-                                                    self.wavelet_diff_of_gauss)
+        wt = self._wavelet_transform(dataset, self.wavelet_ricker)
 
         # remove noise
-        wavelet_transform_threshold = self._wavelet_remove_noise(
-            wavelet_transform)
+        (wt_thresh, noise_prob) = self._wavelet_remove_noise(wt)
 
-        # maxima = self._find_spikes(wavelet_transform_threshold)
-
-        maxima = numpy.zeros(len(dataset))
-        for i in range(0, len(wavelet_transform_threshold)):
-            wavelet_row = wavelet_transform_threshold[i]
-            local_maxima_fast = self._local_maxima_fast(wavelet_row)
-            maxima = numpy.add(maxima, local_maxima_fast)
-
-        time = []
-        i = 0
-        while i < len(maxima)-1:
-            j = i
-            while maxima[j] <= 0 and j < len(maxima)-1:
-                j += 1
-            while maxima[j] > 0 and j < len(maxima)-1:
-                j += 1
-            if j != len(maxima)-1:
-                time.append(numpy.argmax(maxima[i:j]) + i)
-            i = j
+        time = self._find_spikes(wt_thresh, dataset, noise_prob)
 
         maxima_time = []
         # filter out false positives
@@ -69,97 +49,107 @@ class WDM(Spike_detection):
             i = j
 
         # cut off first and last peak if too close to edge
-        if len(maxima_time) > 0 and maxima_time[0] < self.min_spike_width:
-            del maxima_time[0]
-        if len(maxima_time) > 0 and maxima_time[-1] > len(dataset) - self.min_spike_width:
-            del maxima_time[-1]
-                
-        return (maxima, maxima_time)
-    
-    def _find_spikes(self, wavelet_transform):
+        if len(maxima_time) > 0:
+            if maxima_time[0] < self.min_spike_width//2:
+                del maxima_time[0]
+            if maxima_time[-1] > len(dataset) - self.min_spike_width//2:
+                del maxima_time[-1]
+
+        return maxima_time
+
+    def _find_spikes(self, wavelet_transform, dataset, noise_probability):
         maxima = numpy.zeros(len(wavelet_transform[0]))
         for i in range(0, len(wavelet_transform)):
-            avg = numpy.mean(wavelet_transform[i])
-            var = numpy.median(numpy.fabs(wavelet_transform[i]-avg))/0.6745
-            mean = numpy.mean(wavelet_transform[i])
-            l = 0.188
+            wavelet_row = wavelet_transform[i][(self.min_spike_width+i)//2:
+                                               (len(wavelet_transform[i]) -
+                                                (self.min_spike_width+i)//2)]
+            mean = numpy.mean(numpy.fabs(wavelet_row))
+            var = numpy.median(numpy.fabs(wavelet_row-mean))/0.6745
+            l = 0
             l_m = 36.7368
-            gamma = self.noise_probability[i]
-
-            if gamma == 0:
-                gamma = 1/len(wavelet_transform[i])
+            gamma = noise_probability[i]
 
             if mean != 0:
                 threshold = mean/2 + var**2 / mean * (l * l_m + log(gamma))
             else:
-                threshold = mean/2
+                threshold = 100000000
 
-            maxima = numpy.add(maxima, wavelet_transform[i] > threshold)
+            highindices = (wavelet_transform[i]) > threshold
+            highindices[0:(self.min_spike_width+i)//2] = False
+            highindices[len(wavelet_transform[i])-(self.min_spike_width+i)//2:
+                        len(highindices)] = False
 
-        return maxima
+            # from matplotlib import pyplot
+            # if i % 25 == 0:
+            #     pyplot.figure()
+            #     pyplot.subplot(211)
+            #     pyplot.plot(wavelet_transform[i])
+            #     print(i)
+            #     print("mean: {}".format(mean))
+            #     print("var: {}".format(var))
+            #     print("log(noise/signal): {}".format(log(gamma)))
+            #     print("treshold: {}".format(threshold))
+            #     pyplot.subplot(212)
+            #     pyplot.plot(highindices)
+            #     pyplot.show()
 
-    def _find_local_maxima1D(self, dataset, size):
-        """ This function finds local maxima in a 1D array. The size is
-        specified in datapoints. I think this only works for size=1"""
-        # input_abs = numpy.absolute(dataset)
-        input_abs = dataset
-        maxima = numpy.zeros(len(dataset))
-        for i in range(0, len(input_abs)-size):
-            cur_cluster = numpy.sum(input_abs[i:i+size])
-            bigger_cluster = False
-            # for j in range(max(0, i-size//2), min(len(dataset)-size, i+size//2)):
-            #    if cur_cluster > numpy.sum(input_abs[j:j+size]):
-            #        bigger_cluster = True
+            maxima[highindices] = 1
 
-            if bigger_cluster is False:
-                if i < size:
-                    left_bigger = True
-                else:
-                    left_bigger = cur_cluster > numpy.sum(input_abs[i-size:i-1])
-                if i > len(input_abs)-2*size:
-                    right_bigger = True
-                else:
-                    right_bigger = cur_cluster > numpy.sum(
-                        input_abs[i+size+1:i+2*size+1])
+        peaks_time = []
+        i = 0
+        while i < len(dataset):
+            if maxima[i] == 1:
+                j = i
+                curr_max = -1
+                max_ind = i
+                while maxima[j] == 1:
+                    if dataset[j] > curr_max:
+                        curr_max = dataset[j]
+                        max_ind = j
+                    j += 1
+                peaks_time.append(max_ind)
+                i = j+1
+            else:
+                i += 1
 
-                if left_bigger and right_bigger:
-                    maxima[i] = 1
-        return maxima
-
-    def _local_maxima_fast(self, dataset):
-        maxima = numpy.zeros(len(dataset))
-        maxima[argrelextrema(dataset, numpy.greater)] = 1
-        return maxima
-
-    
+        return peaks_time
 
     def _wavelet_remove_noise(self, wavelet_transform):
         wavelet_transform_threshold = numpy.copy(wavelet_transform)
-        self.noise_probability = []
+        noise_probability = []
         for i in range(0, len(wavelet_transform)):
-            wavelet_row = wavelet_transform[i][self.min_spike_width+i:
+            wavelet_row = wavelet_transform[i][(self.min_spike_width+i)//2:
                                                (len(wavelet_transform[i]) -
-                                                self.min_spike_width-i)]
+                                                (self.min_spike_width+i)//2)]
             # estimate variance
             # according to the paper this is accurate
             avg = numpy.mean(wavelet_row)
-            variance = numpy.median(numpy.fabs(wavelet_row - avg))
-            threshold = variance/0.6745*sqrt(2*log(len(wavelet_row)))
+            variance = numpy.median(numpy.fabs(wavelet_row - avg))/0.6745
+            threshold = variance*sqrt(2*log(len(wavelet_row)))
 
+            length_diff = len(wavelet_transform[i]) - len(wavelet_row)
+            len2 = length_diff//2
             # hard threshold the values below this threshold
-            lowindices = wavelet_transform_threshold[i] < threshold
+            lowind_unpad = numpy.fabs(wavelet_row) < threshold
+            len3 = len(wavelet_transform[i]) - (len2 + len(lowind_unpad))
+            lowindices = numpy.lib.pad(lowind_unpad, (len2, len3),
+                                       'constant', constant_values=False)
             wavelet_transform_threshold[i][lowindices] = 0
 
             # append probability to threshold_probability
             # used in probabilistic test for spikes
-            probability = numpy.sum(lowindices)/(len(wavelet_transform[i]) -
-                                                 numpy.sum(lowindices)+1)
-            # print("{}: nr of cut values: {}, percent: {}".format(threshold,
-            #                                                     numpy.sum(lowindices),
-            #                                                     probability))
-            self.noise_probability.append(probability)
+            nr_noise = numpy.sum(lowind_unpad)
+            if len(wavelet_row) - nr_noise != 0:
+                probability = (nr_noise / (len(wavelet_row) - nr_noise))
+            else:
+                probability = 99999999
+            # print("{}: {}/{}, percent: {}".format(threshold,
+            #                                       nr_noise,
+            #                                       len(wavelet_row),
+            #                                       probability))
+            noise_probability.append(probability)
 
-        return wavelet_transform_threshold
+        return wavelet_transform_threshold, noise_probability
 
     def _wavelet_transform(self, dataset, gen_wavelet):
         wt = numpy.zeros((self.max_spike_width - self.min_spike_width,
@@ -167,8 +157,18 @@ class WDM(Spike_detection):
         for j in range(self.min_spike_width, self.max_spike_width):
             wavelet = gen_wavelet(j)
             conv = numpy.convolve(dataset, wavelet, 'valid')
-            wt[j-self.min_spike_width] = numpy.lib.pad(conv, ((j-1)//2, (j)//2), 'constant', constant_values=0)
+            wt[j-self.min_spike_width] = numpy.lib.pad(conv,
+                                                       ((j-1)//2, (j)//2),
+                                                       'constant',
+                                                       constant_values=0)
         return wt
+
+    def wavelet_ricker(self, number_of_points):
+        a = self.min_spike_width/2 * number_of_points/self.max_spike_width
+        wavelet = ricker(number_of_points, a)
+        if numpy.sum(wavelet) > 1:
+            print("dafuq: energy: {}".format(sum(wavelet)))
+        return wavelet
 
     def wavelet_diff_of_gauss(self, number_of_points):
         """ This function returns a wavelet created by a difference of two gauss
@@ -182,8 +182,10 @@ class WDM(Spike_detection):
             g1 = 1 / (sq2pi * sigma1) * exp(-0.5*x*x/(sigma1*sigma1))
             g2 = 1 / (sq2pi * sigma2) * exp(-0.5*x*x/(sigma2*sigma2))
             wavelet[i] = g1 - g2
-        energy = numpy.dot(wavelet, wavelet)
-        return wavelet / sqrt(energy)
+        energy = numpy.linalg.norm(wavelet)
+        if numpy.sum(wavelet/energy) > 1:
+            print("dafuq: energy: {}, -> {}".format(energy, sum(wavelet)))
+        return wavelet / energy
 
     def wavelet_sym6(self, number_of_points):
         """ This function returns a sym6 wavelet with number_of_points """
@@ -214,7 +216,6 @@ class WDM(Spike_detection):
                             0.01657281518405971]
         return self._scale_wavelet(number_of_points, skeleton_bior1_5)
 
-
     def _scale_wavelet(self, number_of_points, skeleton):
         wavelet = []
         scaling_factor = 1/sqrt(number_of_points)
@@ -226,4 +227,3 @@ class WDM(Spike_detection):
                          scaling_factor)
             wavelet.append(datapoint)
         return wavelet
-        

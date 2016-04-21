@@ -1,5 +1,7 @@
 """ Base class for a integration/sum of the pixels """
-
+from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
+import numpy
 
 class Integrator(object):
     """ Base class for an algorithm that sums or integrates (or anything does
@@ -9,7 +11,7 @@ class Integrator(object):
         """ Contructor. An array representing the various ROIs is needed.
         The array contains a number at every ROI. The number represents the
         unique nmumber of the respective ROI """
-
+        self.roi = roi
         raise NotImplemented
 
     def process_frame(self, frame):
@@ -19,3 +21,20 @@ class Integrator(object):
         @returns: list of all ROIs with a respective activity measure. """
 
         raise NotImplemented
+
+    def process_parallel_frames(self, loader):
+        frame_count = loader.frame_count()
+        activities = numpy.zeros((frame_count, numpy.max(self.roi)))
+        loader.lock = Lock()
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [executor.submit(self._load_process_frame, loader, i)
+                       for i in range(0, frame_count)]
+            for future in futures:
+                (index, activity) = future.result()
+                activities[index, :] = activity
+        return activities
+
+    def _load_process_frame(self, loader, idx):
+        with loader.lock:
+            frame = loader.get_frame(idx)
+        return (idx, self.process_frame(frame))

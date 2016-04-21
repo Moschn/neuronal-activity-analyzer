@@ -2,6 +2,7 @@ TODO:
 
 Config file
 windows?
-batch processing
-spike detection std deviation
+batch processing - better summary
+spike detection n*std deviation
 more spike detection?
+save roi in .roi file! load roi?

@@ -19,26 +19,15 @@ def analyze_file(filename, directory):
     frame = loader.next_frame()
 
     print("\tfilter and threshold...")
-    frame = analyzer.filters.gauss_filter(frame, 3)
+    #frame = analyzer.filters.gauss_filter(frame, 3)
     frame_thresh = analyzer.filters.threshold_otsu(frame)
 
     print("\tfinding neurons...")
     roi = analyzer.segmentation.watershed(frame_thresh)
 
     sum_roi = Integrator_sum(roi)
-    frame_activity = sum_roi.process_frame(frame)
-    activities = numpy.array(frame_activity)
-
     print("\tanalyzing all frames...")
-    frame_counter = 1
-    while True:
-        try:
-            frame_counter += 1
-            frame = loader.next_frame()
-            activities = numpy.vstack((activities, sum_roi.process_frame(frame)))
-            # activities.append(sum_roi.process_frame(frame))
-        except EOFError:
-            break
+    activities = sum_roi.process_parallel_frames(loader)
 
     print("\tploting results...")
     fig = pyplot.figure()
@@ -57,21 +46,25 @@ def analyze_file(filename, directory):
 
     print("\tdetecting spikes...")
     summary_peaks = []
+
+    spike_det = WDM(50, 500)
+    spikes = spike_det.detect_spikes_parallel(activities)
+    print("\tplotting results...")
+    
     with open('{}/{}_activity_spikes.csv'.format(root, filename), 'w') as csvfile:
         writer = csv.writer(csvfile)
         idx = 1
-        for neuron_activity in activities.T:
-            spike_det = WDM(40, 150)
-            (maxima, maxima_time) = spike_det.detect_spikes(neuron_activity)
+        for maxima_time in spikes:
+            #spike_det = WDM(40, 150)
+            #(maxima, maxima_time) = spike_det.detect_spikes(neuron_activity)
+            neuron_activity = activities.T[idx-1]
             fig = pyplot.figure()
-            pyplot.subplot(311)
+            pyplot.subplot(211)
             pyplot.plot(neuron_activity)
-            pyplot.subplot(312)
-            pyplot.plot(maxima)
-            time_filled = numpy.zeros(len(maxima))
+            time_filled = numpy.zeros(len(neuron_activity))
             for t in maxima_time:
                 time_filled[t] = 1
-            pyplot.subplot(313)
+            pyplot.subplot(212)
             pyplot.plot(time_filled)
             pyplot.savefig('{}/{}_neuron_{}.png'.format(root, filename, idx),
                            bbox_inches='tight')
@@ -88,11 +81,8 @@ def analyze_file(filename, directory):
         elapsed_time = time.clock() - start_time
         summary.write("\ntime used for analysis: {}".format(elapsed_time))
 
-        
-    
 path = argv[1]
 for root, dirs, files in os.walk(path):
     for name in files:
         if os.stat('{}/{}'.format(root, name)).st_size > 100000000:
             analyze_file(name, root)
-

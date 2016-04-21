@@ -1,4 +1,5 @@
 """ Base class for a spike detection algorithm """
+from concurrent.futures import ThreadPoolExecutor
 
 
 class Spike_detection(object):
@@ -16,3 +17,14 @@ class Spike_detection(object):
 
         @returns: numpy array [roi][time] containing time of the spikes
         detected"""
+
+    def detect_spikes_parallel(self, activities):
+        act = activities.T
+        spikes = []
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [executor.submit(self.detect_spikes, activity)
+                       for activity in act]
+            for future in futures:
+                maxima_time = future.result()
+                spikes.append(maxima_time)
+        return spikes
