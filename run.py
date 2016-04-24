@@ -13,11 +13,15 @@ loader = analyzer.loader.open(argv[1])
 
 frame = loader.next_frame()
 
+frane = loader.get_frame(0)
+# metadata = loader.get_metadata()
+# print(metadata)
+
 # avarage first 50 frames
 # for i in range(1, 1000):
 #    frame += loader.next_frame()/1000
 
-# if the frame is avaraged we need to reset the frame counter in the loader
+# if the frame is avaraged we need to reset the frame counter in the loder
 # frame = loader.get_frame(0)
 
 #frame = analyzer.filters.gauss_filter(frame, 3)

@@ -46,6 +46,10 @@ class Loader(object):
         """ Returns the number of frames """
         raise NotImplemented
 
+    def get_metadata(self):
+        """ Returns the metadata embedded in the image in a dictionary"""
+        raise NotImplemented
+
     def get_mean(self):
         """Get the average frame of 100 equidistant frames over the sequence.
         Destroys the internal frame index"""

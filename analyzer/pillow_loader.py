@@ -3,6 +3,7 @@
 from analyzer.loader import Loader
 from PIL import Image
 import numpy
+import exifread
 
 
 class PILLoader(Loader):
@@ -10,6 +11,7 @@ class PILLoader(Loader):
     def __init__(self, path):
         self.im = Image.open(path)  # Will load first frame
         self.current_frame = -1
+        self.path = path
 
     @classmethod
     def can_open(cls, path):
@@ -33,3 +35,8 @@ class PILLoader(Loader):
 
     def frame_count(self):
         return self.im.n_frames
+
+    def get_metadata(self):
+        f = open(self.path, 'rb')
+        tags = exifread.process_file(f)
+        return tags
