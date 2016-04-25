@@ -3,3 +3,4 @@ pillow
 matplotlib
 wxpython
 scikit-image
+exifread
