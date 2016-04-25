@@ -127,6 +127,8 @@ def save_config(config, path):
                 f.write("%s = %i\n" % (k, v))
             elif type(v) == float:
                 f.write("%s = %f\n" % (k, v))
+            elif type(v) == numpy.float64:
+                f.write("%s = %f\n" % (k, v))
             elif type(v) == str:
                 f.write("%s = '%s'\n" % (k, v))
             else:
