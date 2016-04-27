@@ -6,7 +6,7 @@ from sys import argv
 from ui.segmentation_window import SegmentationWindow
 from ui.roi_editor import ROIEditor
 
-from analyzer.util import apply_defaults, load_config, save_config
+from analyzer.util import load_config, save_config
 
 
 configpath = 'config.py'

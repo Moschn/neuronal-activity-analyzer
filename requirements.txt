@@ -4,3 +4,4 @@ matplotlib
 wxpython
 scikit-image
 exifread
+scipy

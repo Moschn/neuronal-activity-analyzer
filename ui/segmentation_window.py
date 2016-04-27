@@ -1,7 +1,7 @@
 import wx
 
 from ui.image_conv import numpyToBitmap
-from analyzer.util import greyscale16ToNormRGB
+from analyzer.util import greyscale16ToNormRGB, save_config
 import analyzer.segmentation
 
 source_methods = ['first_frame', 'mean', 'variance']
@@ -13,12 +13,13 @@ separation_methods = ['watershed',
 
 
 class SegmentationWindow(wx.Frame):
-    def __init__(self, parent, nextFrame, config):
+    def __init__(self, parent, nextFrame, config, configpath=None):
         wx.Frame.__init__(self, parent,
                           title="Neural Activity Analyzer - Segmentation")
 
         self.nextFrame = nextFrame
         self.config = config
+        self.configpath = configpath
 
         self.panel = wx.Panel(self, style=wx.SUNKEN_BORDER)
         self.gridSizer = wx.GridSizer(cols=2, rows=2, vgap=10, hgap=10)
@@ -173,54 +174,26 @@ class SegmentationWindow(wx.Frame):
         if not hasattr(self, 'loader'):
             return
 
-        if self.config['segmentation_source'] == 'first_frame':
-            self.source = self.loader.get_frame(0)
-        elif self.config['segmentation_source'] == 'mean':
-            self.source = self.loader.get_mean()
-        elif self.config['segmentation_source'] == 'variance':
-            self.source = self.loader.get_variance()
-        else:
-            print("Error, no source method selected")
-            return
+        self.segmented = analyzer.segment(self.loader, self.config)
 
         self.sourceImage.SetBitmap(
-            numpyToBitmap(greyscale16ToNormRGB(self.source)))
-
-        self.filtered = analyzer.segmentation.\
-            gaussian_filter(self.source, self.config['gauss_radius'])
+            numpyToBitmap(greyscale16ToNormRGB(self.segmented['source'])))
 
         self.filteredImage.SetBitmap(
-            numpyToBitmap(greyscale16ToNormRGB(self.filtered)))
-
-        # if no threshold is set yet, set one now
-        if 'threshold' not in self.config:
-            self.onLiButtonClicked(None)
-
-        self.thresholded = analyzer.segmentation.\
-            threshold(self.filtered, self.config['threshold'])
+            numpyToBitmap(greyscale16ToNormRGB(self.segmented['filtered'])))
 
         self.thresholdedImage.SetBitmap(
-            numpyToBitmap(greyscale16ToNormRGB(self.thresholded)))
-
-        if self.config['segmentation_algorithm'] == 'watershed':
-            self.segmented = analyzer.segmentation.watershed(self.thresholded)
-        elif self.config['segmentation_algorithm'] == 'randomwalk':
-            self.segmented = analyzer.segmentation.\
-                             random_walker(self.thresholded)
-        elif self.config['segmentation_algorithm'] == 'kmeans':
-            self.segmented = analyzer.segmentation.k_means(self.thresholded)
-        elif self.config['segmentation_algorithm'] == 'fill':
-            self.segmented = analyzer.segmentation.label(self.thresholded)
+            numpyToBitmap(greyscale16ToNormRGB(self.segmented['thresholded'])))
 
         self.separatedImage.SetBitmap(
-            numpyToBitmap(greyscale16ToNormRGB(self.segmented)))
+            numpyToBitmap(greyscale16ToNormRGB(self.segmented['segmented'])))
 
         self.panel.Fit()
         self.Layout()
         self.Fit()
 
-    def setSegmenter(self, segmenter):
-        self.segmenter = segmenter
+    def updateSliders(self):
+        self.thresholdSlider.SetValue(self.config['threshold'])
 
     def setFile(self, path):
         self.path = path
@@ -229,7 +202,9 @@ class SegmentationWindow(wx.Frame):
         self.update()
 
     def onNextClicked(self, event):
-        self.nextFrame.setSource(self.source, self.segmented)
+        save_config(self.config, self.configpath)
+        self.nextFrame.setSource(self.segmented['source'],
+                                 self.segmented['segmented'])
         self.nextFrame.Show()
         self.Close()
 
@@ -251,18 +226,18 @@ class SegmentationWindow(wx.Frame):
 
     def onLiButtonClicked(self, event):
         self.config['threshold'] = analyzer.segmentation.\
-                                   li_thresh_relative(self.filtered)
+            li_thresh_relative(self.segmented['filtered'])
         self.update()
-        self.thresholdSlider.SetValue(self.config['threshold'])
+        self.updateSliders()
 
     def onOtsuButtonClicked(self, event):
         self.config['threshold'] = analyzer.segmentation.\
-                                   otsu_thresh_relative(self.filtered)
+            otsu_thresh_relative(self.segmented['filtered'])
         self.update()
-        self.thresholdSlider.SetValue(self.config['threshold'])
+        self.updateSliders()
 
     def onYenButtonClicked(self, event):
         self.config['threshold'] = analyzer.segmentation.\
-                                   yen_thresh_relative(self.filtered)
+            yen_thresh_relative(self.segmented['filtered'])
         self.update()
-        self.thresholdSlider.SetValue(self.config['threshold'])
+        self.updateSliders()

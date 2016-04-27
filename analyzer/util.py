@@ -40,7 +40,7 @@ def get_label_color(index):
     return label_colors[(index - 1) % len(label_colors)]
 
 
-def roi_image(roi):
+def color_roi(roi):
     """ Convert a ROI matrix to an image, where each pixel is colored in a
     different color according to its segment"""
     image_data = numpy.zeros((roi.shape[0], roi.shape[1], 3),
@@ -102,17 +102,17 @@ def apply_defaults(config, defaults):
 
 
 def load_config(path):
-    d = ModuleType('config')
+    config = {}
+
     try:
+        d = ModuleType('config')
         with open(path) as f:
             exec(compile(f.read(), path, 'exec'), d.__dict__)
-    except IOError as e:
-        print("Unable to load configuration file (%s)" % e.strerror)
-        raise
+        for key in dir(d):
+            config[key] = getattr(d, key)
+    except IOError:
+        print("config.py not found, using default")
 
-    config = {}
-    for key in dir(d):
-        config[key] = getattr(d, key)
     apply_defaults(config, default_config)
     return config
 
@@ -126,6 +126,8 @@ def save_config(config, path):
             if type(v) == int:
                 f.write("%s = %i\n" % (k, v))
             elif type(v) == float:
+                f.write("%s = %f\n" % (k, v))
+            elif type(v) == numpy.float64:
                 f.write("%s = %f\n" % (k, v))
             elif type(v) == str:
                 f.write("%s = '%s'\n" % (k, v))
