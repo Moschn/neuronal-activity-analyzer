@@ -6,3 +6,8 @@ batch processing - better summary
 spike detection n*std deviation
 more spike detection?
 save roi in .roi file! load roi?
+
+rasterplot bins?
+merge in gui?
+.roi
+config file per video 
