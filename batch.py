@@ -79,7 +79,7 @@ def analyze_file(filename, directory):
     print("\tplotting results...")
 
     total_spikes = 0
-
+    
     with open('{}/{}_activity_spikes.csv'.format(root, filename), 'w') as csvfile:
         writer = csv.writer(csvfile)
         idx = 1
@@ -89,7 +89,7 @@ def analyze_file(filename, directory):
             neuron_activity = activities.T[idx-1]
             fname = '{}/{}_neuron_{}.svg'.format(root, filename, idx)
             fig = analyzer.plot.plot_spikes(neuron_activity, maxima_time)
-            analyzer.plot.save(fig)
+            analyzer.plot.save(fig, fname)
             
             writer.writerow(maxima_time)
 
@@ -97,6 +97,11 @@ def analyze_file(filename, directory):
             total_spikes += len(maxima_time)
             summary_peaks.append("Neuron {}: \t{} peaks/s".format(idx, peaks_time))
             idx += 1
+
+    # plot rasterplot
+    fname = '{}/{}_rasterplot.svg'.format(root, filename)
+    fig = analyzer.plot.plot_rasterplot(spikes, time_frame, 40)
+    analyzer.plot.save(fig, fname)
             
     with open('{}/{}_summary.txt'.format(directory, filename), 'w') as summary:
         summary.write("Summary of analysis of {}\n".format(filename))

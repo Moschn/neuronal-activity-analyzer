@@ -48,6 +48,25 @@ def plot_spikes(activity, spikes):
         pyplot.axvline(time, color='r')
     return fig
 
+def plot_rasterplot(spikes, exposure_time, nr_bins):
+    pyplot.style.use('seaborn-deep')
+    fig, (ax1, ax2) = pyplot.subplots(2)
+    for i, spike in enumerate(spikes):
+        ax1.vlines(spike.astype(float)*exposure_time, i+0.75, i+1.25)
+    ax1.set_ylim(0.5, len(spikes) + 0.5)
+    ax1.set_ylabel('Neuron')
+    ax1.set_xlabel('time [s]')
+    total_spikes = []
+    for spike in spikes:
+        for value in spike:
+            total_spikes.append(value*exposure_time)
+    n, bins, patches = ax2.hist(total_spikes, nr_bins)
+    #pyplot.plot(n)
+    ax2.set_ylabel('spikes')
+    ax2.set_xlabel('time [s]')
+    #fig.subplots_adjust(hspace=0)
+    return fig
+    
 def _normalize8_img(img):
     max_dif = numpy.max(img) - numpy.min(img)
     img_norm = (img - numpy.min(img))/max_dif * 2**8

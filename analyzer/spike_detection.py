@@ -1,5 +1,6 @@
 """ Base class for a spike detection algorithm """
 from concurrent.futures import ThreadPoolExecutor
+import numpy
 
 
 class Spike_detection(object):
