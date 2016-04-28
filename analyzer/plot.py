@@ -52,7 +52,7 @@ def plot_rasterplot(spikes, exposure_time, nr_bins):
     pyplot.style.use('seaborn-deep')
     fig, (ax1, ax2) = pyplot.subplots(2)
     for i, spike in enumerate(spikes):
-        ax1.vlines(spike.astype(float)*exposure_time, i+0.75, i+1.25)
+        ax1.vlines(spike.astype(float)*exposure_time, i+0.5, i+1.5)
     ax1.set_ylim(0.5, len(spikes) + 0.5)
     ax1.set_ylabel('Neuron')
     ax1.set_xlabel('time [s]')

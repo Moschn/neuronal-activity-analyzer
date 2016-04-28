@@ -26,13 +26,9 @@ def analyze_file(filename, directory):
     loader = analyzer.loader.open("{}/{}".format(directory, filename))
     frame = loader.next_frame()
 
-    print("\tfilter and threshold...")
-    frame = analyzer.filters.gauss_filter(frame, 3)
-    frame_thresh = analyzer.filters.threshold_otsu(frame)
-
     print("\tfinding neurons...")
-    roi = analyzer.segmentation.watershed(frame_thresh)
-
+    roi = analyzer.segment(loader, config)['segmented']
+    
     sum_roi = Integrator_sum(roi)
     print("\tanalyzing all frames...")
     activities = sum_roi.process_parallel_frames(loader)
@@ -116,7 +112,7 @@ def analyze_file(filename, directory):
 
 
 config = analyzer.util.load_config('config.py')
-        
+
 path = argv[1]
 for root, dirs, files in os.walk(path):
     for name in files:

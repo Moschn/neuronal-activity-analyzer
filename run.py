@@ -11,7 +11,7 @@ import analyzer.filters
 
 loader = analyzer.loader.open(argv[1])
 
-frame = loader.next_frame()
+frame = loader.get_mean()
 
 frane = loader.get_frame(0)
 # metadata = loader.get_metadata()
@@ -24,8 +24,8 @@ frane = loader.get_frame(0)
 # if the frame is avaraged we need to reset the frame counter in the loder
 # frame = loader.get_frame(0)
 
-#frame = analyzer.filters.gauss_filter(frame, 3)
-frame_thresh = analyzer.filters.threshold_otsu(frame)
+frame = analyzer.filters.gauss_filter(frame, 2)
+frame_thresh = analyzer.filters.threshold_li(frame)
 
 
 # segment = Smooth_locator()
@@ -86,22 +86,26 @@ pyplot.show()
 # pyplot.plot(cD)
 # pyplot.show()
 
-from analyzer.wdm import WDM
-t = WDM(60, 350)
-(maxima, time) = t.detect_spikes(activities.T[14])
-pyplot.figure(1)
-pyplot.subplot(311)
-pyplot.plot(activities.T[14])
-pyplot.subplot(312)
-pyplot.plot(maxima)
-time_filled = numpy.zeros(len(maxima))
-for t in time:
-    time_filled[t] = 1
-pyplot.subplot(313)
-pyplot.plot(time_filled)
+# from analyzer.wdm import WDM
+# t = WDM(60, 350)
+# (maxima, time) = t.detect_spikes(activities.T[14])
+# pyplot.figure(1)
+# pyplot.subplot(311)
+# pyplot.plot(activities.T[14])
+# pyplot.subplot(312)
+# pyplot.plot(maxima)
+# time_filled = numpy.zeros(len(maxima))
+# for t in time:
+#     time_filled[t] = 1
+# pyplot.subplot(313)
+# pyplot.plot(time_filled)
 
 
-print(numpy.mean(maxima))
-print(numpy.var(maxima))
+# print(numpy.mean(maxima))
+# print(numpy.var(maxima))
 
-pyplot.show()
+# pyplot.show()
+
+from analyzer.nsd_spike import SD_spike_detection
+t = SD_spike_detection(1.0)
+t.detect_spikes(activities.T[12])
