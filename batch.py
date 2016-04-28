@@ -28,13 +28,13 @@ def analyze_file(filename, directory):
 
     print("\tfinding neurons...")
     roi = analyzer.segment(loader, config)['segmented']
-    
+
     sum_roi = Integrator_sum(roi)
     print("\tanalyzing all frames...")
     activities = sum_roi.process_parallel_frames(loader)
 
     print("\tploting results...")
-    
+
     # plot roi
     improved_roi = False
     files = [f for f in os.listdir(directory) if
@@ -51,17 +51,15 @@ def analyze_file(filename, directory):
                 fname = '{}/{}_roi_improved.svg'.format(root, filename)
                 analyzer.plot.save(figure, fname)
                 improved_roi = True
-                
-            except Exception as e:
-                print("No seperate imagefile with background/foreground found.")
+            except:
+                print("No seperate imagefile with background/foreground found")
                 print("Only basic plot of ROIs will be generated!")
-                
                 pass
     if not improved_roi:
         fname = '{}/{}_roi.png'.format(root, filename)
         fig = analyzer.plot.plot_roi(roi, frame)
         analyzer.plot.save(fig, fname)
-                
+
     with open('{}/{}_activity.csv'.format(root, filename), 'w') as csvfile:
         writer = csv.writer(csvfile)
         for neuron_activity in activities.T:
@@ -70,12 +68,11 @@ def analyze_file(filename, directory):
     print("\tdetecting spikes...")
     summary_peaks = []
 
-    spike_det = WDM(50, 700)
-    spikes = spike_det.detect_spikes_parallel(activities)
+    spikes = analyzer.detect_spikes(activities, config)
     print("\tplotting results...")
 
     total_spikes = 0
-    
+
     with open('{}/{}_activity_spikes.csv'.format(root, filename), 'w') as csvfile:
         writer = csv.writer(csvfile)
         idx = 1
