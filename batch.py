@@ -15,15 +15,17 @@ from matplotlib import gridspec
 from matplotlib import cm
 from skimage import segmentation
 import time
+import math
 
 # shutter time in s
-time_frame = 0.03
+# time_frame = 0.03
 
 
 def analyze_file(filename, directory):
     start_time = time.clock()
     print("analyzing file {}/{}".format(directory, filename))
     loader = analyzer.loader.open("{}/{}".format(directory, filename))
+    time_frame = loader.exposure_time
     frame = loader.next_frame()
 
     print("\tfinding neurons...")
@@ -97,7 +99,9 @@ def analyze_file(filename, directory):
 
     # plot rasterplot
     fname = '{}/{}_rasterplot.svg'.format(root, filename)
-    fig = analyzer.plot.plot_rasterplot(spikes, time_frame, 40)
+    fig = analyzer.plot.plot_rasterplot(spikes, time_frame,
+                                        math.floor(len(activities) * time_frame))
+    
     analyzer.plot.save(fig, fname)
             
     with open('{}/{}_summary.txt'.format(directory, filename), 'w') as summary:
