@@ -41,20 +41,24 @@ def analyze_file(filename, directory):
              os.path.isfile(os.path.join(directory, f))]
     for f in files:
         fn = os.path.join(directory, f)
-        if f.endswith(".tif") and os.stat(fn).st_size < 100000000:
-            try:
+        try:
+            if f.endswith(".tif") and os.stat(fn).st_size < 100000000:
                 loader2 = analyzer.loader.open(fn)
                 fg_frame = loader2.get_frame(0)
                 bg_frame = loader2.get_frame(1)
 
-                figure = analyzer.plot.plot_roi_bg(roi, bg_frame, fg_frame)
+                figure = analyzer.plot.plot_roi_bg(roi, bg_frame, fg_frame,
+                                                   loader.pixel_per_um)
                 fname = '{}/{}_roi_improved.svg'.format(root, filename)
                 analyzer.plot.save(figure, fname)
                 improved_roi = True
-            except:
-                print("No seperate imagefile with background/foreground found")
-                print("Only basic plot of ROIs will be generated!")
-                pass
+        except:
+            print("No seperate imagefile with background/foreground found")
+            print("Only basic plot of ROIs will be generated!")
+            import sys
+            e = sys.exc_info()
+            print(e)
+            
     if not improved_roi:
         fname = '{}/{}_roi.png'.format(root, filename)
         fig = analyzer.plot.plot_roi(roi, frame)

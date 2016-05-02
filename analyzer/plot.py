@@ -11,24 +11,29 @@ def save(figure, filename):
 def show_plot(figure):
     figure.show()
 
-def plot_roi_bg(roi, bg, fg):
+def plot_roi_bg(roi, bg, fg, pixel_per_um):
     bg_norm = _normalize8_img(bg)
     fg_norm = _normalize8_img(fg)
 
     borders = segmentation.find_boundaries(roi)
 
-    frame_rgb = numpy.zeros((512, 512, 3), dtype='uint8')
+    frame_rgb = numpy.zeros((roi.shape[0], roi.shape[1], 3), dtype='uint8')
     frame_rgb[..., 0] = bg_norm
     frame_rgb[..., 1] = fg_norm
     frame_rgb[..., 0][borders] = 255
     frame_rgb[..., 1][borders] = 255
 
     figure = pyplot.figure()
-    pyplot.imshow(frame_rgb)
+    x_axis_end = roi.shape[0] * 1/pixel_per_um
+    y_axis_end = roi.shape[1] * 1/pixel_per_um
+    pyplot.imshow(frame_rgb, extent=[0, x_axis_end, 0, y_axis_end])
     for i in range(1, numpy.amax(roi)+1):
         coordinates_neuron = numpy.where(roi == i)
-        pyplot.text(coordinates_neuron[1][0]+10,
-                    coordinates_neuron[0][0]+10, i, fontsize=20, color='white')
+        pyplot.text((coordinates_neuron[1][0]+10) * 1/pixel_per_um,
+                    (coordinates_neuron[0][0]+10) * 1/pixel_per_um,
+                    i, fontsize=20, color='white')
+    pyplot.xlabel("[um]")
+    pyplot.ylabel("[um]")
     return figure
 
 def plot_roi(roi, frame):

@@ -10,9 +10,14 @@ class Loader(object):
     """ Base class for a file loader. Implementations must overwrite
     __init__, can_open, next_frame and get_frame methods"""
 
+    
+    
     def __init__(self, path):
         """Constructor, which opens the specified path in
-        implementations."""
+        implementations and sets the exposure_time and the
+        pixels_per_um"""
+        self.exposure_time = 0.031347962382445145  # 1 / 31.9 fps
+        self.pixel_per_um = 0.6466
         raise NotImplemented
 
     @classmethod
