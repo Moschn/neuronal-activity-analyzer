@@ -4,7 +4,13 @@ import os
 from .segmentation_page import segmentation_page
 from .roi_editor import roi_editor
 from .statistics import statistics
-from .util import ROOT_DIR
+
+
+def disable_cache(response):
+    response.headers['Cache-Control'] = 'public, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
+
 
 def create_app():
     app = Flask('Neuronal activity analyzer',
@@ -20,9 +26,11 @@ def create_app():
     for folder in folders:
         if not os.path.isdir(folder):
             os.mkdir(folder)
-        
+
     app.register_blueprint(segmentation_page)
     app.register_blueprint(roi_editor)
     app.register_blueprint(statistics)
+
+    app.after_request(disable_cache)
 
     return app

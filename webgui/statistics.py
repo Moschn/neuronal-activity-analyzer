@@ -1,13 +1,15 @@
-from flask import Blueprint, render_template, request, g, send_file, current_app
+from flask import Blueprint, render_template, g, send_file
+from flask import current_app
 import json
 import os.path
 
 from .util import session_load
 import analyzer
-from analyzer.integrator_sum import Integrator_sum
+import analyzer.integrator_sum
 
 statistics = Blueprint('statistics', __name__,
-                       template_folder='templates') 
+                       template_folder='templates')
+
 
 @statistics.route('/displayable_image/<videoname>/<session>')
 def displayable_image(videoname, session):
@@ -27,8 +29,9 @@ def statistics_page(videoname, session):
     integrator = analyzer.integrator_sum.Integrator_sum(segmentation)
     activities = integrator.process_parallel_frames(loader)
 
-    spikes = analyzer.detect_spikes(activities, {'spike_detection_algorithm': 'wavelet'})
-    spikes = [ l.tolist() for l in spikes ]
+    spikes = analyzer.detect_spikes(activities,
+                                    {'spike_detection_algorithm': 'wavelet'})
+    spikes = [l.tolist() for l in spikes]
 
     summary = []
     num_peaks = []
@@ -39,11 +42,10 @@ def statistics_page(videoname, session):
         summary.append("Neuron %i:\t%i spikes" % (i, len(spikes[i])))
     summary.append("Total:\t%i spikes" % total_peaks)
 
-    
     return render_template('statistics.html',
-        segmentation_data=json.dumps(segmentation.tolist()),
-        session=session,
-        videoname=videoname,
-        activity=json.dumps(activities.T.tolist()),
-        spikes=json.dumps(spikes),
-        summary=summary)
+                           segmentation_data=json.dumps(segmentation.tolist()),
+                           session=session,
+                           videoname=videoname,
+                           activity=json.dumps(activities.T.tolist()),
+                           spikes=json.dumps(spikes),
+                           summary=summary)

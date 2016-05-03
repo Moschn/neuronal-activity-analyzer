@@ -24,7 +24,7 @@ def segment(loader, config):
     config = config.copy()
 
     # Convert gauss sigma parameter
-    config['gauss_radius'] = int(config['gauss_radius'])
+    config['gauss_radius'] = float(config['gauss_radius'])
 
     # Get source image
     if config['segmentation_source'] == 'first_frame':
