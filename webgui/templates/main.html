@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Neuronal activity analyzer</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='jquery-2.2.3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='common.js') }}"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+  </head>
+  <body bgcolor="#D0D0D0">
+    <h1 id="title">Neuronal activity analyzer</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+	    {% for message in messages %}
+                <li>{{ message }}</li>
+	    {% endfor %}
+	    </ul>
+	{% endif %}
+    {% endwith %}
+
+    <!--------------------------------------------------------------------------
+      --
+      -- Run creation
+      --
+      -------------------------------------------------------------------------->
+
+    <div id='file_select'>
+
+      <p>To analyze a file, choose it from the list or upload a new file.</p>
+
+      <table class="centered">
+	<colgroup>
+	  <col span="1" style="width: 300px;">
+	  <col span="1" style="width: 300px;">
+	</colgroup>
+	<tr>
+	  <td>
+	    <form action="/upload" method=post enctype=multipart/form-data>
+              <input type="file" name="uploaded_file" style="width: 65%">
+              <input type="submit" value="Upload" style="width: 30%">
+	    </form>
+	  </td>
+	  <td>
+	    <input type="text" id="runname" name="runname" value="default"
+		   style="width: 55%; margin-right: 0px;">
+	    <input type="submit" value="Create run" onclick="create_run_clicked()"
+		   style="width: 40%">
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <select id="fileselect" name="fileselect" size="10"
+		    style="width: 100%;" onclick="videoname_clicked()">
+              {% for item in files %}
+                <option>{{item}}</option>
+              {% endfor %}
+	    </select>
+	  </td>
+	  <td>
+	    <select id="runselect" name="runselect" size="10"
+		    style="width: 100%" onclick="run_clicked()">
+	    </select>
+	  </td>
+	  <td>
+	    <input type="submit" value="Delete run" onclick="delete_run_clicked()">
+	  </td>
+	</tr>
+      </table>
+    </div>
+    <hr>
+
+    <!--------------------------------------------------------------------------
+      --
+      -- Segmentation
+      --
+      -------------------------------------------------------------------------->
+
+    <div id="segmentation" style="display: none;">
+      <h2>Segmentation</h2>
+      <table class='centered' cols="2" rows="2">
+	<tr>
+	  <td>
+            <p>Source Frame</p>
+	    <table>
+	      <tr>
+		<td>
+		  <canvas id="source_image" width="400" height="400">
+		</td>
+		<td>
+		  Source for segmentation: <br>
+		  <input type="radio" name="segmentation_source" value="first_frame" onclick="segmentation_parameters_changed()">First frame<br>
+		  <input type="radio" name="segmentation_source" value="mean" onclick="segmentation_parameters_changed()" checked>Mean<br>
+		  <input type="radio" name="segmentation_source" value="variance" onclick="segmentation_parameters_changed()">Variance<br>
+		</td>
+	      </tr>
+	    </table>
+          </td>
+	  <td>
+            <p>Gauss filtering</p>
+	    <table>
+	      <tr>
+		<td>
+		  <canvas id="filtered_image" width="400" height="400">
+		</td>
+		<td>
+		  Sigma radius: <br>
+		  <input type="text" id="gauss_radius" name="gauss_radius" value="2.0">
+		  <input type="submit" onclick="segmentation_parameters_changed()" value="go">
+		</td>
+	      </tr>
+	    </table>
+          </td>
+	</tr>
+	<tr>
+	  <td>
+            <p>Thresholding</p>
+	    <table>
+	      <tr>
+		<td>
+		  <canvas id="thresholded_image" width="400" height="400">
+		</td>
+		<td>
+		  Threshold(Percent of dynamic range):
+		  <br>
+		  <input type="text" id="threshold" name="threshold" value="li">
+		  <input type="submit" onclick="segmentation_parameters_changed()" value="go">
+		  <br>
+		  <input type="submit" onclick="apply_li()" value="Li">
+		  <input type="submit" onclick="apply_otsu()" value="Otsu">
+		  <input type="submit" onclick="apply_yen()" value="Yen">
+		</td>
+	      </tr>
+	    </table>
+          </td>
+	  <td>
+            <p>Segmentation Result</p>
+	    <table>
+	      <tr>
+		<td>
+		  <canvas id="segmented_image" width="400" height="400">
+		</td>
+		<td>
+		  Algorithm: <br>
+		  <input type="radio" name="segmentation_algorithm" value="watershed" onclick="segmentation_parameters_changed()" checked>Watershed<br>
+		  <input type="radio" name="segmentation_algorithm" value="randomwalk" onclick="segmentation_parameters_changed()">Random walk<br>
+		  <input type="radio" name="segmentation_algorithm" value="kmeans" onclick="segmentation_parameters_changed()">K means<br>
+		  <input type="radio" name="segmentation_algorithm" value="fill" onclick="segmentation_parameters_changed()">Fill<br>
+		</td>
+	      </tr>
+	    </table>
+	  </td>
+	</tr>
+      </table>
+      <hr>
+    </div>
+
+    <!--------------------------------------------------------------------------
+      --
+      -- ROI Editor
+      --
+      -------------------------------------------------------------------------->
+
+    <div id="roi_editor" style="display: none">
+      <h2>ROI editor</h2>
+      <canvas id='view' width="800" height="800"></canvas>
+      <hr>
+    </div>
+
+    <!--------------------------------------------------------------------------
+      --
+      -- Statistics
+      --
+      -------------------------------------------------------------------------->
+
+    <div id="statistics-button" style="display: none;" onclick="calculate_statistics_clicked()">
+      Calculate statistics
+    </div>
+
+    <div id="statistics" style="display: none;">
+      <h2>Statistics</h2>
+      <table>
+	<tr>
+	  <td>
+	    <canvas id='overview' width="400" height="400">
+	  </td>
+	  <td>
+	    <div id="summmary">
+	    </div>
+	  </td>
+	</tr>
+      </table>
+
+      <div id="plot" style="min-width: 310px; max-width=90%; height: 400px;"></div>
+      <hr>
+    </div>
+
+  </body>
+</html>

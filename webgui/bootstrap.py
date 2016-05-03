@@ -2,7 +2,6 @@ from flask import Flask
 import os
 
 from .segmentation_page import segmentation_page
-from .roi_editor import roi_editor
 from .statistics import statistics
 
 
@@ -21,14 +20,12 @@ def create_app():
 
     # Create folders if they don't exist
     folders = [app.config['VIDEO_FOLDER'],
-               app.config['CACHE_FOLDER'],
                app.config['DATA_FOLDER']]
     for folder in folders:
         if not os.path.isdir(folder):
             os.mkdir(folder)
 
     app.register_blueprint(segmentation_page)
-    app.register_blueprint(roi_editor)
     app.register_blueprint(statistics)
 
     app.after_request(disable_cache)

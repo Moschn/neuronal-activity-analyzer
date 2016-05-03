@@ -133,3 +133,9 @@ def save_config(config, path):
                 f.write("%s = '%s'\n" % (k, v))
             else:
                 print("Not saving config value %s of type %s" % (k, type(v)))
+
+
+def get_default_config():
+    config = {}
+    apply_defaults(config, default_config)
+    return config

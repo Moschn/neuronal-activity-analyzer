@@ -6,13 +6,24 @@
     text-align: center;
 }
 
-#submit_button {
-    text-align: center;
-}
-
 #segmentation {
     margin-left: auto;
     margin-right:auto;
+}
+
+#statistics-button {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 250px;
+    height: 20px;
+    background-color: #E0E0E0;
+    border: solid 3px;
+}
+
+#statistics {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .flashes {
@@ -23,4 +34,8 @@
 .centered {
     margin-left:auto; 
     margin-right:auto;
+}
+
+h2 {
+    text-align: center;
 }

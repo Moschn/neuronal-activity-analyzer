@@ -66,15 +66,11 @@ def segment(loader, config):
         print("Falling back to the watershed algorithm")
         segmented = analyzer.segmentation.watershed(thresholded)
 
-    displayable = combine_images(
-        [greyscale16ToNormRGB(source), color_roi(segmented)], [1., 0.3])
-
     return {
         'source': source,
         'filtered': filtered,
         'thresholded': thresholded,
         'segmented': segmented,
-        'displayable': displayable,
     }
 
 def detect_spikes(activity, config):

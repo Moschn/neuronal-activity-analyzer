@@ -3,13 +3,11 @@ import os
 from threading import Lock
 
 from flask import Blueprint, current_app, request, redirect, url_for
-from flask import render_template, flash, send_file, jsonify, g
+from flask import render_template, flash, jsonify, g
 from werkzeug import secure_filename
-from scipy.misc import imsave
 
 import analyzer
-from .util import check_extension, cache_load, cache_save, session_save
-from .util import get_filename, list_sessions
+from .util import check_extension, run_save, run_load, list_runs
 
 segmentation_page = Blueprint('segmentation', __name__,
                               template_folder='templates')
@@ -20,82 +18,94 @@ segmentation_page = Blueprint('segmentation', __name__,
 segmentation_lock = Lock()
 
 
-def get_segmentation(videoname, params):
-    """ Run the segmentation in the analyzer module or get the result from
-    cache.
-    If running segmentation, store the result in cache and generate pngs of the
-    intermediate steps, taged with segmentation_<image_type>
-    The generated png files should have tags:
-        segmentation_source
-        segmentation_filtered
-        segmentation_thresholded
-        segmentation_segmented
+def generate_segmentation(videoname, config):
+    """ Run the segmentation in the analyzer module and save the result to run's
+    data
     """
     with segmentation_lock:
-        # If we have a cache result for that settings, use it
-        cached = cache_load(videoname, params, 'segmentation')
-        if cached:
-            return cached
-
         loader = analyzer.loader.open(
             os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
-        segmented = analyzer.segment(loader, params)
-        cache_save(videoname, params, 'segmentation', segmented)
+        segmented = analyzer.segment(loader, config)
 
-        # Save images to send to browser
-        for k in segmented:
-            filename = get_filename(videoname, params, 'segmentation_%s' % k,
-                                    'png')
-            imsave(filename, segmented[k])
+        run_save(videoname, 'segmentation', segmented)
 
     return segmented
 
 
-@segmentation_page.route('/create_session/<videoname>/<sessionname>')
-def create_session(videoname, sessionname):
-    g.session = sessionname
-    session_save(videoname, 'created', '')
-    return jsonify({'sessions': list_sessions(videoname)})
+@segmentation_page.route('/set_segmentation_params/<videoname>/<runname>',
+                         methods=['POST'])
+def set_segmentation_params(videoname, runname):
+    try:
+        g.run = runname
+
+        config = run_load(videoname, 'config')
+        for key in ['segmentation_source', 'gauss_radius', 'threshold',
+                    'segmentation_algorithm']:
+            config[key] = request.values.get(key, config[key])
+        run_save(videoname, 'config', config)
+
+        segmented = generate_segmentation(videoname, config)
+
+        run_save(videoname, 'segmentation', segmented)
+
+        # Convert numpy arrays to flat lists
+        response = {}
+        response['success'] = 'Segmentation generated'
+        response['width'] = segmented['source'].shape[0]
+        response['height'] = segmented['source'].shape[1]
+        for k in segmented:
+            response[k] = segmented[k].flatten().tolist()
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({'fail': str(e)})
 
 
-@segmentation_page.route('/get_sessions/<videoname>')
-def get_sessions(videoname):
-    return jsonify({'sessions': list_sessions(videoname)})
+@segmentation_page.route('/get_segmentation/<videoname>/<runname>')
+def get_segmentation(videoname, runname):
+    g.run = runname
+    segmented = run_load(videoname, 'segmentation')
+
+    # Convert numpy arrays to flat lists
+    response = {}
+    response['width'] = segmented['source'].shape[0]
+    response['height'] = segmented['source'].shape[1]
+    for k in segmented:
+        response[k] = segmented[k].flatten().tolist()
+
+    return jsonify(response)
 
 
-@segmentation_page.route('/get_thresholds/<videoname>')
-def get_thresholds(videoname):
-    segmentation_params = {}
-    for key in ['segmentation_source', 'gauss_radius',
-                'threshold', 'segmentation_algorithm']:
-        segmentation_params[key] = request.args.get(key)
+@segmentation_page.route('/create_run/<videoname>/<runname>',
+                         methods=['POST'])
+def create_run(videoname, runname):
+    g.run = runname
+    config = analyzer.util.get_default_config()
 
-    segmentation = get_segmentation(videoname, segmentation_params)
+    run_save(videoname, 'config', config)
+    generate_segmentation(videoname, config)
 
-    thresholds = analyzer.get_thresholds(segmentation['filtered'])
+    return jsonify({'runs': list_runs(videoname)})
+
+@segmentation_page.route('/delete_run/<videoname>/<runname>',
+                         methods=['DELETE'])
+def delete_run(videoname, runname):
+    try:
+        run_delete(videoname, runname)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'fail': str(e)})
+
+@segmentation_page.route('/get_runs/<videoname>')
+def get_runs(videoname):
+    return jsonify({'runs': list_runs(videoname)})
+
+
+@segmentation_page.route('/get_thresholds/<videoname>/<runname>')
+def get_thresholds(videoname, runname):
+    g.run = runname
+    segmented = run_load(videoname, 'segmentation')
+    thresholds = analyzer.get_thresholds(segmented['filtered'])
     return jsonify(**thresholds)
-
-
-@segmentation_page.route('/segmentation_image/<videoname>/<image_type>')
-def segmentation_image(videoname, image_type):
-    g.session = request.args.get('session')
-
-    segmentation_params = {}
-    for key in ['segmentation_source', 'gauss_radius',
-                'threshold', 'segmentation_algorithm']:
-        segmentation_params[key] = request.args.get(key)
-
-    segmented = get_segmentation(videoname, segmentation_params)
-
-    if request.args.get('save', '0') == '1':
-        session_save(videoname, 'segmentation',
-                     segmented['segmented'])
-        session_save(videoname, 'displayable',
-                     get_filename(videoname, segmentation_params,
-                                  'segmentation_displayable', 'png'))
-
-    path = get_filename(videoname, segmentation_params, image_type, 'png')
-    return send_file(path, mimetype='image/png')
 
 
 @segmentation_page.route('/upload', methods=['POST'])
@@ -113,5 +123,5 @@ def upload_file():
 @segmentation_page.route('/segmentation')
 def main_page():
     files = listdir(current_app.config['VIDEO_FOLDER'])
-    return render_template('segmentation_page.html',
+    return render_template('main.html',
                            files=files)

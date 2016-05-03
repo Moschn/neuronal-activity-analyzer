@@ -3,7 +3,6 @@ from os.path import abspath, dirname, join
 ROOT_DIR = abspath(dirname(__file__))
 
 VIDEO_FOLDER = ROOT_DIR + '/uploads'
-CACHE_FOLDER = ROOT_DIR + '/cache'
 DATA_FOLDER = ROOT_DIR + '/data'
 ALLOWED_EXTENSIONS = set(['tif', 'cdx'])
 
