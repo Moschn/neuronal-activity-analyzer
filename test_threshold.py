@@ -7,24 +7,26 @@ import scipy.ndimage
 from skimage import data
 from skimage.filters import threshold_otsu, threshold_adaptive
 from skimage.filters import threshold_isodata, threshold_li, threshold_yen
+from sys import argv
 
-loader = analyzer.Loader.open('test/testfile.tif')
+loader = analyzer.loader.open(argv[1])
 
 image = loader.next_frame()
+image = loader.get_mean()
 
 image = image.astype('int64')
 
 image = scipy.ndimage.filters.gaussian_filter(
-            image, 1, mode='nearest')
+            image, 3, mode='nearest')
 
-image = image/1000
-for i in range(0, 999):
+image = image/800
+for i in range(0, 799):
     image = image + loader.next_frame()/1000
 
 global_thresh = threshold_otsu(image)
 binary_global = image > global_thresh
 
-block_size = 21
+block_size = 99
 binary_adaptive = threshold_adaptive(image, block_size, offset=10)
 
 thresh_isodata = threshold_isodata(image)
@@ -37,7 +39,7 @@ thresh_yen = threshold_yen(image)
 binary_yen = image > thresh_yen
 
 color_range = numpy.amax(image) - numpy.amin(image)
-thresh_manual = numpy.amin(image) + 0.05*color_range
+thresh_manual = numpy.amin(image) + 0.11*color_range
 binary_manual = image > thresh_manual
 
 grid = gridspec.GridSpec(3, 3)

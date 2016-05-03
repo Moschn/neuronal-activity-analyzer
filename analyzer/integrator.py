@@ -1,5 +1,4 @@
 """ Base class for a integration/sum of the pixels """
-from concurrent.futures import ThreadPoolExecutor
 from threading import Lock
 import numpy
 
@@ -23,16 +22,26 @@ class Integrator(object):
         raise NotImplemented
 
     def process_parallel_frames(self, loader):
-        frame_count = loader.frame_count()
-        activities = numpy.zeros((frame_count, numpy.max(self.roi)))
-        loader.lock = Lock()
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = [executor.submit(self._load_process_frame, loader, i)
-                       for i in range(0, frame_count)]
-            for future in futures:
-                (index, activity) = future.result()
+        try:  # python 3.5
+            from concurrent.futures import ThreadPoolExecutor
+            frame_count = loader.frame_count()
+            activities = numpy.zeros((frame_count, numpy.max(self.roi)))
+            loader.lock = Lock()
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                futures = [executor.submit(self._load_process_frame, loader, i)
+                           for i in range(0, frame_count)]
+                for future in futures:
+                    (index, activity) = future.result()
+                    activities[index, :] = activity
+            return activities
+        except ImportError:
+            frame_count = loader.frame_count()
+            activities = numpy.zeros((frame_count, numpy.max(self.roi)))
+            loader.lock = Lock()
+            for i in range(0, frame_count):
+                index, activity = self._load_process_frame(loader, i)
                 activities[index, :] = activity
-        return activities
+            return activities
 
     def _load_process_frame(self, loader, idx):
         with loader.lock:

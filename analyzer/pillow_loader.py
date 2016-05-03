@@ -14,6 +14,9 @@ class PILLoader(Loader):
         self.current_frame = -1
         self.path = path
 
+        self.exposure_time = 0.031347962382445145  # 1 / 31.9 fps
+        self.pixel_per_um = 0.6466
+
         conf_name = path + ".txt"
         try:
             if os.path.isfile(conf_name):
@@ -29,7 +32,8 @@ class PILLoader(Loader):
             if os.stat(path).st_size > 100000000:
                 print("Could not open or convert the config file of " + path)
                 print("FrameRate is set to standard: 31.9 fps")
-                print("PixelPerUM is set to standard: 0.6466")        
+                print("PixelPerUM is set to standard: 0.6466")
+                
 
     @classmethod
     def can_open(cls, path):
