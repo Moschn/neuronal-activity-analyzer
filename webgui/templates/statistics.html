@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Neuronal activity analyzer</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='jquery-2.2.3.min.js') }}"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script>
+
+      var segmentation = {{ segmentation_data }};
+      var activity = {{ activity }};
+      var spikes = {{ spikes }};
+
+      function get_videoname() {
+        return $('#videoname').val();
+      }
+
+      function get_session() {
+        return $('#session').val();
+      }
+
+      function update_plot(neuron_index) {
+        if(neuron_index == 0)
+          return;
+        chart = $('#plot').highcharts({
+          title: {
+              text: 'Activity of Neuron ' + neuron_index,
+              x: -20 //center
+          },
+          xAxis: {
+              title: {
+                  text: 'frame'
+              }
+          },
+          yAxis: {
+              title: {
+                  text: 'brightness'
+              },
+              plotLines: [{
+                  value: 0,
+                  width: 1,
+                  color: '#808080'
+              }]
+          },
+          legend: {
+              layout: 'vertical',
+              align: 'right',
+              verticalAlign: 'middle',
+              borderWidth: 0
+          },
+          series: [{
+              name: 'Neuron ' + neuron_index,
+              data: activity[neuron_index-1]
+          }]
+        });
+        for(var i = 0; i < spikes[neuron_index-1].length; ++i) {
+          chart.highcharts().xAxis[0].addPlotLine({
+            color: 'red',
+            value: spikes[neuron_index-1][i],
+            width: 2
+	  });
+        }
+      }
+    </script>
+  </head>
+  <body bgcolor="#D0D0D0">
+    <h1 id="title">Neuronal activity analyzer - Statistics</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+	    {% for message in messages %}
+                <li>{{ message }}</li>
+	    {% endfor %}
+	    </ul>
+	{% endif %}
+    {% endwith %}
+
+    <table>
+      <tr>
+	<td>
+	  <img id='overview' width="400" height="400" src="/displayable_image/{{ videoname}}/{{ session }}" >
+	  <script>
+	$(document).ready(function() {
+	  $('#overview').click(function(e) {
+	    var offset = $(this).offset();
+	    var x = e.pageX - offset.left;
+	    var y = e.pageY - offset.top;
+            var real_x = x * segmentation.length / $('#overview').width();
+	    var real_y = y * segmentation.length / $('#overview').height();
+	    neuron = segmentation[Math.floor(real_y)][Math.floor(real_x)];
+	    update_plot(neuron);
+	  });
+	});
+	  </script>
+	</td>
+	<td>
+	  <p>
+	    {% for line in summary %}
+              {{ line }}<br>
+	    {% endfor %}
+	  </p>
+	</td>
+      </tr>
+    </table>
+      
+    <div id="plot" style="min-width: 310px; max-width=90%; height: 400px;"></div>
+    
+    <input type="hidden" id="videoname" name="videoname" value="{{ videoname }}">
+    <input type="hidden" id="session" name="session" value="{{ session }}">
+  </body>
+</html>
