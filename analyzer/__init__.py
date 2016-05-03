@@ -3,14 +3,30 @@ import analyzer.pillow_loader
 import analyzer.bioformat_loader
 from analyzer.wdm import WDM
 from analyzer.nsd_spike import SD_spike_detection
+import analyzer.segmentation
+from analyzer.util import combine_images, color_roi, greyscale16ToNormRGB
 
 register_loader_class(analyzer.pillow_loader.PILLoader)
 register_loader_class(analyzer.bioformat_loader.BioFormatLoader)
 
+def get_thresholds(image):
+    """ Returns a dictionary of the li, otsu and yen thresholds for an image """
+    return {
+        'li':   analyzer.segmentation.li_thresh_relative(image),
+        'otsu': analyzer.segmentation.otsu_thresh_relative(image),
+        'yen':  analyzer.segmentation.yen_thresh_relative(image)
+    }
 
 def segment(loader, config):
     """ Using a loader and a config do filtering, thresholding and segmentation
     """
+    # copy config, to not change external representation
+    config = config.copy()
+
+    # Convert gauss sigma parameter
+    config['gauss_radius'] = int(config['gauss_radius'])
+
+    # Get source image
     if config['segmentation_source'] == 'first_frame':
         source = loader.get_frame(0)
     elif config['segmentation_source'] == 'mean':
@@ -22,17 +38,20 @@ def segment(loader, config):
         print("Falling back to the mean of all frames")
         source = loader.get_mean()
 
+    # Apply gaussian filter
     filtered = analyzer.segmentation.\
         gaussian_filter(source, config['gauss_radius'])
 
-    # if no threshold is set yet, set one now (li)
-    if 'threshold' not in config:
-        config['threshold'] = analyzer.segmentation.\
-                                   li_thresh_relative(filtered)
+    # Parse threshold parameter
+    if config['threshold'] in ['li', 'otsu', 'yen']:
+        config['threshold'] = get_thresholds(filtered)[config['threshold']]
+    config['threshold'] = float(config['threshold'])
 
+    # Apply threshold
     thresholded = analyzer.segmentation.\
         threshold(filtered, config['threshold'])
 
+    # Apply segmentation algorithm
     if config['segmentation_algorithm'] == 'watershed':
         segmented = analyzer.segmentation.watershed(thresholded)
     elif config['segmentation_algorithm'] == 'randomwalk':
@@ -47,11 +66,15 @@ def segment(loader, config):
         print("Falling back to the watershed algorithm")
         segmented = analyzer.segmentation.watershed(thresholded)
 
+    displayable = combine_images(
+        [greyscale16ToNormRGB(source), color_roi(segmented)], [1., 0.3])
+
     return {
         'source': source,
         'filtered': filtered,
         'thresholded': thresholded,
-        'segmented': segmented
+        'segmented': segmented,
+        'displayable': displayable,
     }
 
 def detect_spikes(activity, config):
