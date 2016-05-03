@@ -33,10 +33,18 @@ class SD_spike_detection(Spike_detection):
                 j = i + 1
                 while j < len(dataset) and dataset_thresh[j]:
                     j += 1
-                print('{} -> {}'.format(i, j))
                 spikes.append(i+numpy.argmax(dataset_corrected[i:j]))
                 i = j + 1
             else:
                 i += 1
+
+        # from matplotlib import pyplot
+        # pyplot.figure()
+        # pyplot.subplot(211)
+        # pyplot.plot(dataset)
+        # pyplot.subplot(212)
+        # pyplot.plot(dataset_corrected)
+        # pyplot.hlines([threshold, numpy.mean(dataset_corrected)], 0, 1000)
+        # pyplot.show()
 
         return spikes

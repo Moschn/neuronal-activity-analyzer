@@ -81,8 +81,8 @@ def detect_spikes(activity, config):
         if 'nSD_n' in config:
             n = config['nSD_n']
         else:
-            print("If the n*SD spike detection method is ", end="")
-            print("selected an additional 'nSD_n' parameter is required")
+            print("""If the n*SD spike detection method is 
+            selected an additional 'nSD_n' parameter is required""")
             print("A n value of 1 is assumed")
             n = 1
         algo = SD_spike_detection(n)

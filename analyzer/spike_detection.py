@@ -1,5 +1,4 @@
 """ Base class for a spike detection algorithm """
-from concurrent.futures import ThreadPoolExecutor
 import numpy
 
 
@@ -20,12 +19,21 @@ class Spike_detection(object):
         detected"""
 
     def detect_spikes_parallel(self, activities):
-        act = activities.T
-        spikes = []
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = [executor.submit(self.detect_spikes, activity)
-                       for activity in act]
-            for future in futures:
-                maxima_time = future.result()
+        try:  # python 3.5
+            from concurrent.futures import ThreadPoolExecutor
+            act = activities.T
+            spikes = []
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                futures = [executor.submit(self.detect_spikes, activity)
+                           for activity in act]
+                for future in futures:
+                    maxima_time = future.result()
+                    spikes.append(maxima_time)
+            return spikes
+        except ImportError:
+            act = activities.T
+            spikes = []
+            for activity in act:
+                maxima_time = self.detect_spikes(activity)
                 spikes.append(maxima_time)
-        return spikes
+            return spikes
