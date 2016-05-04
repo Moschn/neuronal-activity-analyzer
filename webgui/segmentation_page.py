@@ -7,7 +7,7 @@ from flask import render_template, flash, jsonify, g
 from werkzeug import secure_filename
 
 import analyzer
-from .util import check_extension, run_save, run_load, list_runs
+from .util import check_extension, run_save, run_load, list_runs, run_delete
 
 segmentation_page = Blueprint('segmentation', __name__,
                               template_folder='templates')
@@ -86,6 +86,7 @@ def create_run(videoname, runname):
 
     return jsonify({'runs': list_runs(videoname)})
 
+
 @segmentation_page.route('/delete_run/<videoname>/<runname>',
                          methods=['DELETE'])
 def delete_run(videoname, runname):
@@ -94,6 +95,7 @@ def delete_run(videoname, runname):
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'fail': str(e)})
+
 
 @segmentation_page.route('/get_runs/<videoname>')
 def get_runs(videoname):
