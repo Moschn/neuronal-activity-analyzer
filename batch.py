@@ -5,6 +5,7 @@ import analyzer.filters
 import analyzer.segmentation
 import analyzer.util
 import analyzer.plot
+from analyzer import roi_reader
 from analyzer.wdm import WDM
 import os
 from sys import argv
@@ -30,7 +31,9 @@ def analyze_file(filename, directory):
 
     print("\tfinding neurons...")
     roi = analyzer.segment(loader, config)['segmented']
-
+    # roi = roi_reader.open_roi("test/RoiSet2.zip", frame.shape)
+    # print(roi)
+    
     sum_roi = Integrator_sum(roi)
     print("\tanalyzing all frames...")
     activities = sum_roi.process_parallel_frames(loader)
