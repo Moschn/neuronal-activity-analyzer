@@ -28,7 +28,7 @@ def plot_roi_bg(roi, bg, fg, pixel_per_um):
     figure = pyplot.figure()
     x_axis_end = roi.shape[0] * 1/pixel_per_um
     y_axis_end = roi.shape[1] * 1/pixel_per_um
-    pyplot.imshow(frame_rgb, extent=[0, x_axis_end, 0, y_axis_end])
+    pyplot.imshow(frame_rgb[::-1], extent=[0, x_axis_end, 0, y_axis_end])
     for i in range(1, numpy.amax(roi)+1):
         coordinates_neuron = numpy.where(roi == i)
         pyplot.text((coordinates_neuron[1][0]+10) * 1/pixel_per_um,
@@ -36,17 +36,13 @@ def plot_roi_bg(roi, bg, fg, pixel_per_um):
                     i, fontsize=20, color='white')
     pyplot.xlabel("[um]")
     pyplot.ylabel("[um]")
+    pyplot.tight_layout()
     return figure
 
 
-def plot_roi(roi, frame):
-    fig = pyplot.figure()
-    pyplot.imshow(roi)
-    for i in range(1, numpy.amax(roi)+1):
-        coordinates_neuron = numpy.where(roi == i)
-        pyplot.text(coordinates_neuron[1][0]+10,
-                    coordinates_neuron[0][0]+10, i, fontsize=20, color='white')
-    return fig
+def plot_roi(roi, frame, pixel_per_um):
+    bg = numpy.zeros(frame.shape)
+    return plot_roi_bg(roi, bg, frame, pixel_per_um)
 
 
 def plot_spikes(activity, spikes):
@@ -60,7 +56,7 @@ def plot_spikes(activity, spikes):
 
 def plot_rasterplot(spikes, exposure_time, nr_bins):
     pyplot.style.use('seaborn-deep')
-    fig = pyplot.figure(figsize=(12, 6))
+    fig = pyplot.figure(figsize=(8, 6))
     gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
     ax1 = pyplot.subplot(gs[0])
     ax2 = pyplot.subplot(gs[1])

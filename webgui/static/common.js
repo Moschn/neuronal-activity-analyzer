@@ -165,18 +165,23 @@ function receive_statistics(data) {
     $('#statistics-button-container')[0].style.display = 'none';
     $('#statistics')[0].style.display = '';
 
-    set_image_rgb($('#overview')[0],
-		  greyscale16_to_normrgb(segmentation['segmented'],
-					 segmentation['width'],
-					 segmentation['height']),
-		  segmentation['width'],
-		  segmentation['height']);
-
+    // set_image_rgb($('#overview')[0],
+    // 		  greyscale16_to_normrgb(segmentation['segmented'],
+    // 					 segmentation['width'],
+    // 					 segmentation['height']),
+    // 		  segmentation['width'],
+    // 		  segmentation['height']);
+    fig_roi = segmentation['roi']
+    mpld3.draw_figure("summary2", fig_roi)
+    
     activity_calculation_time = data['time']['activity_calculation'];
     spike_detection_time = data['time']['spike_detection'];
 
     fig_raster = data['rasterplot']
     mpld3.draw_figure("rasterplot", fig_raster)
+
+    fig_roi = data['roi']
+    mpld3.draw_figure("summary2", fig_roi)
     
     update_info_line();
 }
@@ -224,7 +229,7 @@ function update_plot(neuron_index) {
 }
 
 $(document).ready(function() {
-    $('#overview').click(function(e) {
+    $('#summary2').click(function(e) {
 	var offset = $(this).offset();
 	var x = e.pageX - offset.left;
 	var y = e.pageY - offset.top;

@@ -66,7 +66,7 @@ def analyze_file(filename, directory):
             
     if not improved_roi:
         fname = '{}/{}_roi.png'.format(root, filename)
-        fig = analyzer.plot.plot_roi(roi, frame)
+        fig = analyzer.plot.plot_roi(roi, frame, loader.pixel_per_um)
         analyzer.plot.save(fig, fname)
 
     with open('{}/{}_activity.csv'.format(root, filename), 'w') as csvfile:

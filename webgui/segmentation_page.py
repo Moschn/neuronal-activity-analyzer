@@ -9,6 +9,8 @@ from werkzeug import secure_filename
 import analyzer
 from .util import check_extension, run_save, run_load, list_runs, run_delete
 
+import matplotlib.pyplot as pyplot, mpld3
+
 segmentation_page = Blueprint('segmentation', __name__,
                               template_folder='templates')
 
@@ -28,9 +30,9 @@ def generate_segmentation(videoname, config):
         segmented = analyzer.segment(loader, config)
 
         run_save(videoname, 'segmentation', segmented)
+        run_save(videoname, 'pixel_per_um', loader.pixel_per_um)
 
     return segmented
-
 
 @segmentation_page.route('/set_segmentation_params/<videoname>/<runname>',
                          methods=['POST'])
@@ -45,8 +47,6 @@ def set_segmentation_params(videoname, runname):
         run_save(videoname, 'config', config)
 
         segmented = generate_segmentation(videoname, config)
-
-        run_save(videoname, 'segmentation', segmented)
 
         # Convert numpy arrays to flat lists
         response = {}
@@ -64,6 +64,7 @@ def set_segmentation_params(videoname, runname):
 def get_segmentation(videoname, runname):
     g.run = runname
     segmented = run_load(videoname, 'segmentation')
+    pixel_per_um = run_load(videoname, 'pixel_per_um')
 
     # Convert numpy arrays to flat lists
     response = {}
@@ -71,6 +72,11 @@ def get_segmentation(videoname, runname):
     response['height'] = segmented['source'].shape[1]
     for k in segmented:
         response[k] = segmented[k].flatten().tolist()
+
+    fig_roi = analyzer.plot.plot_roi(segmented['segmented'],
+                                     segmented['source'],
+                                     pixel_per_um)
+    response['roi'] = mpld3.fig_to_dict(fig_roi)
 
     return jsonify(response)
 
