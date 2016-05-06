@@ -4,6 +4,7 @@ import analyzer.bioformat_loader
 from analyzer.wdm import WDM
 from analyzer.nsd_spike import SD_spike_detection
 import analyzer.segmentation
+import analyzer.plot
 from analyzer.util import combine_images, color_roi, greyscale16ToNormRGB
 
 register_loader_class(analyzer.pillow_loader.PILLoader)

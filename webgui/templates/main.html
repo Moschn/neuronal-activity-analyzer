@@ -5,6 +5,8 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='jquery-2.2.3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='common.js') }}"></script>
+    <script src="{{ url_for('static', filename='d3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='mpld3.v0.2.js') }}"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
   </head>
   <body bgcolor="#D0D0D0">
@@ -180,19 +182,14 @@
 
     <div id="statistics" style="display: none;">
       <h2>Statistics</h2>
-      <table>
-	<tr>
-	  <td>
-	    <canvas id='overview' width="400" height="400">
-	  </td>
-	  <td>
-	    <div id="summmary">
-	    </div>
-	  </td>
-	</tr>
-      </table>
+      <div style="margin: 0 auto; height=500px">
+	<canvas id="overview" height="400px" width="400px" style="display: inline-block; height: 100%"></canvas>
+	<div id="summmary" style="display: inline-block;"></div>
+	<div id="rasterplot" style="display: inline-block;" height="100%"></div>
+      </div>
 
       <div id="plot" style="min-width: 310px; max-width=90%; height: 400px;"></div>
+      
       <hr>
     </div>
 

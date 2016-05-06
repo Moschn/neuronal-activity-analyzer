@@ -1,10 +1,12 @@
 from flask import Blueprint, g, current_app, jsonify
 import os.path
 import time
+from math import floor
 
 from .util import run_load
 import analyzer
 import analyzer.integrator_sum
+import matplotlib.pyplot as pyplot, mpld3
 
 statistics = Blueprint('statistics', __name__,
                        template_folder='templates')
@@ -28,6 +30,10 @@ def get_statistics(videoname, run):
     spikes = analyzer.detect_spikes(activities,
                                     {'spike_detection_algorithm': 'wavelet'})
     spike_detection_time = time.time() - spike_detection_start
+    fig_raster = analyzer.plot.plot_rasterplot(spikes, loader.exposure_time,
+                                               floor(len(activities) *
+                                                     loader.exposure_time))
+
     spikes = [l.tolist() for l in spikes]
 
     response = {}
@@ -38,4 +44,6 @@ def get_statistics(videoname, run):
         "activity_calculation": integration_time,
         "spike_detection": spike_detection_time
     }
+    response['rasterplot'] = mpld3.fig_to_dict(fig_raster)
+
     return jsonify(**response)

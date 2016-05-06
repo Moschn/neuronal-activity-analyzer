@@ -175,6 +175,9 @@ function receive_statistics(data) {
     activity_calculation_time = data['time']['activity_calculation'];
     spike_detection_time = data['time']['spike_detection'];
 
+    fig_raster = data['rasterplot']
+    mpld3.draw_figure("rasterplot", fig_raster)
+    
     update_info_line();
 }
 

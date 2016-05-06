@@ -67,3 +67,4 @@ config.py
 data
 upload
 cache
+uploads

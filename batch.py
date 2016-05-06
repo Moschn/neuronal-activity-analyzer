@@ -11,7 +11,7 @@ import os
 from sys import argv
 from analyzer.integrator_sum import Integrator_sum
 import csv
-from matplotlib import pyplot
+import matplotlib.pyplot as pyplot, mpld3
 from matplotlib import gridspec
 from matplotlib import cm
 from skimage import segmentation
@@ -104,7 +104,7 @@ def analyze_file(filename, directory):
     fname = '{}/{}_rasterplot.svg'.format(root, filename)
     fig = analyzer.plot.plot_rasterplot(spikes, time_frame,
                                         math.floor(len(activities) * time_frame))
-    
+    # print(mpld3.fig_to_html(fig))
     analyzer.plot.save(fig, fname)
             
     with open('{}/{}_summary.txt'.format(directory, filename), 'w') as summary:

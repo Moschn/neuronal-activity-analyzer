@@ -47,4 +47,4 @@ class SD_spike_detection(Spike_detection):
         # pyplot.hlines([threshold, numpy.mean(dataset_corrected)], 0, 1000)
         # pyplot.show()
 
-        return spikes
+        return numpy.array(spikes)
