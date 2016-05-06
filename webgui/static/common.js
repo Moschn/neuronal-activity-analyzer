@@ -10,6 +10,11 @@ var segmentation = undefined;
 var activities = undefined;
 var spikes = undefined;
 
+// Info line
+var segmentation_time = undefined;
+var activity_calculation_time = undefined;
+var spike_detection_time = undefined;
+
 /* 
  * Run management
  */
@@ -157,7 +162,7 @@ function receive_statistics(data) {
     activities = data['activities'];
     spikes = data['spikes'];
 
-    $('#statistics-button')[0].style.display = 'none';
+    $('#statistics-button-container')[0].style.display = 'none';
     $('#statistics')[0].style.display = '';
 
     set_image_rgb($('#overview')[0],
@@ -166,6 +171,11 @@ function receive_statistics(data) {
 					 segmentation['height']),
 		  segmentation['width'],
 		  segmentation['height']);
+
+    activity_calculation_time = data['time']['activity_calculation'];
+    spike_detection_time = data['time']['spike_detection'];
+
+    update_info_line();
 }
 
 function update_plot(neuron_index) {
@@ -225,6 +235,29 @@ $(document).ready(function() {
     });
 });
 
+/*
+ * Info line
+ */
+
+function update_info_line() {
+    var text = '';
+
+    if (segmentation_time != undefined) {
+	text += 'Segmentation time: ' + segmentation_time + 's | '
+    }
+    if (activity_calculation_time != undefined) {
+	text += 'Activity calculation time: ' + activity_calculation_time + 's | '
+    }
+    if (spike_detection_time != undefined) {
+	text += 'Spike detection time: ' + spike_detection_time + 's | '
+    }
+
+    text += 'Developed at Laboratory for Biosensors and Bioelectronics';
+    text += ', ETH Zurich';
+
+    $('#infoline').html(text);
+}
+
 /* 
  * General functions
  */
@@ -235,19 +268,19 @@ function show_up_to(stage) {
     if (stage == 'file_select') {
 	$('#segmentation')[0].style.display = 'none';
 	$('#roi_editor')[0].style.display = 'none';
-	$('#statistics-button')[0].style.display = 'none';
+	$('#statistics-button-container')[0].style.display = 'none';
     } else if (stage =='segmentation') {
 	$('#segmentation')[0].style.display = '';
 	$('#roi_editor')[0].style.display = 'none';
-	$('#statistics-button')[0].style.display = 'none';
+	$('#statistics-button-container')[0].style.display = 'none';
     } else if (stage =='roi_editor') {
 	$('#segmentation')[0].style.display = '';
 	$('#roi_editor')[0].style.display = '';
-	$('#statistics-button')[0].style.display = 'none';
+	$('#statistics-button-container')[0].style.display = 'none';
     } else if (stage =='statistics') {
 	$('#segmentation')[0].style.display = '';
 	$('#roi_editor')[0].style.display = '';
-	$('#statistics-button')[0].style.display = '';
+	$('#statistics-button-container')[0].style.display = '';
     }
 }
 
@@ -319,7 +352,7 @@ function arrayMin(arr) {
 	}
     }
     return min;
-};
+}
 
 function arrayMax(arr) {
     /* From https://stackoverflow.com/questions/1669190/javascript-min-max-array-values */
@@ -330,4 +363,6 @@ function arrayMax(arr) {
 	}
     }
     return max;
-};
+}
+
+$(document).ready(update_info_line);

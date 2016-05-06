@@ -11,6 +11,10 @@
     margin-right:auto;
 }
 
+div.segmentation_title {
+    font-weight: bold;
+}
+
 #statistics-button {
     margin-left: auto;
     margin-right: auto;
@@ -24,6 +28,12 @@
 #statistics {
     margin-left: auto;
     margin-right: auto;
+}
+
+#infoline {
+    text-align: center;
+    font-size: 0.7em;
+    color: #707070;
 }
 
 .flashes {

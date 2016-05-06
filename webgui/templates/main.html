@@ -79,77 +79,74 @@
 
     <div id="segmentation" style="display: none;">
       <h2>Segmentation</h2>
-      <table class='centered' cols="2" rows="2">
+      <p>
+	In this step we find the neurons in the video. We assume they do not
+	move and one localisation will work for all of the movie.
+      </p>
+      <table class='centered' cols="4" rows="2" width="80%">
 	<tr>
-	  <td>
-            <p>Source Frame</p>
-	    <table>
-	      <tr>
-		<td>
-		  <canvas id="source_image" width="400" height="400">
-		</td>
-		<td>
-		  Source for segmentation: <br>
-		  <input type="radio" name="segmentation_source" value="first_frame" onclick="segmentation_parameters_changed()">First frame<br>
-		  <input type="radio" name="segmentation_source" value="mean" onclick="segmentation_parameters_changed()" checked>Mean<br>
-		  <input type="radio" name="segmentation_source" value="variance" onclick="segmentation_parameters_changed()">Variance<br>
-		</td>
-	      </tr>
-	    </table>
-          </td>
-	  <td>
-            <p>Gauss filtering</p>
-	    <table>
-	      <tr>
-		<td>
-		  <canvas id="filtered_image" width="400" height="400">
-		</td>
-		<td>
-		  Sigma radius: <br>
-		  <input type="text" id="gauss_radius" name="gauss_radius" value="2.0">
-		  <input type="submit" onclick="segmentation_parameters_changed()" value="go">
-		</td>
-	      </tr>
-	    </table>
-          </td>
+	  <td colspan="2" width="50%">
+            <div class="segmentation_title">Source image</div>
+	    <p class="segmentation_desc">Choose what data to use for segmentation. Mean is bad if some neurons are rarely active, but filters noise very well. Variance should yield good results, but might also show noise.</p>
+	  </td>
+	  <td colspan="2" width="50%">
+	    <div class="segmentation_title">Gauss filtering</div>
+	    <p class="segmentation_desc">
+	      Here we filter noise, so random light pixels do not appear as small neurons. Increase, if axons are recognised as neurons<br>
+	      Decrease, if small neurons disappear
+	    </p>
+	  </td>
 	</tr>
 	<tr>
 	  <td>
-            <p>Thresholding</p>
-	    <table>
-	      <tr>
-		<td>
-		  <canvas id="thresholded_image" width="400" height="400">
-		</td>
-		<td>
-		  Threshold(Percent of dynamic range):
-		  <br>
-		  <input type="text" id="threshold" name="threshold" value="li">
-		  <input type="submit" onclick="segmentation_parameters_changed()" value="go">
-		  <br>
-		  <input type="submit" onclick="apply_li()" value="Li">
-		  <input type="submit" onclick="apply_otsu()" value="Otsu">
-		  <input type="submit" onclick="apply_yen()" value="Yen">
-		</td>
-	      </tr>
-	    </table>
-          </td>
+	    <canvas id="source_image" width="400" height="400">
+	  </td>
 	  <td>
-            <p>Segmentation Result</p>
-	    <table>
-	      <tr>
-		<td>
-		  <canvas id="segmented_image" width="400" height="400">
-		</td>
-		<td>
-		  Algorithm: <br>
-		  <input type="radio" name="segmentation_algorithm" value="watershed" onclick="segmentation_parameters_changed()" checked>Watershed<br>
-		  <input type="radio" name="segmentation_algorithm" value="randomwalk" onclick="segmentation_parameters_changed()">Random walk<br>
-		  <input type="radio" name="segmentation_algorithm" value="kmeans" onclick="segmentation_parameters_changed()">K means<br>
-		  <input type="radio" name="segmentation_algorithm" value="fill" onclick="segmentation_parameters_changed()">Fill<br>
-		</td>
-	      </tr>
-	    </table>
+	    Source for segmentation: <br>
+	    <input type="radio" name="segmentation_source" value="first_frame" onclick="segmentation_parameters_changed()">First frame<br>
+	    <input type="radio" name="segmentation_source" value="mean" onclick="segmentation_parameters_changed()" checked>Mean of frames<br>
+	    <input type="radio" name="segmentation_source" value="variance" onclick="segmentation_parameters_changed()">Variance of pixels<br>
+	  </td>
+	  <td>
+	    <canvas id="filtered_image" width="400" height="400">
+	  </td>
+	  <td>
+	    Sigma radius: <br>
+	    <input type="text" id="gauss_radius" name="gauss_radius" value="2.0">
+	    <input type="submit" onclick="segmentation_parameters_changed()" value="go">
+	  </td>
+	</tr>
+	<tr>
+	  <td colspan="2">
+            <div class="segmentation_title">Thresholding</div>
+	  </td>
+	  <td colspan="2">
+            <div class="segmentation_title">Segmentation Result</div>
+	  </td>
+	</tr>
+	<tr>
+	  <td>
+	    <canvas id="thresholded_image" width="400" height="400">
+	  </td>
+	  <td>
+	    Threshold(Percent of dynamic range):
+	    <br>
+	    <input type="text" id="threshold" name="threshold" value="li">
+	    <input type="submit" onclick="segmentation_parameters_changed()" value="go">
+	    <br>
+	    <input type="submit" onclick="apply_li()" value="Li">
+	    <input type="submit" onclick="apply_otsu()" value="Otsu">
+	    <input type="submit" onclick="apply_yen()" value="Yen">
+	  </td>
+	  <td>
+	    <canvas id="segmented_image" width="400" height="400">
+	  </td>
+	  <td>
+	    Algorithm: <br>
+	    <input type="radio" name="segmentation_algorithm" value="watershed" onclick="segmentation_parameters_changed()" checked>Watershed<br>
+	    <input type="radio" name="segmentation_algorithm" value="randomwalk" onclick="segmentation_parameters_changed()">Random walk<br>
+	    <input type="radio" name="segmentation_algorithm" value="kmeans" onclick="segmentation_parameters_changed()">K means<br>
+	    <input type="radio" name="segmentation_algorithm" value="fill" onclick="segmentation_parameters_changed()">Fill<br>
 	  </td>
 	</tr>
       </table>
@@ -174,8 +171,11 @@
       --
       -------------------------------------------------------------------------->
 
-    <div id="statistics-button" style="display: none;" onclick="calculate_statistics_clicked()">
-      Calculate statistics
+    <div id="statistics-button-container" style="display: none;">
+      <div id="statistics-button" onclick="calculate_statistics_clicked()">
+	Calculate statistics
+      </div>
+      <hr>
     </div>
 
     <div id="statistics" style="display: none;">
@@ -196,5 +196,6 @@
       <hr>
     </div>
 
+    <div id="infoline"></div>
   </body>
 </html>
