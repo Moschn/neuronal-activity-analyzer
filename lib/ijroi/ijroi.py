@@ -149,13 +149,13 @@ def read_roi(fileobj, shape):
 
     if roi_type == RoiType.RECT:
         if options & SUB_PIXEL_RESOLUTION:
-            result = np.zeros((x1+x2, y1+y2)) > 0
+            result = np.zeros(shape) > 0
             for i in range(x1, x1+x2):
                 for j in range(y1, y1+y2):
                     result[i, j] = True
             return result
         else:
-            result = np.zeros((bottom, right)) > 0
+            result = np.zeros(shape) > 0
             for i in range(top, bottom):
                 for j in range(left, right):
                     result[i, j] = True
