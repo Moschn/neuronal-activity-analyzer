@@ -5,3 +5,4 @@ scikit-image
 exifread
 scipy
 flask
+mpld3
