@@ -26,11 +26,20 @@ p.segmentation_desc {
 #statistics-button {
     margin-left: auto;
     margin-right: auto;
-    text-align: center;
     width: 250px;
     height: 20px;
+}
+
+div.button {
     background-color: #E0E0E0;
     border: solid 3px;
+    text-align: center;
+}
+
+div.button_clicked {
+    background-color: #A0A0A0;
+    border: solid 3px;
+    text-align: center;
 }
 
 #statistics {

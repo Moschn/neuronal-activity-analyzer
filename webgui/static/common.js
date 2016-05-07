@@ -47,7 +47,7 @@ function run_clicked() {
     }
     run = new_run;
 
-    show_up_to('statistics');
+    show_up_to('roi_editor');
 
     $.getJSON('/get_segmentation/' + videoname + '/' + run,
 	      display_segmentations);
@@ -127,6 +127,7 @@ function segmentation_parameters_changed() {
 	    return;
 	}
 	current_stage = 'segmentation';
+	show_up_to('roi_editor');
     }
 
     $.post('/set_segmentation_params/' + videoname + '/' + run,
@@ -155,15 +156,17 @@ function calculate_statistics_clicked() {
     
     var button = $('#statistics-button');
     button.html("Calculating...");
-    button[0].style.backgroundColor = '#A0A0A0';
+    button[0].className = 'button_clicked';
 }
 
 function receive_statistics(data) {
     activities = data['activities'];
     spikes = data['spikes'];
 
-    $('#statistics-button-container')[0].style.display = 'none';
-    $('#statistics')[0].style.display = '';
+    var button = $('#statistics-button');
+    button.html("Calculate statistics");
+    button[0].className = "button";
+    show_up_to('statistics');
 
     // set_image_rgb_scaled($('#overview')[0],
     // 		  greyscale16_to_normrgb(segmentation['segmented'],
@@ -289,18 +292,22 @@ function show_up_to(stage) {
 	$('#segmentation')[0].style.display = 'none';
 	$('#roi_editor')[0].style.display = 'none';
 	$('#statistics-button-container')[0].style.display = 'none';
+	$('#statistics')[0].style.display = 'none';
     } else if (stage =='segmentation') {
 	$('#segmentation')[0].style.display = '';
 	$('#roi_editor')[0].style.display = 'none';
 	$('#statistics-button-container')[0].style.display = 'none';
+	$('#statistics')[0].style.display = 'none';
     } else if (stage =='roi_editor') {
 	$('#segmentation')[0].style.display = '';
 	$('#roi_editor')[0].style.display = '';
-	$('#statistics-button-container')[0].style.display = 'none';
+	$('#statistics-button-container')[0].style.display = '';
+	$('#statistics')[0].style.display = 'none';
     } else if (stage =='statistics') {
 	$('#segmentation')[0].style.display = '';
 	$('#roi_editor')[0].style.display = '';
-	$('#statistics-button-container')[0].style.display = '';
+	$('#statistics-button-container')[0].style.display = 'none';
+	$('#statistics')[0].style.display = '';
     }
 }
 
@@ -393,3 +400,6 @@ function arrayMax(arr) {
 }
 
 $(document).ready(update_info_line);
+$(document).ready(function () {
+    show_up_to('file_select');
+});
