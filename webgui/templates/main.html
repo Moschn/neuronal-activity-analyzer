@@ -81,17 +81,17 @@
 
     <div id="segmentation" style="display: none;">
       <h2>Segmentation</h2>
-      <p>
+      <p style="text-align: center;">
 	In this step we find the neurons in the video. We assume they do not
 	move and one localisation will work for all of the movie.
       </p>
-      <table class='centered' cols="4" rows="2" width="80%">
+      <table id="segmentation_table" class='centered' cols="4" rows="2" width="80%">
 	<tr>
-	  <td colspan="2" width="50%">
+	  <td class="segmentation_table" colspan="2" width="50%">
             <div class="segmentation_title">Source image</div>
 	    <p class="segmentation_desc">Choose what data to use for segmentation. Mean is bad if some neurons are rarely active, but filters noise very well. Variance should yield good results, but might also show noise.</p>
 	  </td>
-	  <td colspan="2" width="50%">
+	  <td class="segmentation_table" colspan="2" width="50%">
 	    <div class="segmentation_title">Gauss filtering</div>
 	    <p class="segmentation_desc">
 	      Here we filter noise, so random light pixels do not appear as small neurons. Increase, if axons are recognised as neurons<br>
@@ -100,37 +100,43 @@
 	  </td>
 	</tr>
 	<tr>
-	  <td>
+	  <td class="segmentation_table">
 	    <canvas id="source_image" width="400" height="400">
 	  </td>
-	  <td>
+	  <td class="segmentation_table">
 	    Source for segmentation: <br>
 	    <input type="radio" name="segmentation_source" value="first_frame" onclick="segmentation_parameters_changed()">First frame<br>
 	    <input type="radio" name="segmentation_source" value="mean" onclick="segmentation_parameters_changed()" checked>Mean of frames<br>
 	    <input type="radio" name="segmentation_source" value="variance" onclick="segmentation_parameters_changed()">Variance of pixels<br>
 	  </td>
-	  <td>
+	  <td class="segmentation_table">
 	    <canvas id="filtered_image" width="400" height="400">
 	  </td>
-	  <td>
+	  <td class="segmentation_table">
 	    Sigma radius: <br>
 	    <input type="text" id="gauss_radius" name="gauss_radius" value="2.0">
 	    <input type="submit" onclick="segmentation_parameters_changed()" value="go">
 	  </td>
 	</tr>
 	<tr>
-	  <td colspan="2">
+	  <td class="segmentation_table" colspan="2">
             <div class="segmentation_title">Thresholding</div>
+	    <p class="segmentation_desc">
+	      The image is divided into background and neurons by defining a threshold. Every pixel brighter than the threshold will belong to foreground and every pixel darker to the background. There are several algorithms to choose an appropriate threshold. Click the buttons to use a value provided by an algorithm or define one manually.
+	      </p>
 	  </td>
-	  <td colspan="2">
+	  <td class="segmentation_table" colspan="2">
             <div class="segmentation_title">Segmentation Result</div>
+	    <p class="segmentation_desc">
+	      Last we apply an algorithm to seperate neurons, which are overlapping. To just use every continuous region as one neuron, select 'fill'.
+	    </p>
 	  </td>
 	</tr>
 	<tr>
-	  <td>
+	  <td class="segmentation_table">
 	    <canvas id="thresholded_image" width="400" height="400">
 	  </td>
-	  <td>
+	  <td class="segmentation_table">
 	    Threshold(Percent of dynamic range):
 	    <br>
 	    <input type="text" id="threshold" name="threshold" value="li">
@@ -140,10 +146,10 @@
 	    <input type="submit" onclick="apply_otsu()" value="Otsu">
 	    <input type="submit" onclick="apply_yen()" value="Yen">
 	  </td>
-	  <td>
+	  <td class="segmentation_table">
 	    <canvas id="segmented_image" width="400" height="400">
 	  </td>
-	  <td>
+	  <td class="segmentation_table">
 	    Algorithm: <br>
 	    <input type="radio" name="segmentation_algorithm" value="watershed" onclick="segmentation_parameters_changed()" checked>Watershed<br>
 	    <input type="radio" name="segmentation_algorithm" value="randomwalk" onclick="segmentation_parameters_changed()">Random walk<br>

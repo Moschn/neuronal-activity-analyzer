@@ -11,8 +11,16 @@
     margin-right:auto;
 }
 
+td.segmentation_table {
+    padding: 20px;
+}
+
 div.segmentation_title {
     font-weight: bold;
+}
+
+p.segmentation_desc {
+    text-align: justify;
 }
 
 #statistics-button {
