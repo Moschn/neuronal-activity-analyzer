@@ -231,11 +231,23 @@ function update_plot(neuron_index) {
 $(document).ready(function() {
     $('#summary2').click(function(e) {
 	var offset = $(this).offset();
-	var x = e.pageX - offset.left;
-	var y = e.pageY - offset.top;
-        var real_x = x * segmentation['width'] / $('#overview').width();
-	var real_y = y * segmentation['height'] / $('#overview').height();
-        neuron = (segmentation['segmented'][Math.floor(real_y)*segmentation['width'] + Math.floor(real_x)]);
+	// Get coordinates on whole image
+	var img_x = e.pageX - offset.left;
+	var img_y = e.pageY - offset.top;
+	var img_w = $('#summary2').width();
+	var img_h = $('#summary2').height();
+	// Get actual image in plot metrics
+	// bbox is [x, y, w, h] of plot in coords from 0 to 1, where 0 is left
+	// or bottom and 1 is right or top
+	var bbox = segmentation['roi'].axes[0].bbox;
+	var plot_x = img_x - bbox[0] * img_w;
+	var plot_y = img_y - (1-bbox[1]-bbox[3]) * img_h;
+	var plot_w = bbox[2] * img_w;
+	var plot_h = bbox[3] * img_h;
+	// Get coordinates on segmentation as integer
+        var seg_x = Math.floor(plot_x * segmentation['width'] / plot_w);
+	var seg_y = Math.floor(plot_y * segmentation['height'] / plot_h);
+        neuron = (segmentation['segmented'][seg_y*segmentation['width'] + seg_x]);
 	//if (plotted_neurons.indexOf(neuron) == -1) {
 	//    plotted_neurons.push(neuron);
 	//}
