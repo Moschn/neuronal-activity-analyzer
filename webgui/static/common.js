@@ -89,13 +89,13 @@ function display_segmentations(data) {
     var w = data['width'];
     var h = data['height'];
 
-    set_image_rgb($('#source_image')[0],
+    set_image_rgb_scaled($('#source_image')[0],
 		  greyscale16_to_normrgb(data['source'], w, h), w, h);
-    set_image_rgb($('#filtered_image')[0],
+    set_image_rgb_scaled($('#filtered_image')[0],
 		  greyscale16_to_normrgb(data['filtered'], w, h), w, h);
-    set_image_rgb($('#thresholded_image')[0],
+    set_image_rgb_scaled($('#thresholded_image')[0],
 		  greyscale16_to_normrgb(data['thresholded'], w, h), w, h);
-    set_image_rgb($('#segmented_image')[0],
+    set_image_rgb_scaled($('#segmented_image')[0],
 		  greyscale16_to_normrgb(data['segmented'], w, h), w, h);
     
     $.getJSON("/get_thresholds/" + videoname + '/' + run,
@@ -165,7 +165,7 @@ function receive_statistics(data) {
     $('#statistics-button-container')[0].style.display = 'none';
     $('#statistics')[0].style.display = '';
 
-    // set_image_rgb($('#overview')[0],
+    // set_image_rgb_scaled($('#overview')[0],
     // 		  greyscale16_to_normrgb(segmentation['segmented'],
     // 					 segmentation['width'],
     // 					 segmentation['height']),
@@ -292,16 +292,18 @@ function show_up_to(stage) {
     }
 }
 
-function set_image_rgb(canvas, img, w, h) {
+function set_image_rgb_scaled(canvas, img, w, h) {
     /* Takes a w*h*3 long array of 24 bit RGB pixel data and displays
-       it in the canvas
+       it in the canvas. The image is scaled to the size of the canvas
 
        Args:
          canvas: A canvas object as returned by getDocumentById or $('#id')[0]
          img(w*h*3 Array): An array of length W*H*3 with values from 0-255
     */
-    var ctx = canvas.getContext("2d");
-    var imgData = ctx.createImageData(w, h)
+    var temp_canvas = $("<canvas>")
+	.attr("width", w).attr("height", h)[0];
+    var temp_ctx = temp_canvas.getContext("2d");
+    var imgData = temp_ctx.createImageData(w, h)
     
     for (var i = 0; i < w*h; ++i) {
 	    imgData.data[4*i] = img[3*i];
@@ -310,7 +312,12 @@ function set_image_rgb(canvas, img, w, h) {
 	    imgData.data[4*i + 3] = 255;
     }
 
-    ctx.putImageData(imgData, 0, 0);
+    temp_ctx.putImageData(imgData, 0, 0);
+
+    var ctx = canvas.getContext("2d");
+    ctx.scale(canvas.width / w, canvas.height / h);
+    ctx.drawImage(temp_canvas, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
 }
 
 function trans_draw_rgb_to_canvas(canvas, img, w, h, alpha) {
