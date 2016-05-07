@@ -31,8 +31,10 @@ def generate_segmentation(videoname, config):
 
         run_save(videoname, 'segmentation', segmented)
         run_save(videoname, 'pixel_per_um', loader.pixel_per_um)
+        run_save(videoname, 'statistics', None)
 
     return segmented
+
 
 @segmentation_page.route('/set_segmentation_params/<videoname>/<runname>',
                          methods=['POST'])
@@ -77,7 +79,6 @@ def get_segmentation(videoname, runname):
                                      segmented['source'],
                                      pixel_per_um)
     response['roi'] = mpld3.fig_to_dict(fig_roi)
-
     return jsonify(response)
 
 

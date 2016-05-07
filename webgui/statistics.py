@@ -3,7 +3,7 @@ import os.path
 import time
 from math import floor
 
-from .util import run_load
+from .util import run_load, run_save
 import analyzer
 import analyzer.integrator_sum
 import matplotlib.pyplot as pyplot, mpld3
@@ -15,6 +15,10 @@ statistics = Blueprint('statistics', __name__,
 @statistics.route('/get_statistics/<videoname>/<run>')
 def get_statistics(videoname, run):
     g.run = run
+
+    response = run_load(videoname, 'statistics')
+    if response is not None:
+        return jsonify(**response)
 
     loader = analyzer.loader.open(
         os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
@@ -45,5 +49,7 @@ def get_statistics(videoname, run):
         "spike_detection": spike_detection_time
     }
     response['rasterplot'] = mpld3.fig_to_dict(fig_raster)
+
+    run_save(videoname, 'statistics', response)
 
     return jsonify(**response)
