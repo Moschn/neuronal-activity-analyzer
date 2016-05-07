@@ -33,7 +33,6 @@ class PILLoader(Loader):
                 print("Could not open or convert the config file of " + path)
                 print("FrameRate is set to standard: 31.9 fps")
                 print("PixelPerUM is set to standard: 0.6466")
-                
 
     @classmethod
     def can_open(cls, path):

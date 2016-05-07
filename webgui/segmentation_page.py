@@ -9,7 +9,7 @@ from werkzeug import secure_filename
 import analyzer
 from .util import check_extension, run_save, run_load, list_runs, run_delete
 
-import matplotlib.pyplot as pyplot, mpld3
+import matplotlib.pyplot as mpld3
 
 segmentation_page = Blueprint('segmentation', __name__,
                               template_folder='templates')

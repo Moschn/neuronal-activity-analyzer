@@ -1,5 +1,4 @@
 """ Base class for a spike detection algorithm """
-import numpy
 
 
 class Spike_detection(object):

@@ -1,22 +1,24 @@
-from analyzer.loader import Loader, register_loader_class
+from analyzer.loader import register_loader_class
 import analyzer.pillow_loader
 import analyzer.bioformat_loader
 from analyzer.wdm import WDM
 from analyzer.nsd_spike import SD_spike_detection
 import analyzer.segmentation
 import analyzer.plot
-from analyzer.util import combine_images, color_roi, greyscale16ToNormRGB
 
 register_loader_class(analyzer.pillow_loader.PILLoader)
 register_loader_class(analyzer.bioformat_loader.BioFormatLoader)
 
+
 def get_thresholds(image):
-    """ Returns a dictionary of the li, otsu and yen thresholds for an image """
+    """ Returns a dictionary of the li, otsu and yen thresholds for an image
+    """
     return {
         'li':   analyzer.segmentation.li_thresh_relative(image),
         'otsu': analyzer.segmentation.otsu_thresh_relative(image),
         'yen':  analyzer.segmentation.yen_thresh_relative(image)
     }
+
 
 def segment(loader, config):
     """ Using a loader and a config do filtering, thresholding and segmentation
@@ -74,6 +76,7 @@ def segment(loader, config):
         'segmented': segmented,
     }
 
+
 def detect_spikes(activity, config):
     if config['spike_detection_algorithm'] == 'wavelet':
         algo = WDM(50, 700)  # TODO: adaptive min/max spike width
@@ -82,7 +85,7 @@ def detect_spikes(activity, config):
         if 'nSD_n' in config:
             n = config['nSD_n']
         else:
-            print("""If the n*SD spike detection method is 
+            print("""If the n*SD spike detection method is
             selected an additional 'nSD_n' parameter is required""")
             print("A n value of 1 is assumed")
             n = 1

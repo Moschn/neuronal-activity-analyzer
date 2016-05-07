@@ -6,7 +6,7 @@ from math import floor
 from .util import run_load, run_save
 import analyzer
 import analyzer.integrator_sum
-import matplotlib.pyplot as pyplot, mpld3
+import matplotlib.pyplot as mpld3
 
 statistics = Blueprint('statistics', __name__,
                        template_folder='templates')

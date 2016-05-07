@@ -1,8 +1,9 @@
 import numpy
 from matplotlib import pyplot
-from matplotlib import cm, gridspec
+from matplotlib import gridspec
 from skimage import segmentation
 from math import ceil
+
 
 def save(figure, filename):
     figure.savefig(filename, bbox_inches='tight')

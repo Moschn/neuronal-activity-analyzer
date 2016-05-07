@@ -2,6 +2,7 @@
 from threading import Lock
 import numpy
 
+
 class Integrator(object):
     """ Base class for an algorithm that sums or integrates (or anything does
     anything else) the brightness of the regions of interest (ROIs) """

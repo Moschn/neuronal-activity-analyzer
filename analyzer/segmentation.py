@@ -10,6 +10,7 @@ from skimage.filters import threshold_li, threshold_otsu, threshold_yen
 # Smoothing
 #
 
+
 def gaussian_filter(image, radius):
     return scipy.ndimage.filters.gaussian_filter(image, radius, mode='nearest')
 
@@ -17,28 +18,33 @@ def gaussian_filter(image, radius):
 # Thresholding
 #
 
+
 def color_in_range(image, c):
-    """ Returns  where in between the darkest and brightest pixel in image the 
+    """ Returns  where in between the darkest and brightest pixel in image the
     color c is. If c is the same as darkest, returns 0, for brightest 1, for
     brighter > 1, for darker than the darkest pixel < 0 """
     min = numpy.amin(image)
     range = numpy.amax(image) - min
     return (c - min) / range
 
+
 def li_thresh_relative(image):
     """ Returns from 0 to 1 where in the dynamic range of image the li threshold
     is """
     return color_in_range(image, threshold_li(image))
+
 
 def otsu_thresh_relative(image):
     """ Returns from 0 to 1 where in the dynamic range of image the otsu threshold
     is """
     return color_in_range(image, threshold_otsu(image))
 
+
 def yen_thresh_relative(image):
     """ Returns from 0 to 1 where in the dynamic range of image the yen threshold
     is """
     return color_in_range(image, threshold_yen(image))
+
 
 def threshold(image, percentage):
     color_range = numpy.amax(image) - numpy.amin(image)
@@ -48,6 +54,7 @@ def threshold(image, percentage):
 #
 # Segmentation
 #
+
 
 def watershed(image):
     # from http://www.scipy-lectures.org/packages/scikit-image/
