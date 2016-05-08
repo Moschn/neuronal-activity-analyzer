@@ -324,33 +324,29 @@ function calculate_statistics_clicked() {
 }
 
 function receive_statistics(data) {
+    // Save the data
     activities = data['activities'];
     spikes = data['spikes'];
 
+    // Reset button and show statistics area
     var button = $('#statistics-button');
     button.html("Calculate statistics");
     button[0].disabled = '';
     show_up_to('statistics');
 
-    // draw_image_rgb_scaled($('#overview')[0],
-    // 		  greyscale16_to_normrgb(segmentation['segmented'],
-    // 					 segmentation['width'],
-    // 					 segmentation['height']),
-    // 		  segmentation['width'],
-    // 		  segmentation['height']);
-    
+    // create plots
     fig_roi = segmentation['roi']
     mpld3.draw_figure("summary2", fig_roi)
     
-    activity_calculation_time = data['time']['activity_calculation'];
-    spike_detection_time = data['time']['spike_detection'];
-
     fig_raster = data['rasterplot']
     mpld3.draw_figure("rasterplot", fig_raster)
 
     fig_roi = data['roi']
     mpld3.draw_figure("summary2", fig_roi)
-    
+
+    // Show statistics in info line
+    activity_calculation_time = data['time']['activity_calculation'];
+    spike_detection_time = data['time']['spike_detection'];
     update_info_line();
 }
 
