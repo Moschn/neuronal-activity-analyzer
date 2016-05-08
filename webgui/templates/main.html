@@ -169,7 +169,31 @@
 
     <div id="roi_editor" style="display: none">
       <h2>ROI editor</h2>
-      <canvas id='view' width="800" height="800"></canvas>
+      <p style="text-align: center;">
+	In this step the segmentation can be edited for better results.
+      </p>
+      <table class="centered" id="editor_table">
+	<tr>
+	  <td>
+	    <div id="editor_view" style="position: relative; width: 800px; height: 800px;"
+		 tabindex="1">
+	      <canvas id='editor_layer0' width="800" height="800"
+		      style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
+	      <canvas id='editor_layer1' width="800" height="800"
+		      style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+	    </div>
+	  </td>
+	  <td>
+	      Click on a neuron to choose it.<br>
+	      <div class="key_label">d</div>: Delete the chosen neuron.<br>
+	      <div class="key_label">m</div>: Hover over a second neuron and press this key to merge the two neurons.<br>
+	      <div class="key_label">u</div>: Undo the last operation<br>
+	      <input id="editor_save" type="submit" value="Save" onclick="editor_save()"
+		     style="display: inline;">
+	      <div id="saved_label"></div>
+	  </td>
+	</tr>
+      </table>
       <hr>
     </div>
 

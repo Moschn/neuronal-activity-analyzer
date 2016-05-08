@@ -15,6 +15,33 @@ var segmentation_time = undefined;
 var activity_calculation_time = undefined;
 var spike_detection_time = undefined;
 
+var label_colors = [
+    [0xff, 0x00, 0x00],
+    [0x00, 0xff, 0x00],
+    [0x00, 0x00, 0xff],
+    [0x00, 0xff, 0xff],
+    [0xff, 0x00, 0xff],
+    [0xff, 0xff, 0x00],
+    [0xff, 0x40, 0x00],
+    [0x00, 0x40, 0xff],
+    [0x40, 0x00, 0xff],
+    [0x40, 0xff, 0x00],
+    [0xff, 0x00, 0x40],
+    [0x00, 0xff, 0x40],
+    [0xff, 0x40, 0x40],
+    [0x40, 0xff, 0x40],
+    [0x40, 0x40, 0xff],
+    [0xff, 0x80, 0x00],
+    [0x00, 0x80, 0xff],
+    [0x80, 0xff, 0x00],
+    [0x80, 0x00, 0xff],
+    [0x00, 0xff, 0x80],
+    [0xff, 0x00, 0x80],
+    [0x80, 0x80, 0xff],
+    [0x80, 0xff, 0x80],
+    [0xff, 0x80, 0x80]
+]
+
 /* 
  * Run management
  */
@@ -50,7 +77,7 @@ function run_clicked() {
     show_up_to('roi_editor');
 
     $.getJSON('/get_segmentation/' + videoname + '/' + run,
-	      display_segmentations);
+	      receive_segmentations);
 }
 
 function create_run_clicked() {
@@ -80,7 +107,7 @@ function delete_run_clicked() {
 
 var thresholds = {};
       
-function display_segmentations(data) {
+function receive_segmentations(data) {
     /* Callback for an ajax query to get_segmentations, which displays the
        retrived images */
 
@@ -89,17 +116,27 @@ function display_segmentations(data) {
     var w = data['width'];
     var h = data['height'];
 
-    set_image_rgb_scaled($('#source_image')[0],
-		  greyscale16_to_normrgb(data['source'], w, h), w, h);
-    set_image_rgb_scaled($('#filtered_image')[0],
-		  greyscale16_to_normrgb(data['filtered'], w, h), w, h);
-    set_image_rgb_scaled($('#thresholded_image')[0],
-		  greyscale16_to_normrgb(data['thresholded'], w, h), w, h);
-    set_image_rgb_scaled($('#segmented_image')[0],
-		  greyscale16_to_normrgb(data['segmented'], w, h), w, h);
+    draw_image_rgb_scaled($('#source_image')[0],
+			  greyscale16_to_normrgb(data.source, w, h),
+			  w, h);
+    draw_image_rgb_scaled($('#filtered_image')[0],
+			  greyscale16_to_normrgb(data.filtered, w, h),
+			  w, h);
+    draw_image_rgb_scaled($('#thresholded_image')[0],
+			  greyscale16_to_normrgb(data.thresholded, w, h),
+			  w, h);
+
+    draw_image_rgb_scaled($('#segmented_image')[0],
+			  greyscale16_to_normrgb(data.source, w, h),
+			  w, h);
+    draw_image_rgba_scaled($('#segmented_image')[0],
+			   color_roi(data.segmented, w, h),
+			   w, h);
     
     $.getJSON("/get_thresholds/" + videoname + '/' + run,
               function(data) { thresholds = data; });
+
+    redraw_editor();
 }
 
 function apply_li() {
@@ -137,20 +174,146 @@ function segmentation_parameters_changed() {
 	       threshold: threshold,
 	       segmentation_algorithm: algorithm
 	   },
-	   display_segmentations, 'json');
+	   receive_segmentations, 'json');
 }
 
 /* 
  * ROI editor
  */
 
+var editor_active_neuron = -1;
+var editor_hovered_neuron = -1;
+var editor_undo_stack = Array();
+var editor_saved = true;
 
+function editor_not_saved() {
+    $('#saved_label').html("Unsaved changes!");
+    editor_saved = false;
+}
+
+function changes_saved() {
+    /* Show that the changes have been saved */
+    $('#saved_label').html("Changes saved");
+    editor_saved = true;
+    show_up_to('roi_editor');
+}
+
+function editor_save() {
+    /* Send the current segmentation in the editor to the server */
+    var encoded_data = encode_array_8(segmentation.editor);
+    $.post('/set_edited_segmentation/' + videoname + '/' + run,
+	   { edited_segmentation: encoded_data },
+	   changes_saved);
+}
+
+function redraw_editor() {
+    var layer0 = $('#editor_layer0')[0];
+    var layer1 = $('#editor_layer1')[0];
+    var w = segmentation['width'];
+    var h = segmentation['height'];
+    draw_image_rgb_scaled(layer0,
+			  greyscale16_to_normrgb(segmentation.source, w, h),
+			  w, h);
+    draw_image_rgba_scaled(layer0,
+			   color_roi(segmentation.editor, w, h),
+			   w, h);
+
+    var layer1_ctx = layer1.getContext("2d");
+    layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
+    if(editor_active_neuron > 0) {
+	var overlay = roi_overlay(segmentation.editor, w, h,
+				  editor_active_neuron,
+				  255, 255, 255, 80);
+	draw_image_rgba_scaled(layer1, overlay, w, h);
+    }
+    if(editor_hovered_neuron > 0) {
+	var hov_overlay = roi_overlay(segmentation.editor, w, h,
+				  editor_hovered_neuron,
+				  255, 255, 255, 50);
+	draw_image_rgba_scaled(layer1, hov_overlay, w, h);
+    }
+}
+
+function editor_clicked(e) {
+    var offset = $(this).offset();
+    // Get coordinates on whole image
+    var x = e.pageX - offset.left;
+    var y = e.pageY - offset.top;
+    var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
+    var seg_y = Math.floor(y * segmentation['height'] / $(this)[0].offsetHeight);
+    editor_active_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
+    redraw_editor();
+}
+$(document).ready(function() {
+    $('#editor_view').click(editor_clicked);
+});
+
+function editor_hovered(e) {
+    var offset = $(this).offset();
+    // Get coordinates on whole image
+    var x = e.pageX - offset.left;
+    var y = e.pageY - offset.top;
+    var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
+    var seg_y = Math.floor(y * segmentation['height'] / $(this)[0].offsetHeight);
+    editor_hovered_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
+    redraw_editor();
+}
+$(document).ready(function() {
+    $('#editor_view').mousemove(editor_hovered);
+});
+
+function editor_keypress(e) {
+    var key = String.fromCharCode(e.which);
+    if(key == 'm') {
+	if(editor_active_neuron > 0 && editor_hovered_neuron > 0) {
+	    editor_undo_stack.push(new Uint8Array(segmentation.editor));
+
+	    var dest = Math.min(editor_active_neuron, editor_hovered_neuron);
+	    var src = Math.max(editor_active_neuron, editor_hovered_neuron);
+
+	    for(var i = 0; i < segmentation.width * segmentation.height; ++i) {
+		if(segmentation.editor[i] == src) {
+		    segmentation.editor[i] = dest;
+		}
+	    }
+	    editor_not_saved();
+	    redraw_editor();
+	}
+    } else if(key == 'd') {
+	if(editor_active_neuron > 0) {
+	    editor_undo_stack.push(new Uint8Array(segmentation.editor));
+
+	    for(var i = 0; i < segmentation.width * segmentation.height; ++i) {
+		if(segmentation.editor[i] == editor_active_neuron) {
+		    segmentation.editor[i] = 0;
+		}
+	    }
+	    editor_not_saved();
+	    redraw_editor();
+	}
+    } else if(key == 'u') {
+	if(editor_undo_stack.length > 0) {
+	    segmentation.editor = editor_undo_stack.pop();
+	    editor_not_saved();
+	    redraw_editor();
+	}
+    }
+}
+$(document).ready(function() {
+    $('#editor_view').keypress(editor_keypress);
+});
 
 /*
  * Statistics
  */
 
 function calculate_statistics_clicked() {
+    if(!editor_saved) {
+	if(!confirm("You have unsaved changes in the ROI editor? Calculate statistics anyway?")) {
+	    return;
+	}
+    }
+    
     current_stage = 'statistics';
     $.getJSON('/get_statistics/' + videoname + '/' + run, receive_statistics);
     
@@ -168,12 +331,13 @@ function receive_statistics(data) {
     button[0].className = "button";
     show_up_to('statistics');
 
-    // set_image_rgb_scaled($('#overview')[0],
+    // draw_image_rgb_scaled($('#overview')[0],
     // 		  greyscale16_to_normrgb(segmentation['segmented'],
     // 					 segmentation['width'],
     // 					 segmentation['height']),
     // 		  segmentation['width'],
     // 		  segmentation['height']);
+    
     fig_roi = segmentation['roi']
     mpld3.draw_figure("summary2", fig_roi)
     
@@ -311,14 +475,58 @@ function show_up_to(stage) {
     }
 }
 
-function set_image_rgb_scaled(canvas, img, w, h) {
-    /* Takes a w*h*3 long array of 24 bit RGB pixel data and displays
-       it in the canvas. The image is scaled to the size of the canvas
+function encode_array_8(arr) {
+    /* Converts an array of 8 bit values to a base64 encoded string */
+    var str = "";
+    for(var i = 0; i < arr.length; ++i)
+    {
+	str += String.fromCharCode(arr[i]);
+    }
+    return btoa(str);
+}
+
+function encode_array_16(arr) {
+    /* Converts an array of 16 bit values to a base64 encoded string */
+    var str = "";
+    for(var i = 0; i < arr.length; ++i)
+    {
+	str += String.fromCharCode(arr[i] >> 8);
+	str += String.fromCharCode(arr[i] & 0xff);
+    }
+    return btoa(str);
+}
+
+function decode_array_8(data) {
+    /* Takes a base64 encoded string and outputs an array of numbers, each
+       representing 8 bit of the base64 encoded data */
+    var u8 = new Uint8Array(atob(data).split("").map(
+	function(c) {
+	    return c.charCodeAt(0);
+	}));
+    return u8;
+}
+
+function decode_array_16(data) {
+    /* Takes a base64 encoded string and outputs an array of numbers, each
+       representing 16 bit of the encoded data */
+    var u8 = decode_array_8(data);
+    return new Uint16Array(u8.buffer);
+}
+
+function draw_image_rgb_scaled(canvas, img, w, h, alpha) {
+    /* Takes a w*h*3 long array of 24 bit RGB pixel data and draws
+       it on the canvas with an alpha value. The image is scaled to the size of
+       the canvas.
 
        Args:
          canvas: A canvas object as returned by getDocumentById or $('#id')[0]
          img(w*h*3 Array): An array of length W*H*3 with values from 0-255
+	 w, h: Size of the source image
+	 alpha: transparency to use while drawing, defaults to 255 (opaque)
     */
+    if (typeof(alpha) === 'undefined')
+	alpha = 255;
+
     var temp_canvas = $("<canvas>")
 	.attr("width", w).attr("height", h)[0];
     var temp_ctx = temp_canvas.getContext("2d");
@@ -328,7 +536,7 @@ function set_image_rgb_scaled(canvas, img, w, h) {
 	    imgData.data[4*i] = img[3*i];
 	    imgData.data[4*i + 1] = img[3*i + 1];
 	    imgData.data[4*i + 2] = img[3*i + 2];
-	    imgData.data[4*i + 3] = 255;
+	    imgData.data[4*i + 3] = alpha;
     }
 
     temp_ctx.putImageData(imgData, 0, 0);
@@ -339,12 +547,30 @@ function set_image_rgb_scaled(canvas, img, w, h) {
     ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
 }
 
-function trans_draw_rgb_to_canvas(canvas, img, w, h, alpha) {
-    /* Take a w*h*3 long array of 24 bit RGB pixel data and draw it in the
-       canvas over the existing image. Use the provided alpha as transparency
+function draw_image_rgba_scaled(canvas, img, w, h) {
+    /* Takes a w*h*4 long array of 32 bit RGBA pixel data and draws
+       it on the canvas. The image is scaled to the size of the canvas.
+
+       Args:
+         canvas: A canvas object as returned by getDocumentById or $('#id')[0]
+         img(w*h*4 Array): An array of length W*H*4 with values from 0-255
+	 w, h: Size of the source image
     */
-    var ctx = canvas.getContext("2d");
+    var temp_canvas = $("<canvas>")
+	.attr("width", w).attr("height", h)[0];
+    var temp_ctx = temp_canvas.getContext("2d");
+    var imgData = temp_ctx.createImageData(w, h)
     
+    for (var i = 0; i < w*h*4; ++i) {
+	imgData.data[i] = img[i];
+    }
+
+    temp_ctx.putImageData(imgData, 0, 0);
+
+    var ctx = canvas.getContext("2d");
+    ctx.scale(canvas.width / w, canvas.height / h);
+    ctx.drawImage(temp_canvas, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
 }
 
 function greyscale16_to_normrgb(img, w, h) {
@@ -375,6 +601,53 @@ function greyscale16_to_normrgb(img, w, h) {
 	rgb[3*i + 2] = brightness;
     }
     return rgb
+}
+
+function color_roi(roi, w, h) {
+    /* Take an roi map of width w, and height h and create an rgba image, which
+       has each roi in a different color. The background is transparent.
+
+       Args:
+           roi(uint8 array w*h): Map of the rois
+	   w: width of the map
+	   h: height of the map
+
+       Returns:
+           A rgba image of width w and height h as an array of w*h*4 elements in
+	   the range from 0 to 255
+    */
+    var img = new Uint8Array(w*h*4);
+    for(var i = 0; i < w*h; ++i)
+    {
+	if(roi[i] == 0) {
+	    img[4*i] = 0;
+	    img[4*i + 1] = 0;
+	    img[4*i + 2] = 0;
+	    img[4*i + 3] = 0;
+	} else {
+	    var index = (roi[i] - 1) % label_colors.length;
+	    img[4*i] = label_colors[index][0];
+	    img[4*i + 1] = label_colors[index][1];
+	    img[4*i + 2] = label_colors[index][2];
+	    img[4*i + 3] = 30;
+	}
+    }
+    return img;
+}
+
+function roi_overlay(roi, w, h, index, r, g, b, a) {
+    /* Create an rgba image, where everything is transparent except for the roi
+       indicated by index, which is in the color given by r,g,b and a */
+    var img = new Uint8Array(w*h*4).fill(0);
+    for(var i = 0; i < w*h; ++i) {
+	if(roi[i] == index) {
+	    img[4*i] = r;
+	    img[4*i + 1] = g;
+	    img[4*i + 2] = b;
+	    img[4*i + 3] = a;
+	}
+    }
+    return img;
 }
 
 function arrayMin(arr) {

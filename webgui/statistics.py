@@ -26,7 +26,7 @@ def get_statistics(videoname, run):
 
     integration_start = time.time()
     integrator = analyzer.integrator_sum.Integrator_sum(
-        segmentation['segmented'])
+        segmentation['editor'])
     activities = integrator.process_parallel_frames(loader)
     integration_time = time.time() - integration_start
 

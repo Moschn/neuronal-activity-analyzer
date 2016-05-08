@@ -1,6 +1,8 @@
 from os.path import abspath, dirname, join, isfile
 from os import listdir, remove
 import shelve
+import numpy
+from base64 import b64decode
 
 from flask import current_app, g
 
@@ -43,3 +45,8 @@ def list_runs(videoname):
 def run_delete(videoname, runname):
     path = run_path(videoname, runname)
     remove(path)
+
+
+def decode_array_8(data, w, h):
+    decoded = b64decode(data)
+    return numpy.frombuffer(decoded, dtype='uint8').reshape(w, h)
