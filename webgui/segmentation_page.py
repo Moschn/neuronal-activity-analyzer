@@ -127,11 +127,11 @@ def create_run(videoname, runname):
 
 
 @segmentation_page.route('/delete_run/<videoname>/<runname>',
-                         methods=['DELETE'])
+                         methods=['POST'])
 def delete_run(videoname, runname):
     try:
         run_delete(videoname, runname)
-        return jsonify({'success': True})
+        return jsonify({'runs': list_runs(videoname)})
     except Exception as e:
         return jsonify({'fail': str(e)})
 

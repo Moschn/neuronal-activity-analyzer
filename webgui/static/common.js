@@ -89,15 +89,8 @@ function create_run_clicked() {
 function delete_run_clicked() {
     if(window.confirm('Are you sure you want to delete the run "'
 		      + run + '"?')) {
-	$.ajax({
-	    url: "/delete_run/" + videoname + "/" + run,
-	    type:' DELETE',
-	    dataType: 'json',
-	    success: display_runs,
-	    error: function (jqXHR, textStatus, errorThrown) { 
-		console.log(textStatus);
-	    }
-	});
+	$.post("/delete_run/" + videoname + "/" + run, {},
+	       display_runs, 'json');
     }
     return false;
 }
