@@ -2,7 +2,6 @@
 <html>
   <head>
     <title>Neuronal activity analyzer</title>
-    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"> -->
     <script src="{{ url_for('static', filename='jquery-2.2.3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='common.js') }}"></script>
     <script src="{{ url_for('static', filename='d3.min.js') }}"></script>
@@ -23,12 +22,12 @@
   <body>
       <div class="container" >
 	  <div class="page-header">
-	      <h1 id="title">Neuronal activity analyzer</h1>
+	      <h1 id="title" style="text-align: center;">Neuronal activity analyzer</h1>
 	  </div>
 	  
 	  {% with messages = get_flashed_messages() %}
           {% if messages %}
-          <ul class=flashes>
+          <ul style="border: 2px; background-color: #EE4444;">
 	      {% for message in messages %}
               <li>{{ message }}</li>
 	      {% endfor %}
@@ -87,7 +86,7 @@
 	     -------------------------------------------------------------------------->
 	  
 	  <div id="segmentation" style="display: none;">
-	      <h2>Segmentation</h2>
+	      <h2 style="text-align: center">Segmentation</h2>
 	      <p>
 		  In this step we find the neurons in the video. We assume they do not
 		  move and one localisation will work for all of the movie.
@@ -96,7 +95,7 @@
 	      <div class="row">
 		  <div class="col-md-6">
 		      <h3>Source image</h3>
-		      <p>Choose what data to use for segmentation. Mean is bad if some neurons are rarely active, but filters noise very well. Variance should yield good results, but might also show noise.</p>
+		      <p style="text-align: justify;">Choose what data to use for segmentation. Mean is bad if some neurons are rarely active, but filters noise very well. Variance should yield good results, but might also show noise.</p>
 		      
 		      <canvas id="source_image" width="400" height="400" class="col-md-8"></canvas>
 
@@ -112,7 +111,7 @@
 		  
 		  <div class="col-md-6">
 		      <h3>Gauss filtering</h3>
-		      <p>Here we filter noise, so random light pixels do not appear as small neurons. Increase, if axons are recognised as neurons<br>
+		      <p style="text-align: justify;">Here we filter noise, so random light pixels do not appear as small neurons. Increase, if axons are recognised as neurons<br>
 			  Decrease, if small neurons disappear
 		      </p>
 		      <canvas id="filtered_image" width="400" height="400" class="col-md-8"></canvas>
@@ -130,13 +129,13 @@
 	      <div class="row">
 		  <div class="col-md-6">
 		      <h3>Thresholding</h3>
-		      <p>The image is divided into background and neurons by defining a threshold. Every pixel brighter than the threshold will belong to foreground and every pixel darker to the background. There are several algorithms to choose an appropriate threshold. Click the buttons to use a value provided by an algorithm or define one manually.
+		      <p style="text-align: justify;">The image is divided into background and neurons by defining a threshold. Every pixel brighter than the threshold will belong to foreground and every pixel darker to the background. There are several algorithms to choose an appropriate threshold. Click the buttons to use a value provided by an algorithm or define one manually.
 		      </p>
 		      
 		  </div>
 		  <div class="col-md-6">
 		      <h3>Segmentation Result</h3>
-		      <p>Last we apply an algorithm to seperate neurons, which are overlapping. To just use every continuous region as one neuron, select 'fill'.
+		      <p style="text-align: justify;">Last we apply an algorithm to seperate neurons, which are overlapping. To just use every continuous region as one neuron, select 'fill'.
 		      </p>
 		  </div>
 	      </div>
@@ -182,7 +181,7 @@
 	    -------------------------------------------------------------------------->
 	  
 	  <div id="roi_editor" style="display: none">
-	    <h2>ROI editor</h2>
+	    <h2 style="text-align: center">ROI editor</h2>
 	    <p>
 	      In this step the segmentation can be edited for better results.
 	    </p>
@@ -216,23 +215,26 @@
 	     -------------------------------------------------------------------------->
 	  
 	  <div id="statistics-button-container" style="display: none;">
-	      <button id="statistics-button" class="btn btn-primary" onclick="calculate_statistics_clicked()">
+	    <div class="row">
+	      <div class="col-md-12" style="text-align: center;">
+		<button id="statistics-button" class="btn btn-primary" onclick="calculate_statistics_clicked()">
 		  Calculate statistics
-	      </button>
-	      <hr>
+		</button>
+	      </div>
+	    </div>
+	    <hr>
 	  </div>
 	  
 	  <div id="statistics" style="display: none;">
-	      <h2>Statistics</h2>
-	      <div class="col-md-12">
-		  <!-- <canvas id="overview" height="400px" width="400px" style="display: inline-block; height: 100%"></canvas> -->
-		  <div class="row">
-		      <div id="summary2" class="col-md-5"></div>
-		      <div id="rasterplot" class="col-md-7"></div>
-		  </div>
-		  <div id="plot" class="col-md-12"></div>
-	      </div>
-	      <hr>
+	    <h2 style="text-align: center">Statistics</h2>
+	    <div class="row">
+	      <div id="summary2" class="col-md-5"></div>
+	      <div id="rasterplot" class="col-md-7"></div>
+	    </div>
+	    <div class="row">
+	      <div id="plot" class="col-md-12"></div>
+	    </div>
+	    <hr>
 	  </div>
 	  
 	  <div id="infoline" style="text-align: center;"></div>
