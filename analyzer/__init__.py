@@ -5,6 +5,7 @@ from analyzer.wdm import WDM
 from analyzer.nsd_spike import SD_spike_detection
 import analyzer.segmentation
 import analyzer.plot
+import analyzer.util
 
 register_loader_class(analyzer.pillow_loader.PILLoader)
 register_loader_class(analyzer.bioformat_loader.BioFormatLoader)

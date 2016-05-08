@@ -26,7 +26,7 @@ def plot_roi_bg(roi, bg, fg, pixel_per_um):
     frame_rgb[..., 0][borders] = 255
     frame_rgb[..., 1][borders] = 255
 
-    figure = pyplot.figure()
+    figure = pyplot.figure(figsize=(5, 5))
     x_axis_end = roi.shape[0] * 1/pixel_per_um
     y_axis_end = roi.shape[1] * 1/pixel_per_um
     pyplot.imshow(frame_rgb[::-1], extent=[0, x_axis_end, 0, y_axis_end])
@@ -57,7 +57,7 @@ def plot_spikes(activity, spikes):
 
 def plot_rasterplot(spikes, exposure_time, nr_bins):
     pyplot.style.use('seaborn-deep')
-    fig = pyplot.figure(figsize=(8, 6))
+    fig = pyplot.figure(figsize=(7, 5))
     gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
     ax1 = pyplot.subplot(gs[0])
     ax2 = pyplot.subplot(gs[1])
