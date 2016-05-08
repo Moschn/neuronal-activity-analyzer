@@ -6,7 +6,7 @@ from math import floor
 from .util import run_load, run_save
 import analyzer
 import analyzer.integrator_sum
-import matplotlib.pyplot as pyplot, mpld3
+import mpld3
 
 statistics = Blueprint('statistics', __name__,
                        template_folder='templates')
@@ -26,7 +26,7 @@ def get_statistics(videoname, run):
 
     integration_start = time.time()
     integrator = analyzer.integrator_sum.Integrator_sum(
-        segmentation['segmented'])
+        segmentation['editor'])
     activities = integrator.process_parallel_frames(loader)
     integration_time = time.time() - integration_start
 

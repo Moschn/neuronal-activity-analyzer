@@ -1,6 +1,7 @@
 from os import listdir
 import os
 from threading import Lock
+import numpy
 
 from flask import Blueprint, current_app, request, redirect, url_for
 from flask import render_template, flash, jsonify, g
@@ -8,6 +9,7 @@ from werkzeug import secure_filename
 
 import analyzer
 from .util import check_extension, run_save, run_load, list_runs, run_delete
+from .util import decode_array_8
 
 import mpld3
 
@@ -20,6 +22,33 @@ segmentation_page = Blueprint('segmentation', __name__,
 segmentation_lock = Lock()
 
 
+@segmentation_page.route('/set_edited_segmentation/<videoname>/<runname>',
+                         methods=['POST'])
+def set_edited_segmentation(videoname, runname):
+    try:
+        g.run = runname
+        segmented = run_load(videoname, 'segmentation')
+
+        encoded_data = request.values.get('edited_segmentation')
+        edited_seg = decode_array_8(encoded_data,
+                                    segmented['editor'].shape[0],
+                                    segmented['editor'].shape[1])
+        unique_neurons = numpy.unique(edited_seg)[1:]  # 0 is background
+        filled_seg = numpy.zeros(edited_seg.shape, dtype='uint8')
+        n = 1
+        for i in unique_neurons:
+            filled_seg[edited_seg == i] = n
+            n += 1
+        segmented['editor'] = filled_seg
+        print(numpy.amax(filled_seg))
+
+        run_save(videoname, 'segmentation', segmented)
+        run_save(videoname, 'statistics', None)  # Invalidate statistics
+        return jsonify(success=True)
+    except Exception as e:
+        return jsonify(fail=str(e))
+
+
 def generate_segmentation(videoname, config):
     """ Run the segmentation in the analyzer module and save the result to run's
     data
@@ -28,6 +57,9 @@ def generate_segmentation(videoname, config):
         loader = analyzer.loader.open(
             os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
         segmented = analyzer.segment(loader, config)
+
+        # Set the roi editor state to the automatic segmentation result
+        segmented['editor'] = segmented['segmented']
 
         run_save(videoname, 'segmentation', segmented)
         run_save(videoname, 'pixel_per_um', loader.pixel_per_um)
