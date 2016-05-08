@@ -99,6 +99,7 @@ function delete_run_clicked() {
 	    }
 	});
     }
+    return false;
 }
 
 /* 
@@ -319,7 +320,7 @@ function calculate_statistics_clicked() {
     
     var button = $('#statistics-button');
     button.html("Calculating...");
-    button[0].className = 'button_clicked';
+    button[0].disabled = 'disabled';
 }
 
 function receive_statistics(data) {
@@ -328,7 +329,7 @@ function receive_statistics(data) {
 
     var button = $('#statistics-button');
     button.html("Calculate statistics");
-    button[0].className = "button";
+    button[0].disabled = '';
     show_up_to('statistics');
 
     // draw_image_rgb_scaled($('#overview')[0],
