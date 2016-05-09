@@ -309,6 +309,9 @@ $(document).ready(function() {
  * Statistics
  */
 
+var statistics_active_neurons = [];
+var statistics_hovered_neuron = -1;
+
 function calculate_statistics_clicked() {
     if(!editor_saved) {
 	if(!confirm("You have unsaved changes in the ROI editor? Calculate statistics anyway?")) {
@@ -323,6 +326,73 @@ function calculate_statistics_clicked() {
     button.html("Calculating...");
     button[0].disabled = 'disabled';
 }
+
+function statistics_redraw_overview() {
+    var layer0 = $('#statistics_layer0')[0];
+    var layer1 = $('#statistics_layer1')[0];
+    var w = segmentation['width'];
+    var h = segmentation['height'];
+    draw_image_rgb_scaled(layer0,
+			  greyscale16_to_normrgb(segmentation.source, w, h),
+			  w, h);
+    draw_image_rgba_scaled(layer0,
+			   color_roi(segmentation.editor, w, h),
+			   w, h);
+
+    var layer1_ctx = layer1.getContext("2d");
+    layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
+    if(statistics_hovered_neuron > 0) {
+	var overlay = roi_overlay(segmentation.editor, w, h,
+				  statistics_hovered_neuron,
+				  255, 255, 255, 80);
+	draw_image_rgba_scaled(layer1, overlay, w, h);
+    }
+    statistics_active_neurons.forEach(function (neuron) {
+	var hov_overlay = roi_overlay(segmentation.editor, w, h,
+				  neuron,
+				  255, 255, 255, 50);
+	draw_image_rgba_scaled(layer1, hov_overlay, w, h);
+    })
+}
+
+function statistics_overview_clicked(e) {
+    var offset = $(this).offset();
+    // Get coordinates on whole image
+    var x = e.pageX - offset.left;
+    var y = e.pageY - offset.top;
+    var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
+    var seg_y = Math.floor(y * segmentation['height'] / $(this)[0].offsetHeight);
+    neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
+
+    var index = statistics_active_neurons.indexOf(neuron);
+    if(index != -1) {
+	// If neuron is active, remove it from active list
+	statistics_active_neurons.splice(index, 1);
+    } else {
+	// If neuron is not active add it to active list
+	statistics_active_neurons.push(neuron);
+    }
+    statistics_redraw_overview();
+    plot_active_neurons();
+}
+$(document).ready(function() {
+    $('#overview').click(statistics_overview_clicked);
+});
+
+function statistics_overview_hovered(e) {
+    var offset = $(this).offset();
+    // Get coordinates on whole image
+    var x = e.pageX - offset.left;
+    var y = e.pageY - offset.top;
+    var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
+    var seg_y = Math.floor(y * segmentation['height'] / $(this)[0].offsetHeight);
+    statistics_hovered_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
+    statistics_redraw_overview();
+    plot_hovered_neuron(statistics_hovered_neuron);
+}
+$(document).ready(function() {
+    $('#overview').mousemove(statistics_overview_hovered);
+});
 
 function receive_statistics(data) {
     // Save the data
@@ -364,8 +434,7 @@ function receive_statistics(data) {
 			.attr("fill", "yellow")
 			.attr("opacity", 0);
 
-    fig_roi = data['roi']
-    mpld3.draw_figure("summary2", fig_roi)
+    statistics_redraw_overview();
 
     // Show statistics in info line
     activity_calculation_time = data['time']['activity_calculation'];
@@ -373,10 +442,17 @@ function receive_statistics(data) {
     update_info_line();
 }
 
-function update_plot(neuron_index) {
-    chart = $('#plot').highcharts({
+function plot_active_neurons() {
+    data = [];
+    statistics_active_neurons.forEach(function (neuron) {
+	data.push({
+	    name: 'Neuron ' + neuron,
+	    data: activities[neuron-1]
+	});
+    })
+    chart = $('#plot_active').highcharts({
         title: {
-            text: 'Activity of Neurons',
+            text: 'Activities',
             x: -20 //center
         },
         xAxis: {
@@ -386,7 +462,38 @@ function update_plot(neuron_index) {
         },
         yAxis: {
             title: {
-                text: 'brightness'
+                text: 'brightness [max 65535]'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle',
+            borderWidth: 0
+        },
+        series: data
+    });
+}
+
+function plot_hovered_neuron(neuron_index) {
+    chart = $('#plot_hovered').highcharts({
+        title: {
+            text: 'Activity of hovered neuron',
+            x: -20 //center
+        },
+        xAxis: {
+            title: {
+                text: 'frame'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'brightness [max 65535]'
             },
             plotLines: [{
                 value: 0,
@@ -430,38 +537,6 @@ function update_rasterplot(neuron)
     var plot_y = ((bbox[1]+bbox[3])*img_h - (1-bbox[3])*img_h + 12)/activities.length *(activities.length - neuron+1) + 6;
     raster_rect.transition().attr("y", plot_y).attr("opacity", 0.5);
 }
-
-$(document).ready(function() {
-    $('#summary2').click(function(e) {
-	var offset = $(this).offset();
-	// Get coordinates on whole image
-	var img_x = e.pageX - offset.left;
-	var img_y = e.pageY - offset.top;
-	//var img_w = $('#summary2').width();
-	//var img_h = $('#summary2').height();
-	var img_w = 400
-	var img_h = 400
-	// Get actual image in plot metrics
-	// bbox is [x, y, w, h] of plot in coords from 0 to 1, where 0 is left
-	// or bottom and 1 is right or top
-	var bbox = fig_roi.axes[0].bbox;
-	var plot_x = img_x - bbox[0] * img_w -15; 
-	var plot_y = img_y - (1-bbox[1]-bbox[3]) * img_h;
-	var plot_w = bbox[2] * img_w;
-	var plot_h = bbox[3] * img_h;
-	// Get coordinates on segmentation as integer
-        var seg_x = Math.floor(plot_x * segmentation['width'] / plot_w);
-	var seg_y = Math.floor(plot_y * segmentation['height'] / plot_h);
-        neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
-	//if (plotted_neurons.indexOf(neuron) == -1) {
-	//    plotted_neurons.push(neuron);
-	//}
-	//$('#testcoords').html(seg_y + "|" + seg_x)
-	
-	update_plot(neuron);
-	update_rasterplot(neuron);
-    });
-});
 
 /*
  * Info line

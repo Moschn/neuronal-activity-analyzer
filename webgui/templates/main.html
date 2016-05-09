@@ -254,12 +254,20 @@
 	  <div id="statistics" style="display: none;">
 	    <h2 style="text-align: center">Statistics</h2>
 	    <div class="row">
-	      <div id="summary2" class="col-md-5"></div>
+	      <div class="col-md-5">
+		<div id="overview" style="position: relative; width:400px; height:400px">
+		  <canvas id='statistics_layer0' width="400px" height="400px"
+			  style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
+		  <canvas id='statistics_layer1' width="400px" height="400px"
+			  style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+		</div>
+	      </div>
 	      <div id="rasterplot" class="col-md-7"></div>
 	    </div>
 	    <!-- <p id="testcoords"> </p> -->
 	    <div class="row">
-	      <div id="plot" class="col-md-12" style="height:400px"></div>
+	      <div id="plot_hovered" class="col-md-12" style="height:400px"></div>
+	      <div id="plot_active" class="col-md-12" style="height:400px"></div>
 	    </div>
 	    <hr>
 	  </div>
