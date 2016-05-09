@@ -37,6 +37,9 @@ def get_statistics(videoname, run):
     fig_raster = analyzer.plot.plot_rasterplot(spikes, loader.exposure_time,
                                                floor(len(activities) *
                                                      loader.exposure_time))
+    fig_roi = analyzer.plot.plot_roi(segmentation['editor'],
+                                     segmentation['source'],
+                                     loader.pixel_per_um)
 
     spikes = [l.tolist() for l in spikes]
 
@@ -49,6 +52,7 @@ def get_statistics(videoname, run):
         "spike_detection": spike_detection_time
     }
     response['rasterplot'] = mpld3.fig_to_dict(fig_raster)
+    response['roi'] = mpld3.fig_to_dict(fig_roi)
 
     run_save(videoname, 'statistics', response)
 

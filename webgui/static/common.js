@@ -160,7 +160,10 @@ function segmentation_parameters_changed() {
 	current_stage = 'segmentation';
 	show_up_to('roi_editor');
     }
-
+    // clear plots in statisctics
+    $('#summary2').html("");
+    $('#rasterplot').html("");
+    $('#plot').html("");
     $.post('/set_segmentation_params/' + videoname + '/' + run,
 	   {
 	       segmentation_source: source,
@@ -195,6 +198,9 @@ function changes_saved() {
 function editor_save() {
     /* Send the current segmentation in the editor to the server */
     var encoded_data = encode_array_8(segmentation.editor);
+    $('#summary2').html("");
+    $('#rasterplot').html("");
+    $('#plot').html("");
     $.post('/set_edited_segmentation/' + videoname + '/' + run,
 	   { edited_segmentation: encoded_data },
 	   changes_saved);
@@ -328,8 +334,8 @@ function receive_statistics(data) {
     show_up_to('statistics');
 
     // create plots
-    fig_roi = segmentation['roi']
-    mpld3.draw_figure("summary2", fig_roi)
+    //fig_roi = segmentation['roi']
+    //mpld3.draw_figure("summary2", fig_roi)
     
     fig_raster = data['rasterplot']
     mpld3.draw_figure("rasterplot", fig_raster)
@@ -375,13 +381,15 @@ function update_plot(neuron_index) {
             data: activities[neuron_index-1]
         }]
     });
-    
-    for(var i = 0; i < spikes[neuron_index-1].length; ++i) {
-        chart.highcharts().xAxis[0].addPlotLine({
-            color: 'red',
-            value: spikes[neuron_index-1][i],
-            width: 2
-	});
+    if (typeof spikes[neuron_index-1] != 'undefined')
+    {
+	for(var i = 0; i < spikes[neuron_index-1].length; ++i) {
+            chart.highcharts().xAxis[0].addPlotLine({
+		color: 'red',
+		value: spikes[neuron_index-1][i],
+		width: 2
+	    });
+	}
     }
 }
 
@@ -391,13 +399,15 @@ $(document).ready(function() {
 	// Get coordinates on whole image
 	var img_x = e.pageX - offset.left;
 	var img_y = e.pageY - offset.top;
-	var img_w = $('#summary2').width();
-	var img_h = $('#summary2').height();
+	//var img_w = $('#summary2').width();
+	//var img_h = $('#summary2').height();
+	var img_w = 400
+	var img_h = 400
 	// Get actual image in plot metrics
 	// bbox is [x, y, w, h] of plot in coords from 0 to 1, where 0 is left
 	// or bottom and 1 is right or top
-	var bbox = segmentation['roi'].axes[0].bbox;
-	var plot_x = img_x - bbox[0] * img_w;
+	var bbox = fig_roi.axes[0].bbox;
+	var plot_x = img_x - bbox[0] * img_w -15; 
 	var plot_y = img_y - (1-bbox[1]-bbox[3]) * img_h;
 	var plot_w = bbox[2] * img_w;
 	var plot_h = bbox[3] * img_h;
@@ -408,6 +418,7 @@ $(document).ready(function() {
 	//if (plotted_neurons.indexOf(neuron) == -1) {
 	//    plotted_neurons.push(neuron);
 	//}
+	$('#testcoords').html(seg_y + "|" + seg_x)
 	update_plot(neuron);
     });
 });
