@@ -340,6 +340,28 @@ function receive_statistics(data) {
     fig_raster = data['rasterplot']
     mpld3.draw_figure("rasterplot", fig_raster)
 
+    var img_w = $('#rasterplot').width();
+    var img_h = $('#rasterplot').height();
+        // Get actual image in plot metrics
+    // bbox is [x, y, w, h] of plot in coords from 0 to 1, where 0 is left
+    // or bottom and 1 is right or top
+    // magic offset 8
+    var bbox = fig_raster.axes[0].bbox;
+    var plot_x = bbox[0] * img_w - 8;
+    var plot_y = (1-bbox[1]-bbox[3]) * img_h;
+    var width = bbox[2] * img_w - plot_x - 24;
+    var height = bbox[3] * img_h / activities.length;
+    
+    raster_rect = d3.select(".mpld3-figure")
+			.append("rect")
+			.attr("x", plot_x)
+			.attr("y", plot_y)
+			.attr("height", height)
+			.attr("width", width)
+			.attr("id", "raster-rect")
+			.attr("fill", "yellow")
+			.attr("opacity", 0);
+
     fig_roi = data['roi']
     mpld3.draw_figure("summary2", fig_roi)
 
@@ -393,6 +415,20 @@ function update_plot(neuron_index) {
     }
 }
 
+function update_rasterplot(neuron)
+{
+    var img_w = $('#rasterplot').width();
+    var img_h = $('#rasterplot').height();
+    // Get actual image in plot metrics
+    // bbox is [x, y, w, h] of plot in coords from 0 to 1, where 0 is left
+    // or bottom and 1 is right or top
+    // magic offset 8
+    var bbox = fig_raster.axes[0].bbox;
+    var plot_x = bbox[0] * img_w - 8;
+    var plot_y = ((bbox[1]+bbox[3])*img_h - (1-bbox[3])*img_h + 12)/activities.length *(activities.length - neuron+1) + 6;
+    raster_rect.transition().attr("y", plot_y).attr("opacity", 0.5);
+}
+
 $(document).ready(function() {
     $('#summary2').click(function(e) {
 	var offset = $(this).offset();
@@ -414,12 +450,14 @@ $(document).ready(function() {
 	// Get coordinates on segmentation as integer
         var seg_x = Math.floor(plot_x * segmentation['width'] / plot_w);
 	var seg_y = Math.floor(plot_y * segmentation['height'] / plot_h);
-        neuron = (segmentation['segmented'][seg_y*segmentation['width'] + seg_x]);
+        neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
 	//if (plotted_neurons.indexOf(neuron) == -1) {
 	//    plotted_neurons.push(neuron);
 	//}
-	$('#testcoords').html(seg_y + "|" + seg_x)
+	//$('#testcoords').html(seg_y + "|" + seg_x)
+	
 	update_plot(neuron);
+	update_rasterplot(neuron);
     });
 });
 
