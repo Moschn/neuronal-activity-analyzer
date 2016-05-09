@@ -414,7 +414,7 @@ $(document).ready(function() {
 	// Get coordinates on segmentation as integer
         var seg_x = Math.floor(plot_x * segmentation['width'] / plot_w);
 	var seg_y = Math.floor(plot_y * segmentation['height'] / plot_h);
-        neuron = (segmentation['segmented'][seg_y*segmentation['width'] + seg_x]);
+        neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
 	//if (plotted_neurons.indexOf(neuron) == -1) {
 	//    plotted_neurons.push(neuron);
 	//}
