@@ -374,6 +374,7 @@ function statistics_overview_clicked(e) {
     }
     statistics_redraw_overview();
     plot_active_neurons();
+    redraw_rasterplot();
 }
 $(document).ready(function() {
     $('#overview').click(statistics_overview_clicked);
@@ -411,28 +412,9 @@ function receive_statistics(data) {
     
     fig_raster = data['rasterplot']
     mpld3.draw_figure("rasterplot", fig_raster)
-
-    var img_w = $('#rasterplot').width();
-    var img_h = $('#rasterplot').height();
-        // Get actual image in plot metrics
-    // bbox is [x, y, w, h] of plot in coords from 0 to 1, where 0 is left
-    // or bottom and 1 is right or top
-    // magic offset 8
-    var bbox = fig_raster.axes[0].bbox;
-    var plot_x = bbox[0] * img_w - 8;
-    var plot_y = (1-bbox[1]-bbox[3]) * img_h;
-    var width = bbox[2] * img_w - plot_x - 24;
-    var height = bbox[3] * img_h / activities.length;
+    raster = d3.select(".mpld3-figure");
+    raster_rect = Array(activities.length)
     
-    raster_rect = d3.select(".mpld3-figure")
-			.append("rect")
-			.attr("x", plot_x)
-			.attr("y", plot_y)
-			.attr("height", height)
-			.attr("width", width)
-			.attr("id", "raster-rect")
-			.attr("fill", "yellow")
-			.attr("opacity", 0);
 
     statistics_redraw_overview();
 
@@ -476,6 +458,9 @@ function plot_active_neurons() {
             verticalAlign: 'middle',
             borderWidth: 0
         },
+	credits: {
+	    enabled: false
+	},
         series: data
     });
 }
@@ -501,6 +486,9 @@ function plot_hovered_neuron(neuron_index) {
                 color: '#808080'
             }]
         },
+	credits: {
+	    enabled: false
+	},
         legend: {
             layout: 'vertical',
             align: 'right',
@@ -524,18 +512,43 @@ function plot_hovered_neuron(neuron_index) {
     }
 }
 
-function update_rasterplot(neuron)
+function redraw_rasterplot()
 {
-    var img_w = $('#rasterplot').width();
-    var img_h = $('#rasterplot').height();
-    // Get actual image in plot metrics
-    // bbox is [x, y, w, h] of plot in coords from 0 to 1, where 0 is left
-    // or bottom and 1 is right or top
-    // magic offset 8
-    var bbox = fig_raster.axes[0].bbox;
-    var plot_x = bbox[0] * img_w - 8;
-    var plot_y = ((bbox[1]+bbox[3])*img_h - (1-bbox[3])*img_h + 12)/activities.length *(activities.length - neuron+1) + 6;
-    raster_rect.transition().attr("y", plot_y).attr("opacity", 0.5);
+    for (var i = 0; i < raster_rect.length; i++)
+    {
+	var img_w = $('#rasterplot').width();
+	var img_h = $('#rasterplot').height();
+	// Get actual image in plot metrics
+	// bbox is [x, y, w, h] of plot in coords from 0 to 1, where 0 is left
+	// or bottom and 1 is right or top
+	// magic offset 8
+	var bbox = fig_raster.axes[0].bbox;
+	var y_offset = (1-bbox[1]-bbox[3])*img_h + bbox[3]*img_h/activities.length*(i+1);
+	var plot_x = bbox[0] * img_w - 8;
+	var width = bbox[2] * img_w - plot_x - 24;
+	var height = bbox[3] * img_h / activities.length;
+	if (statistics_active_neurons.indexOf(i+1) != -1)
+	{
+	    if (typeof raster_rect[i] == "undefined")
+	    {
+		raster_rect[i] = raster.append("rect")
+				       .attr("x", plot_x)
+				       .attr("y", y_offset)
+				       .attr("height", height)
+				       .attr("width", width)
+				       .attr("fill", "yellow")
+				       .attr("opacity", 0.3);
+	    }
+	}
+	else
+	{
+	    if (typeof raster_rect[i] != "undefined")
+	    {
+		raster_rect[i].remove();
+		delete raster_rect[i];
+	    }
+	}
+    }
 }
 
 /*
