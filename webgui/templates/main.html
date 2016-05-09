@@ -186,23 +186,47 @@
 	      In this step the segmentation can be edited for better results.
 	    </p>
 	    <div class="row">
-	      <div id="editor_view" style="display:inline-block; width:800px; height:800px"
-		   tabindex="1">
-		<div style="position: relative; width:800px; height:800px">
+	      <div class="col-md-9">
+		<div id="editor_view" style="position: relative; width:800px; height:800px"
+		     tabindex="1">
 		  <canvas id='editor_layer0' width="800px" height="800px"
 			  style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
 		  <canvas id='editor_layer1' width="800px" height="800px"
 			  style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
 		</div>
 	      </div>
-	      <div class="well" style="display:inline-block; width:250px; vertical-align: top">
-		Click on a neuron to choose it.<br>
-		<strong>d</strong>: Delete the chosen neuron.<br>
-		<strong>m</strong>: Hover over a second neuron and press this key to merge the two neurons.<br>
-		<strong>u</strong>: Undo the last operation<br>
-		<input id="editor_save" type="submit" value="Save" onclick="editor_save()"
-		       style="display: inline;">
-		<div id="saved_label"></div>
+	      <div class="col-md-3">
+		<div class="well well-lg" style="display:inline-block; height: 100%; vertical-align: top">
+		  Click on a neuron to choose it.<br>
+		  <table>
+		    <tr>
+		      <td style="vertical-align: top; padding: 3px;">
+			<strong>d</strong>
+		      </td>
+		      <td style="vertical-align: top; padding: 3px;">
+			Delete the chosen neuron.
+		      </td>
+		    </tr>
+		    <tr>
+		      <td style="vertical-align: top; padding: 3px;">
+			<strong>m</strong>
+		      </td>
+		      <td style="vertical-align: top; padding: 3px;">
+			Hover over a second neuron and press this key to merge the two neurons.
+		      </td>
+		    </tr>
+		    <tr>
+		      <td style="vertical-align: top; padding: 3px;">
+			<strong>u</strong>
+		      </td>
+		      <td style="vertical-align: top; padding: 3px;">
+			Undo the last operation.
+		      </td>
+		    </tr>
+		  </table>
+		  <button id="editor_save" class="btn btn-success" onclick="editor_save()"
+			  style="display: inline;">Changes saved</button>
+		</div>
 	      </div>
 	    </div>
 	    <hr>

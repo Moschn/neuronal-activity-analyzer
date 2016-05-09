@@ -184,13 +184,15 @@ var editor_undo_stack = Array();
 var editor_saved = true;
 
 function editor_not_saved() {
-    $('#saved_label').html("Unsaved changes!");
+    $('#editor_save').html("Unsaved changes!");
+    $('#editor_save')[0].className = "btn btn-danger";
     editor_saved = false;
 }
 
 function changes_saved() {
     /* Show that the changes have been saved */
-    $('#saved_label').html("Changes saved");
+    $('#editor_save').html("Changes saved!");
+    $('#editor_save')[0].className = "btn btn-success";
     editor_saved = true;
     show_up_to('roi_editor');
 }
