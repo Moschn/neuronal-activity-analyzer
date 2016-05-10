@@ -60,7 +60,7 @@ function videoname_clicked() {
 }
 
 function display_runs(data) {
-    var options_as_string;
+    var options_as_string = '';
     for(var i = 0; i < data['runs'].length; ++i) {
         options_as_string += '<option>' + data['runs'][i] + '</option>';
     }
@@ -523,7 +523,7 @@ function redraw_rasterplot()
 	// or bottom and 1 is right or top
 	// magic offset 8
 	var bbox = fig_raster.axes[0].bbox;
-	var y_offset = (1-bbox[1]-bbox[3])*img_h + bbox[3]*img_h/activities.length*(i+1);
+	var y_offset = (1-bbox[1]-bbox[3])*img_h + bbox[3]*img_h/activities.length*(activities.length-i-1);
 	var plot_x = bbox[0] * img_w - 8;
 	var width = bbox[2] * img_w - plot_x - 24;
 	var height = bbox[3] * img_h / activities.length;
