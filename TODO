@@ -15,8 +15,24 @@ config file per video
 UNISOTROPIC DIFFUSION
 
 
+New:
+
+1. NAS connection
+2. Batch
+3. CSV export
+4. Axes labels for JS plots
+5. Change bin size
+6. Numbers on plot
+7. Correlation statistics
+8. Windows fix
+
+Outlines for plot
+n times std switch
+ImageJ Import Button
+
 
 MATHIAS:
 Simon alders
 webserver + apache proxy
 domain
+htaccess
