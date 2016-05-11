@@ -9,7 +9,7 @@ from werkzeug import secure_filename
 
 import analyzer
 from .util import check_extension, run_save, run_load, list_runs, run_delete
-from .util import decode_array_8
+from .util import decode_array_8, make_tree
 
 import mpld3
 
@@ -22,7 +22,7 @@ segmentation_page = Blueprint('segmentation', __name__,
 segmentation_lock = Lock()
 
 
-@segmentation_page.route('/set_edited_segmentation/<videoname>/<runname>',
+@segmentation_page.route('/set_edited_segmentation/<path:videoname>/<runname>',
                          methods=['POST'])
 def set_edited_segmentation(videoname, runname):
     try:
@@ -53,6 +53,7 @@ def generate_segmentation(videoname, config):
     """ Run the segmentation in the analyzer module and save the result to run's
     data
     """
+    print(videoname)
     with segmentation_lock:
         loader = analyzer.loader.open(
             os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
@@ -68,7 +69,7 @@ def generate_segmentation(videoname, config):
     return segmented
 
 
-@segmentation_page.route('/set_segmentation_params/<videoname>/<runname>',
+@segmentation_page.route('/set_segmentation_params/<path:videoname>/<runname>',
                          methods=['POST'])
 def set_segmentation_params(videoname, runname):
     try:
@@ -94,7 +95,7 @@ def set_segmentation_params(videoname, runname):
         return jsonify({'fail': str(e)})
 
 
-@segmentation_page.route('/get_segmentation/<videoname>/<runname>')
+@segmentation_page.route('/get_segmentation/<path:videoname>/<runname>')
 def get_segmentation(videoname, runname):
     g.run = runname
     segmented = run_load(videoname, 'segmentation')
@@ -107,14 +108,14 @@ def get_segmentation(videoname, runname):
     for k in segmented:
         response[k] = segmented[k].flatten().tolist()
 
-    fig_roi = analyzer.plot.plot_roi(segmented['segmented'],
-                                     segmented['source'],
-                                     pixel_per_um)
-    response['roi'] = mpld3.fig_to_dict(fig_roi)
+    # fig_roi = analyzer.plot.plot_roi(segmented['segmented'],
+    #                                 segmented['source'],
+    #                                 pixel_per_um)
+    #response['roi'] = mpld3.fig_to_dict(fig_roi)
     return jsonify(response)
 
 
-@segmentation_page.route('/create_run/<videoname>/<runname>',
+@segmentation_page.route('/create_run/<path:videoname>/<runname>',
                          methods=['POST'])
 def create_run(videoname, runname):
     g.run = runname
@@ -126,7 +127,7 @@ def create_run(videoname, runname):
     return jsonify({'runs': list_runs(videoname)})
 
 
-@segmentation_page.route('/delete_run/<videoname>/<runname>',
+@segmentation_page.route('/delete_run/<path:videoname>/<runname>',
                          methods=['POST'])
 def delete_run(videoname, runname):
     try:
@@ -136,12 +137,12 @@ def delete_run(videoname, runname):
         return jsonify({'fail': str(e)})
 
 
-@segmentation_page.route('/get_runs/<videoname>')
+@segmentation_page.route('/get_runs/<path:videoname>')
 def get_runs(videoname):
     return jsonify({'runs': list_runs(videoname)})
 
 
-@segmentation_page.route('/get_thresholds/<videoname>/<runname>')
+@segmentation_page.route('/get_thresholds/<path:videoname>/<runname>')
 def get_thresholds(videoname, runname):
     g.run = runname
     segmented = run_load(videoname, 'segmentation')
@@ -165,4 +166,5 @@ def upload_file():
 def main_page():
     files = listdir(current_app.config['VIDEO_FOLDER'])
     return render_template('main.html',
-                           files=files)
+                           files=files,
+                           tree=make_tree(current_app.config['VIDEO_FOLDER']))

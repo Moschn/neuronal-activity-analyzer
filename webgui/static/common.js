@@ -46,18 +46,56 @@ var label_colors = [
  * Run management
  */
 
-function videoname_clicked() {
-    var new_videoname = $('#fileselect').find(":selected").text();
-    if (new_videoname == videoname) {
-	return;
-    }
-    videoname = new_videoname;
+// function videoname_clicked() {
+//     var new_videoname = $('#fileselect').find(":selected").text();
+//     if (new_videoname == videoname) {
+// 	return;
+//     }
+//     videoname = new_videoname;
     
-    show_up_to('file_select');
+//     show_up_to('file_select');
     
-    // Update the list of runs for that file
-    $.getJSON("/get_runs/" + videoname, display_runs);
-}
+//     // Update the list of runs for that file
+//     $.getJSON("/get_runs/" + videoname, display_runs);
+// }
+
+$(document).ready(function() {
+    $('#tree').on('nodeSelected', function(event, data) {
+	
+	console.log(event);
+	console.log(data);
+	var new_videoname = ""
+	if (typeof $('#tree').treeview('getParent', data.nodeId).nodeId == "undefined")
+	{
+	    new_videoname = data.text;
+	}
+	else
+	{
+	    new_videoname = data.text;
+	    var node_id = $('#tree').treeview('getParent', data.nodeId).nodeId;
+	    var node_text = $('#tree').treeview('getParent', data.nodeId).text;
+	    while(typeof node_id != "undefined")
+	    {
+		console.log(new_videoname)
+		node_text = $('#tree').treeview('getNode', node_id).text;
+		new_videoname = node_text + "/" + new_videoname;
+		node_id = $('#tree').treeview('getParent', node_id).nodeId;
+	    }
+	}
+	if (new_videoname == videoname) {
+	    return;
+	}
+	videoname = new_videoname;
+	
+	console.log(videoname)
+	console.log(new_videoname)
+	show_up_to('file_select');
+	
+	// Update the list of runs for that file
+	$.getJSON("/get_runs/" + videoname, display_runs);
+	
+    });
+});
 
 function display_runs(data) {
     var options_as_string = '';

@@ -1,12 +1,11 @@
-from os.path import abspath, dirname, join, isfile
-from os import listdir, remove
+import os
 import shelve
 import numpy
 from base64 import b64decode
 
 from flask import current_app, g
 
-ROOT_DIR = abspath(dirname(__file__))
+ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 def check_extension(filename, allowed):
@@ -15,19 +14,23 @@ def check_extension(filename, allowed):
 
 
 def run_path(videoname, runname):
-    return join(current_app.config['DATA_FOLDER'],
+    return os.path.join(current_app.config['DATA_FOLDER'],
                 "%s-%s.run" % (videoname, runname))
 
 
 def run_save(videoname, key, value):
     path = run_path(videoname, g.run)
+    folder = os.path.dirname(path)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
     with shelve.open(path, writeback=True) as shelf:
         shelf[key] = value
 
 
 def run_load(videoname, key):
     path = run_path(videoname, g.run)
-    if not isfile(path):
+    print(path)
+    if not os.path.isfile(path):
         return None
     with shelve.open(path) as shelf:
         if key in shelf:
@@ -36,17 +39,38 @@ def run_load(videoname, key):
 
 
 def list_runs(videoname):
-    files = listdir(current_app.config['DATA_FOLDER'])
-    runs = [name[len(videoname)+1:-4] for name in files
-            if name.startswith(videoname)]
+    path = os.path.dirname(videoname)
+    basename = os.path.basename(videoname)
+    files = os.listdir(os.path.join(current_app.config['DATA_FOLDER'],
+                                    path))
+    runs = [name[len(basename)+1:-4] for name in files
+            if name.startswith(basename)]
     return runs
 
 
 def run_delete(videoname, runname):
     path = run_path(videoname, runname)
-    remove(path)
+    os.remove(path)
 
 
 def decode_array_8(data, w, h):
     decoded = b64decode(data)
     return numpy.frombuffer(decoded, dtype='uint8').reshape(w, h)
+
+
+def make_tree(path_arg):
+    tree = dict(name=os.path.basename(path_arg), children=[])
+    try:
+        lst = os.listdir(path_arg)
+    except OSError:
+        print("dafuq")
+        pass  # ignore errors
+    else:
+        for name in lst:
+            fn = os.path.join(path_arg, name)
+            if os.path.isdir(fn):
+                tree['children'].append(make_tree(fn))
+            else:
+                tree['children'].append(dict(name=name))
+    print(tree)
+    return tree

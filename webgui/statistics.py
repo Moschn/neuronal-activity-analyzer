@@ -12,7 +12,7 @@ statistics = Blueprint('statistics', __name__,
                        template_folder='templates')
 
 
-@statistics.route('/get_statistics/<videoname>/<run>')
+@statistics.route('/get_statistics/<path:videoname>/<run>')
 def get_statistics(videoname, run):
     g.run = run
 

@@ -6,6 +6,7 @@
     <script src="{{ url_for('static', filename='common.js') }}"></script>
     <script src="{{ url_for('static', filename='d3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='mpld3.v0.2.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap-treeview.js') }}"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
     <script src="http://code.highcharts.com/modules/offline-exporting.js"></script>
@@ -57,12 +58,32 @@
 				  </div>
 				  <button type="submit" class="btn btn-primary">Upload</button>
 			      </div>
-			      <select id="fileselect" name="fileselect" size="10"
-				      class="form-control" onclick="videoname_clicked()" style="margin-top:10px">
-				  {% for item in files %}
-				  <option>{{item}}</option>
-				  {% endfor %}
-			      </select>
+			      <!-- <select id="fileselect" name="fileselect" size="10" -->
+			      <!-- 	      class="form-control" onclick="videoname_clicked()" style="margin-top:10px"> -->
+			      <!-- 	  {% for item in files %} -->
+			      <!-- 	  <option>{{item}}</option> -->
+			      <!-- 	  {% endfor %} -->
+			      <!-- </select> -->
+			      <br>
+			      <div id="tree"></div>
+			      <script>
+			           
+			           var tree = [
+				       {%- for item in tree.children recursive %}
+				           {
+				               text: "{{ item.name }}",
+					       selectable: true
+				               {%- if item.children -%}
+				               ,    nodes: [
+				                   {{ loop(item.children) }}
+					       ]
+				               {%- endif %}
+					   },
+				       {%- endfor %}
+				   ];
+			           $('#tree').treeview({data: tree});
+			      
+			      </script>
 			  </div>
 		      </form>
 		      
