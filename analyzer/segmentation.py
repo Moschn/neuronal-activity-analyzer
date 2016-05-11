@@ -88,3 +88,6 @@ def k_means(frame):
     labels = segmentation.slic(frame, n_segments=250, compactness=0.001,
                                sigma=0)
     return labels
+
+def get_borders(roi):
+    return segmentation.find_boundaries(roi);

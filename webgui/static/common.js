@@ -62,8 +62,6 @@ var label_colors = [
 $(document).ready(function() {
     $('#tree').on('nodeSelected', function(event, data) {
 	
-	console.log(event);
-	console.log(data);
 	var new_videoname = ""
 	if (typeof $('#tree').treeview('getParent', data.nodeId).nodeId == "undefined")
 	{
@@ -76,7 +74,6 @@ $(document).ready(function() {
 	    var node_text = $('#tree').treeview('getParent', data.nodeId).text;
 	    while(typeof node_id != "undefined")
 	    {
-		console.log(new_videoname)
 		node_text = $('#tree').treeview('getNode', node_id).text;
 		new_videoname = node_text + "/" + new_videoname;
 		node_id = $('#tree').treeview('getParent', node_id).nodeId;
@@ -87,8 +84,6 @@ $(document).ready(function() {
 	}
 	videoname = new_videoname;
 	
-	console.log(videoname)
-	console.log(new_videoname)
 	show_up_to('file_select');
 	
 	// Update the list of runs for that file
@@ -162,7 +157,7 @@ function receive_segmentations(data) {
 			  greyscale16_to_normrgb(data.source, w, h),
 			  w, h);
     draw_image_rgba_scaled($('#segmented_image')[0],
-			   color_roi(data.segmented, w, h),
+			   color_roi_borders(data.segmented, data.borders, w, h),
 			   w, h);
     
     $.getJSON("/get_thresholds/" + videoname + '/' + run,
@@ -202,6 +197,7 @@ function segmentation_parameters_changed() {
     $('#summary2').html("");
     $('#rasterplot').html("");
     $('#plot').html("");
+    statistics_active_neurons = [];
     $.post('/set_segmentation_params/' + videoname + '/' + run,
 	   {
 	       segmentation_source: source,
@@ -241,6 +237,7 @@ function editor_save() {
     $('#summary2').html("");
     $('#rasterplot').html("");
     $('#plot').html("");
+    statistics_active_neurons = [];
     $.post('/set_edited_segmentation/' + videoname + '/' + run,
 	   { edited_segmentation: encoded_data },
 	   changes_saved);
@@ -364,6 +361,19 @@ function calculate_statistics_clicked() {
     button.html("Calculating...");
     button[0].disabled = 'disabled';
 }
+
+$(document).ready(function() {
+    $('#bin_form').submit(function(event) {
+	event.preventDefault();
+	var nr_bins = $("#nr_bins").val();
+	$.getJSON('/get_statistics_rasterplot/' + videoname + '/' + run + '/' + nr_bins,
+		  function( data ) {
+		      fig_raster = data['rasterplot'];
+		      $("#rasterplot").empty();
+		      mpld3.draw_figure("rasterplot", fig_raster);
+		  });
+    });
+});
 
 function statistics_redraw_overview() {
     var layer0 = $('#statistics_layer0')[0];
@@ -561,7 +571,7 @@ function redraw_rasterplot()
 	// or bottom and 1 is right or top
 	// magic offset 8
 	var bbox = fig_raster.axes[0].bbox;
-	var y_offset = (1-bbox[1]-bbox[3])*img_h + bbox[3]*img_h/activities.length*(activities.length-i-1);
+	var y_offset = (1-bbox[1]-bbox[3])*img_h + (bbox[3]*img_h-4)/activities.length*(activities.length-i-1);
 	var plot_x = bbox[0] * img_w - 8;
 	var width = bbox[2] * img_w - plot_x - 24;
 	var height = bbox[3] * img_h / activities.length;
@@ -680,6 +690,59 @@ function decode_array_16(data) {
     return new Uint16Array(u8.buffer);
 }
 
+function draw_axis(ctx, xmin, xmax, ymin, ymax, xlabel, ylabel, w, h) {
+    ctx.save();
+    ctx.rotate(-Math.PI/2);
+
+    draw_x_axis(ctx, ymin, ymax, ylabel, w, h);
+    
+    ctx.restore();
+    draw_x_axis(ctx, xmin, xmax, xlabel, w, h);
+}
+function draw_x_axis(ctx, xmin, xmax, xlabel, w, h) {
+    ctx.textAlign = "center";
+    ctx.fillText(xlabel, (w+30)/2, 0);
+    // draw axis
+    ctx.beginPath();
+    ctx.moveTo(15, h);
+    ctx.lineTo(2, h);
+    ctx.stroke();
+    // draw ticks
+    var ticks = 10;
+    var ticks_loc = get_ticks(xmin, xmax);
+    for (var i = 0; i < ticks_loc.length; i++)
+    {
+	var tick_pixel = (ticks_loc[i] - xmin) * (xmax-xmin)/ticks_loc.length;
+	ctx.beginPath();
+	ctx.moveTo(30 + tick_pixel, h-10);
+	ctx.lineTo(30 + tick_pixel, h+10);
+	ctx.stroke();
+    }
+}
+
+function get_ticks(min, max) {
+    var length = max - min;
+    var significant_digit = Math.floor(length/Math.pow(10,Math.floor(Math.log10(length))-1))/10;
+
+    var scale = 0;
+    if (significant_digit > 5) {
+	scale = Math.pow(10, Math.floor(Math.log10(length)));
+    }
+    else if (significant_digit <= 5 && significant_digit > 2.5) {
+	scale = Math.pow(10, Math.floor(Math.log10(length)))/2;
+    }
+    else if (significant_digit <= 2.5) {
+	scale = Math.pow(10, Math.floor(Math.log10(length)))/4;
+    }
+    var result = []
+    var curr = Math.ceil(min / scale)*scale;
+    while (curr <= max) {
+	result.push(curr);
+	curr += scale;
+    }
+    return result;
+}
+
 function draw_image_rgb_scaled(canvas, img, w, h, alpha) {
     /* Takes a w*h*3 long array of 24 bit RGB pixel data and draws
        it on the canvas with an alpha value. The image is scaled to the size of
@@ -709,8 +772,9 @@ function draw_image_rgb_scaled(canvas, img, w, h, alpha) {
     temp_ctx.putImageData(imgData, 0, 0);
 
     var ctx = canvas.getContext("2d");
-    ctx.scale(canvas.width / w, canvas.height / h);
+    ctx.scale((canvas.width) / w, (canvas.height) / h);
     ctx.drawImage(temp_canvas, 0, 0);
+    
     ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
 }
 
@@ -797,6 +861,21 @@ function color_roi(roi, w, h) {
 	    img[4*i + 1] = label_colors[index][1];
 	    img[4*i + 2] = label_colors[index][2];
 	    img[4*i + 3] = 30;
+	}
+    }
+    return img;
+}
+
+function color_roi_borders(roi, borders, w, h) {
+    var img = color_roi(roi, w, h);
+    for(var i = 0; i < w*h; i++)
+    {
+	if(borders[i] == true)
+	{
+	    img[4*i] = 255;
+	    img[4*i+1] = 255;
+	    img[4*i+2] = 0;
+	    img[4*i+3] = 255;
 	}
     }
     return img;

@@ -70,10 +70,14 @@ def segment(loader, config):
         print("Falling back to the watershed algorithm")
         segmented = analyzer.segmentation.watershed(thresholded)
 
+    # return borders as well
+    borders = analyzer.segmentation.get_borders(segmented)
+
     return {
         'source': source,
         'filtered': filtered,
         'thresholded': thresholded,
+        'borders': borders,
         'segmented': segmented,
     }
 

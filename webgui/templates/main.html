@@ -283,7 +283,16 @@
 			  style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
 		</div>
 	      </div>
-	      <div id="rasterplot" class="col-md-7"></div>
+	      <div class="col-md-7">
+		  <div id="rasterplot"></div>
+		  <form class="form-inline" id="bin_form">
+		      <div class="form-group">
+			  <label for="nr_bins">Number of bins</label>
+			  <input type="text" class="form-control" id="nr_bins" value="30">
+		      </div>
+		      <button type="submit" id="bin_button" class="btn btn-default">Update</button>
+		  </form>
+	      </div>
 	    </div>
 	    <!-- <p id="testcoords"> </p> -->
 	    <div class="row">

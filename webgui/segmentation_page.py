@@ -64,6 +64,7 @@ def generate_segmentation(videoname, config):
 
         run_save(videoname, 'segmentation', segmented)
         run_save(videoname, 'pixel_per_um', loader.pixel_per_um)
+        run_save(videoname, 'exposure_time', loader.exposure_time)
         run_save(videoname, 'statistics', None)
 
     return segmented

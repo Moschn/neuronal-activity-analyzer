@@ -55,5 +55,19 @@ def get_statistics(videoname, run):
     response['roi'] = mpld3.fig_to_dict(fig_roi)
 
     run_save(videoname, 'statistics', response)
+    run_save(videoname, 'exposure_time', loader.exposure_time)
 
+    return jsonify(**response)
+
+
+@statistics.route('/get_statistics_rasterplot/<path:videoname>/<run>/<nr_bins>')
+def get_statistics_rasterplot(videoname, run, nr_bins):
+    g.run = run
+    statistics = run_load(videoname, 'statistics')
+    exposure_time = run_load(videoname, 'exposure_time')
+    fig_raster = analyzer.plot.plot_rasterplot(statistics['spikes'],
+                                               exposure_time,
+                                               int(nr_bins))
+    response = {}
+    response['rasterplot'] = mpld3.fig_to_dict(fig_raster)
     return jsonify(**response)

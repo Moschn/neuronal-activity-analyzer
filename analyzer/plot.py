@@ -65,7 +65,8 @@ def plot_rasterplot(spikes, exposure_time, nr_bins):
     max_time = 0
     for i, spike in enumerate(spikes):
         if len(spike) > 0:
-            ax1.vlines(spike.astype(float)*exposure_time, i+0.5, i+1.5)
+            ax1.vlines(numpy.array(spike).astype(float)*exposure_time,
+                       i+0.5, i+1.5)
             if numpy.max(spike) > max_time:
                 max_time = numpy.max(spike)
     ax1.set_ylim(0.5, len(spikes) + 0.5)
