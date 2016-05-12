@@ -42,6 +42,9 @@ def set_edited_segmentation(videoname, runname):
         segmented['editor'] = filled_seg
         print(numpy.amax(filled_seg))
 
+        segmented['borders'] = analyzer.segmentation\
+                                       .get_borders(segmented['editor'])
+
         run_save(videoname, 'segmentation', segmented)
         run_save(videoname, 'statistics', None)  # Invalidate statistics
         return jsonify(success=True)
@@ -66,7 +69,6 @@ def generate_segmentation(videoname, config):
         run_save(videoname, 'pixel_per_um', loader.pixel_per_um)
         run_save(videoname, 'exposure_time', loader.exposure_time)
         run_save(videoname, 'statistics', None)
-
     return segmented
 
 
@@ -100,7 +102,6 @@ def set_segmentation_params(videoname, runname):
 def get_segmentation(videoname, runname):
     g.run = runname
     segmented = run_load(videoname, 'segmentation')
-    pixel_per_um = run_load(videoname, 'pixel_per_um')
 
     # Convert numpy arrays to flat lists
     response = {}
@@ -109,10 +110,6 @@ def get_segmentation(videoname, runname):
     for k in segmented:
         response[k] = segmented[k].flatten().tolist()
 
-    # fig_roi = analyzer.plot.plot_roi(segmented['segmented'],
-    #                                 segmented['source'],
-    #                                 pixel_per_um)
-    #response['roi'] = mpld3.fig_to_dict(fig_roi)
     return jsonify(response)
 
 
@@ -149,6 +146,14 @@ def get_thresholds(videoname, runname):
     segmented = run_load(videoname, 'segmentation')
     thresholds = analyzer.get_thresholds(segmented['filtered'])
     return jsonify(**thresholds)
+
+
+@segmentation_page.route('/get_borders/<path:videoname>/<runname>')
+def get_borders(videoname, runname):
+    g.run = runname
+    segmented = run_load(videoname, 'segmentation')
+    borders = segmented['borders'].flatten().tolist()
+    return jsonify({'borders': borders})
 
 
 @segmentation_page.route('/upload', methods=['POST'])

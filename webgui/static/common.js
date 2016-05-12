@@ -241,6 +241,15 @@ function editor_save() {
     $.post('/set_edited_segmentation/' + videoname + '/' + run,
 	   { edited_segmentation: encoded_data },
 	   changes_saved);
+    $.getJSON("/get_borders/" + videoname + '/' + run,
+              function(data) { segmentation.borders = data; });
+    var w = segmentation['width'];
+    var h = segmentation['height'];
+    draw_image_rgba_scaled($('#segmented_image')[0],
+			   color_roi_borders(segmentation.segmented,
+					     segmentation.borders, w, h),
+			   w, h);
+
 }
 
 function redraw_editor() {
@@ -248,12 +257,12 @@ function redraw_editor() {
     var layer1 = $('#editor_layer1')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
+    
     draw_image_rgb_scaled(layer0,
 			  greyscale16_to_normrgb(segmentation.source, w, h),
 			  w, h);
     draw_image_rgba_scaled(layer0,
-			   color_roi(segmentation.editor, w, h),
-			   w, h);
+			   color_roi(segmentation.editor, w, h),w, h);
 
     var layer1_ctx = layer1.getContext("2d");
     layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
@@ -279,6 +288,7 @@ function editor_clicked(e) {
     var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
     var seg_y = Math.floor(y * segmentation['height'] / $(this)[0].offsetHeight);
     editor_active_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
+    
     redraw_editor();
 }
 $(document).ready(function() {
@@ -384,8 +394,8 @@ function statistics_redraw_overview() {
 			  greyscale16_to_normrgb(segmentation.source, w, h),
 			  w, h);
     draw_image_rgba_scaled(layer0,
-			   color_roi(segmentation.editor, w, h),
-			   w, h);
+			   color_roi_borders(segmentation.editor,
+					     segmentation.borders, w, h), w, h);
 
     var layer1_ctx = layer1.getContext("2d");
     layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
