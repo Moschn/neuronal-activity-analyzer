@@ -82,6 +82,11 @@ def plot_rasterplot(spikes, exposure_time, nr_bins):
     ax2.set_ylabel('spikes')
     ax2.set_xlabel('time [s]')
     ax2.set_xlim(0, ceil(max_time * exposure_time))
+
+    max_yticks = 4
+    yloc = pyplot.MaxNLocator(max_yticks)
+    ax2.yaxis.set_major_locator(yloc)
+
     pyplot.tight_layout()
     # fig.subplots_adjust(hspace=0)
     return fig
