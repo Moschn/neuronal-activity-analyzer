@@ -94,5 +94,4 @@ def make_tree(path_arg):
                 tree['children'].append(make_tree(fn))
             else:
                 tree['children'].append(dict(name=name))
-    print(tree)
     return tree
