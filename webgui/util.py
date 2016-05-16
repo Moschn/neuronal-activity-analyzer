@@ -7,7 +7,7 @@ from flask import current_app, g
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 
-ALLOWED_EXTENSIONS = {".run", ".db", ".dat"}
+ALLOWED_EXTENSIONS = {".run", ".run.db", ".run.dat"}
 
 
 def check_extension(filename):
@@ -29,8 +29,8 @@ def run_path(videoname, runname):
     dirname = os.path.join(current_app.config['DATA_FOLDER'],
                            os.path.dirname(videoname))
     for filename in os.listdir(dirname):
-        if runname in filename and check_extension(filename):
-            return os.path.join(current_app.config['DATA_FOLDER'], filename)
+        if runname in filename.split(".") and check_extension(filename):
+            return os.path.join(dirname, filename)
     return False
 
 
@@ -50,17 +50,21 @@ def run_load(videoname, key):
     print(path)
     if not os.path.isfile(path):
         return None
+    if path.endswith(".db"):
+        path = path[0:-3]
     with shelve.open(path) as shelf:
         if key in shelf:
             return shelf[key]
         return None
 
+
 def list_runs(videoname):
     path = os.path.join(current_app.config['DATA_FOLDER'],
                         os.path.dirname(videoname))
     runs = []
+    basename = os.path.basename(videoname)
     for filename in os.listdir(path):
-        if check_extension(filename) and videoname in filename:
+        if check_extension(filename) and basename in filename:
             complete_name = strip_allowed_extension(os.path.basename(filename))
             runs.append(complete_name.split(".")[-1])
     return runs

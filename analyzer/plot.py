@@ -1,4 +1,6 @@
 import numpy
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot
 from matplotlib import gridspec
 from skimage import segmentation
