@@ -143,22 +143,28 @@ function receive_segmentations(data) {
     var w = data['width'];
     var h = data['height'];
 
+    var c_w = $('#source_image')[0].width;
+    var c_h = $('#source_image')[0].height;
+
     draw_image_rgb_scaled($('#source_image')[0],
 			  greyscale16_to_normrgb(data.source, w, h),
-			  w, h);
+			  w, h, c_w, c_h-70);
+    draw_image_pixel_per_um($('#source_image')[0], 0, h-100, w, data.pixel_per_um)
     draw_image_rgb_scaled($('#filtered_image')[0],
 			  greyscale16_to_normrgb(data.filtered, w, h),
-			  w, h);
+			  w, h, c_w, c_h-70);
+    draw_image_pixel_per_um($('#filtered_image')[0], 0, h-100, w, data.pixel_per_um)
     draw_image_rgb_scaled($('#thresholded_image')[0],
 			  greyscale16_to_normrgb(data.thresholded, w, h),
-			  w, h);
-
+			  w, h, c_w, c_h-70);
+    draw_image_pixel_per_um($('#thresholded_image')[0], 0, h-100, w, data.pixel_per_um)
     draw_image_rgb_scaled($('#segmented_image')[0],
 			  greyscale16_to_normrgb(data.source, w, h),
-			  w, h);
+			  w, h, c_w, c_h-70);
+    draw_image_pixel_per_um($('#segmented_image')[0], 0, h-100, w, data.pixel_per_um)
     draw_image_rgba_scaled($('#segmented_image')[0],
 			   color_roi_borders(data.segmented, data.borders, w, h),
-			   w, h);
+			   w, h, c_w, c_h-70);
     
     $.getJSON("/get_thresholds/" + videoname + '/' + run,
               function(data) { thresholds = data; });
@@ -700,60 +706,7 @@ function decode_array_16(data) {
     return new Uint16Array(u8.buffer);
 }
 
-function draw_axis(ctx, xmin, xmax, ymin, ymax, xlabel, ylabel, w, h) {
-    ctx.save();
-    ctx.rotate(-Math.PI/2);
-
-    draw_x_axis(ctx, ymin, ymax, ylabel, w, h);
-    
-    ctx.restore();
-    draw_x_axis(ctx, xmin, xmax, xlabel, w, h);
-}
-function draw_x_axis(ctx, xmin, xmax, xlabel, w, h) {
-    ctx.textAlign = "center";
-    ctx.fillText(xlabel, (w+30)/2, 0);
-    // draw axis
-    ctx.beginPath();
-    ctx.moveTo(15, h);
-    ctx.lineTo(2, h);
-    ctx.stroke();
-    // draw ticks
-    var ticks = 10;
-    var ticks_loc = get_ticks(xmin, xmax);
-    for (var i = 0; i < ticks_loc.length; i++)
-    {
-	var tick_pixel = (ticks_loc[i] - xmin) * (xmax-xmin)/ticks_loc.length;
-	ctx.beginPath();
-	ctx.moveTo(30 + tick_pixel, h-10);
-	ctx.lineTo(30 + tick_pixel, h+10);
-	ctx.stroke();
-    }
-}
-
-function get_ticks(min, max) {
-    var length = max - min;
-    var significant_digit = Math.floor(length/Math.pow(10,Math.floor(Math.log10(length))-1))/10;
-
-    var scale = 0;
-    if (significant_digit > 5) {
-	scale = Math.pow(10, Math.floor(Math.log10(length)));
-    }
-    else if (significant_digit <= 5 && significant_digit > 2.5) {
-	scale = Math.pow(10, Math.floor(Math.log10(length)))/2;
-    }
-    else if (significant_digit <= 2.5) {
-	scale = Math.pow(10, Math.floor(Math.log10(length)))/4;
-    }
-    var result = []
-    var curr = Math.ceil(min / scale)*scale;
-    while (curr <= max) {
-	result.push(curr);
-	curr += scale;
-    }
-    return result;
-}
-
-function draw_image_rgb_scaled(canvas, img, w, h, alpha) {
+function draw_image_rgb_scaled(canvas, img, w, h, c_w, c_h, alpha) {
     /* Takes a w*h*3 long array of 24 bit RGB pixel data and draws
        it on the canvas with an alpha value. The image is scaled to the size of
        the canvas.
@@ -762,6 +715,7 @@ function draw_image_rgb_scaled(canvas, img, w, h, alpha) {
          canvas: A canvas object as returned by getDocumentById or $('#id')[0]
          img(w*h*3 Array): An array of length W*H*3 with values from 0-255
 	 w, h: Size of the source image
+         c_w, c_h: Size of the drawing space inside of the canvas
 	 alpha: transparency to use while drawing, defaults to 255 (opaque)
     */
     if (typeof(alpha) === 'undefined')
@@ -782,13 +736,46 @@ function draw_image_rgb_scaled(canvas, img, w, h, alpha) {
     temp_ctx.putImageData(imgData, 0, 0);
 
     var ctx = canvas.getContext("2d");
-    ctx.scale((canvas.width) / w, (canvas.height) / h);
+    if (typeof c_w == "undefined")
+    {
+	c_w = canvas.width;
+	c_h = canvas.height;
+    }
+    ctx.scale(c_w / w, c_h / h);
     ctx.drawImage(temp_canvas, 0, 0);
     
     ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
 }
 
-function draw_image_rgba_scaled(canvas, img, w, h) {
+function draw_image_pixel_per_um(canvas, x, y, img_width, pixel_per_um) {
+    var ctx = canvas.getContext('2d');
+    var msd = Math.pow(10, Math.floor(Math.log10(img_width/pixel_per_um)));
+    if ((img_width/pixel_per_um)/msd < 2)
+    {
+	msd = msd/10;
+    }
+    pixel_length = img_width * msd/(img_width/pixel_per_um);
+    
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x+pixel_length,y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x,y+5);
+    ctx.lineTo(x,y-5);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x+pixel_length,y+5);
+    ctx.lineTo(x+pixel_length,y-5);
+    ctx.stroke();
+
+    ctx.font = "16px Arial";
+    ctx.fillText(msd + "um", x, y + 20);
+}
+
+function draw_image_rgba_scaled(canvas, img, w, h, c_w, c_h) {
     /* Takes a w*h*4 long array of 32 bit RGBA pixel data and draws
        it on the canvas. The image is scaled to the size of the canvas.
 
@@ -809,7 +796,12 @@ function draw_image_rgba_scaled(canvas, img, w, h) {
     temp_ctx.putImageData(imgData, 0, 0);
 
     var ctx = canvas.getContext("2d");
-    ctx.scale(canvas.width / w, canvas.height / h);
+    if (typeof c_w == "undefined")
+    {
+	c_w = canvas.width;
+	c_h = canvas.height;
+    }
+    ctx.scale(c_w / w, c_h / h);
     ctx.drawImage(temp_canvas, 0, 0);
     ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
 }

@@ -65,6 +65,7 @@ def generate_segmentation(videoname, config):
         # Set the roi editor state to the automatic segmentation result
         segmented['editor'] = segmented['segmented']
 
+
         run_save(videoname, 'segmentation', segmented)
         run_save(videoname, 'pixel_per_um', loader.pixel_per_um)
         run_save(videoname, 'exposure_time', loader.exposure_time)
@@ -102,6 +103,7 @@ def set_segmentation_params(videoname, runname):
 def get_segmentation(videoname, runname):
     g.run = runname
     segmented = run_load(videoname, 'segmentation')
+    pixel_per_um = run_load(videoname, 'pixel_per_um')
 
     # Convert numpy arrays to flat lists
     response = {}
@@ -109,6 +111,7 @@ def get_segmentation(videoname, runname):
     response['height'] = segmented['source'].shape[1]
     for k in segmented:
         response[k] = segmented[k].flatten().tolist()
+    response['pixel_per_um'] = pixel_per_um
 
     return jsonify(response)
 
