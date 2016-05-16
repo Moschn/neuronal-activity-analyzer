@@ -1,8 +1,11 @@
 from flask import Flask
+from flask.ext.compress import Compress
 import os
 
 from .segmentation_page import segmentation_page
 from .statistics import statistics
+
+compress = Compress()
 
 
 def disable_cache(response):
@@ -29,5 +32,9 @@ def create_app():
     app.register_blueprint(statistics)
 
     app.after_request(disable_cache)
+
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+
+    compress.init_app(app)
 
     return app
