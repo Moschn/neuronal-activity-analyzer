@@ -272,18 +272,26 @@
 	  </div>
 	  
 	  <div id="statistics" style="display: none;">
-	    <h2 style="text-align: center">Statistics</h2>
-	    <div class="row">
-	      <div class="col-md-5">
-		<div id="overview" style="position: relative; width:400px; height:470px">
-		  <canvas id='statistics_layer0' width="400px" height="470px"
-			  style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
-		  <canvas id='statistics_layer1' width="400px" height="470px"
-			  style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
-		</div>
+	      <h2 style="text-align: center">Statistics</h2>
+	      <div class="row">
+		  <div class="col-md-5">
+		      <div id="overview" style="position: relative; width:400px; height:440px">
+			  <canvas id='statistics_layer0' width="400px" height="440px"
+				  style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
+			  <canvas id='statistics_layer1' width="400px" height="440px"
+				  style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+		      </div>
+		  </div>
+		  <div class="col-md-7">
+		      <div class="row">
+			  <div id="plot_hovered" class="col-md-12" style="height:200px"></div>
+			  <div id="plot_active" class="col-md-12" style="height:200px"></div>
+		      </div>
+		      
+		  </div>
 	      </div>
-	      <div class="col-md-7">
-		  <div id="rasterplot"></div>
+	      <div style="text-align: center">
+		  <div id="rasterplot" style="display: inline-block"></div>
 		  <form class="form-inline" id="bin_form">
 		      <div class="form-group">
 			  <label for="nr_bins">Number of bins</label>
@@ -292,12 +300,7 @@
 		      <button type="submit" id="bin_button" class="btn btn-default">Update</button>
 		  </form>
 	      </div>
-	    </div>
-	    <!-- <p id="testcoords"> </p> -->
-	    <div class="row">
-	      <div id="plot_hovered" class="col-md-12" style="height:400px"></div>
-	      <div id="plot_active" class="col-md-12" style="height:400px"></div>
-	    </div>
+	      
 	    <hr>
 	  </div>
 	  

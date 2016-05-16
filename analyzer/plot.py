@@ -60,7 +60,7 @@ def plot_spikes(activity, spikes):
 
 def plot_rasterplot(spikes, exposure_time, nr_bins):
     pyplot.style.use('seaborn-deep')
-    fig = pyplot.figure(figsize=(7, 5))
+    fig = pyplot.figure(figsize=(10, 5))
     gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
     ax1 = pyplot.subplot(gs[0])
     ax2 = pyplot.subplot(gs[1])

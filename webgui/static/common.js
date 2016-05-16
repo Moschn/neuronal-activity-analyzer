@@ -91,7 +91,7 @@ $(document).ready(function() {
 	show_up_to('file_select');
 	
 	// Update the list of runs for that file
-	$.getJSON("/get_runs/" + videoname, display_runs);
+	$.getJSON('/get_runs/' + videoname, display_runs);
 	
     });
 });
@@ -619,8 +619,8 @@ function redraw_rasterplot()
 	// magic offset 8
 	var bbox = fig_raster.axes[0].bbox;
 	var y_offset = (1-bbox[1]-bbox[3])*img_h + (bbox[3]*img_h-4)/activities.length*(activities.length-i-1);
-	var plot_x = bbox[0] * img_w - 8;
-	var width = bbox[2] * img_w - plot_x - 24;
+	var plot_x = bbox[0] * img_w;
+	var width = bbox[2] * img_w;
 	var height = bbox[3] * img_h / activities.length;
 	if (statistics_active_neurons.indexOf(i+1) != -1)
 	{
