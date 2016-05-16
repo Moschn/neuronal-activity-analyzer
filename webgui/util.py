@@ -7,19 +7,37 @@ from flask import current_app, g
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 
+ALLOWED_EXTENSIONS = {".run", ".db", ".dat"}
 
-def check_extension(filename, allowed):
+
+def check_extension(filename):
     """ Checks if the filename ends with an extension in the allowed list """
-    return '.' in filename and filename.rsplit('.', 1)[1] in allowed
+    for extension in ALLOWED_EXTENSIONS:
+        if filename.endswith(extension):
+            return True
+    return False
+
+
+def strip_allowed_extension(filename):
+    for extension in ALLOWED_EXTENSIONS:
+        if filename.endswith(extension):
+            return filename[0:-len(extension)]
+    return False
 
 
 def run_path(videoname, runname):
-    return os.path.join(current_app.config['DATA_FOLDER'],
-                "%s-%s.run" % (videoname, runname))
+    dirname = os.path.join(current_app.config['DATA_FOLDER'],
+                           os.path.dirname(videoname))
+    for filename in os.listdir(dirname):
+        if runname in filename and check_extension(filename):
+            return os.path.join(current_app.config['DATA_FOLDER'], filename)
+    return False
 
 
 def run_save(videoname, key, value):
-    path = run_path(videoname, g.run)
+    path = os.path.join(current_app.config['DATA_FOLDER'],
+                        videoname + "." + g.run + ".run")
+
     folder = os.path.dirname(path)
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -37,14 +55,14 @@ def run_load(videoname, key):
             return shelf[key]
         return None
 
-
 def list_runs(videoname):
-    path = os.path.dirname(videoname)
-    basename = os.path.basename(videoname)
-    files = os.listdir(os.path.join(current_app.config['DATA_FOLDER'],
-                                    path))
-    runs = [name[len(basename)+1:-4] for name in files
-            if name.startswith(basename)]
+    path = os.path.join(current_app.config['DATA_FOLDER'],
+                        os.path.dirname(videoname))
+    runs = []
+    for filename in os.listdir(path):
+        if check_extension(filename) and videoname in filename:
+            complete_name = strip_allowed_extension(os.path.basename(filename))
+            runs.append(complete_name.split(".")[-1])
     return runs
 
 

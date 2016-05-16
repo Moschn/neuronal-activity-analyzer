@@ -46,7 +46,7 @@ var label_colors = [
     [0xff, 0x80, 0x80]
 ]
 
-/* 
+7/* 
  * Run management
  */
 
@@ -102,10 +102,11 @@ function display_runs(data) {
         options_as_string += '<option>' + data['runs'][i] + '</option>';
     }
     $('#runselect').html(options_as_string);
+    $('#runselect').click(run_clicked);
 }
 
 function run_clicked() {
-    var new_run = $('#runselect').find(":selected").text();
+    var new_run = $('#runselect').find(':selected').text();
     if (new_run == run) {
 	return;
     }
@@ -119,14 +120,14 @@ function run_clicked() {
 
 function create_run_clicked() {
     run = $('#runname').val();
-    $.post("/create_run/" + videoname + "/" + run, {},
+    $.post('/create_run/' + videoname + '/' + run, {},
 	   display_runs, 'json');
 }
 
 function delete_run_clicked() {
     if(window.confirm('Are you sure you want to delete the run "'
 		      + run + '"?')) {
-	$.post("/delete_run/" + videoname + "/" + run, {},
+	$.post('/delete_run/' + videoname + '/' + run, {},
 	       display_runs, 'json');
     }
     return false;
@@ -170,7 +171,7 @@ function receive_segmentations(data) {
 			   color_roi_borders(data.segmented, data.borders, w, h),
 			   w, h, c_w, c_h-70);
     
-    $.getJSON("/get_thresholds/" + videoname + '/' + run,
+    $.getJSON('/get_thresholds/' + videoname + '/' + run,
               function(data) { thresholds = data; });
 
     draw_editor();
@@ -205,9 +206,9 @@ function segmentation_parameters_changed() {
 	show_up_to('roi_editor');
     }
     // clear plots in statisctics
-    $('#summary2').html("");
-    $('#rasterplot').html("");
-    $('#plot').html("");
+    $('#summary2').html('');
+    $('#rasterplot').html('');
+    $('#plot').html('');
     statistics_active_neurons = [];
     $.post('/set_segmentation_params/' + videoname + '/' + run,
 	   {
@@ -229,15 +230,15 @@ var editor_undo_stack = Array();
 var editor_saved = true;
 
 function editor_not_saved() {
-    $('#editor_save').html("Unsaved changes!");
-    $('#editor_save')[0].className = "btn btn-danger";
+    $('#editor_save').html('Unsaved changes!');
+    $('#editor_save')[0].className = 'btn btn-danger';
     editor_saved = false;
 }
 
 function changes_saved() {
     /* Show that the changes have been saved */
-    $('#editor_save').html("Changes saved!");
-    $('#editor_save')[0].className = "btn btn-success";
+    $('#editor_save').html('Changes saved!');
+    $('#editor_save')[0].className = 'btn btn-success';
     editor_saved = true;
     show_up_to('roi_editor');
 }
@@ -245,14 +246,14 @@ function changes_saved() {
 function editor_save() {
     /* Send the current segmentation in the editor to the server */
     var encoded_data = encode_array_8(segmentation.editor);
-    $('#summary2').html("");
-    $('#rasterplot').html("");
-    $('#plot').html("");
+    $('#summary2').html('');
+    $('#rasterplot').html('');
+    $('#plot').html('');
     statistics_active_neurons = [];
     $.post('/set_edited_segmentation/' + videoname + '/' + run,
 	   { edited_segmentation: encoded_data },
 	   changes_saved);
-    $.getJSON("/get_borders/" + videoname + '/' + run,
+    $.getJSON('/get_borders/' + videoname + '/' + run,
               function(data) { segmentation.borders = data; });
     var w = segmentation['width'];
     var h = segmentation['height'];
@@ -282,7 +283,7 @@ function redraw_editor() {
     var w = segmentation['width'];
     var h = segmentation['height'];
     
-    var layer1_ctx = layer1.getContext("2d");
+    var layer1_ctx = layer1.getContext('2d');
     layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
     if(editor_active_neuron > 0) {
 	var overlay = editor_roi_overlay(segmentation.editor, w, h,
@@ -380,7 +381,7 @@ var statistics_hovered_neuron = -1;
 
 function calculate_statistics_clicked() {
     if(!editor_saved) {
-	if(!confirm("You have unsaved changes in the ROI editor? Calculate statistics anyway?")) {
+	if(!confirm('You have unsaved changes in the ROI editor? Calculate statistics anyway?')) {
 	    return;
 	}
     }
@@ -389,19 +390,19 @@ function calculate_statistics_clicked() {
     $.getJSON('/get_statistics/' + videoname + '/' + run, receive_statistics);
     
     var button = $('#statistics-button');
-    button.html("Calculating...");
+    button.html('Calculating...');
     button[0].disabled = 'disabled';
 }
 
 $(document).ready(function() {
     $('#bin_form').submit(function(event) {
 	event.preventDefault();
-	var nr_bins = $("#nr_bins").val();
+	var nr_bins = $('#nr_bins').val();
 	$.getJSON('/get_statistics_rasterplot/' + videoname + '/' + run + '/' + nr_bins,
 		  function( data ) {
 		      fig_raster = data['rasterplot'];
-		      $("#rasterplot").empty();
-		      mpld3.draw_figure("rasterplot", fig_raster);
+		      $('#rasterplot').empty();
+		      mpld3.draw_figure('rasterplot', fig_raster);
 		  });
     });
 });
@@ -432,7 +433,7 @@ function statistics_redraw_overview() {
     var c_w = layer0.width;
     var c_h = layer0.height - 70;
     
-    var layer1_ctx = layer1.getContext("2d");
+    var layer1_ctx = layer1.getContext('2d');
     layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
     if(statistics_hovered_neuron > 0) {
 	var overlay = statistics_roi_overlay(segmentation.editor, w, h,
@@ -496,17 +497,17 @@ function receive_statistics(data) {
 
     // Reset button and show statistics area
     var button = $('#statistics-button');
-    button.html("Calculate statistics");
+    button.html('Calculate statistics');
     button[0].disabled = '';
     show_up_to('statistics');
 
     // create plots
     //fig_roi = segmentation['roi']
-    //mpld3.draw_figure("summary2", fig_roi)
+    //mpld3.draw_figure('summary2', fig_roi)
     
     fig_raster = data['rasterplot']
-    mpld3.draw_figure("rasterplot", fig_raster)
-    raster = d3.select(".mpld3-figure");
+    mpld3.draw_figure('rasterplot', fig_raster)
+    raster = d3.select('.mpld3-figure');
     raster_rect = Array(activities.length)
     
     statistics_draw_overview();
@@ -623,20 +624,20 @@ function redraw_rasterplot()
 	var height = bbox[3] * img_h / activities.length;
 	if (statistics_active_neurons.indexOf(i+1) != -1)
 	{
-	    if (typeof raster_rect[i] == "undefined")
+	    if (typeof raster_rect[i] == 'undefined')
 	    {
-		raster_rect[i] = raster.append("rect")
-				       .attr("x", plot_x)
-				       .attr("y", y_offset)
-				       .attr("height", height)
-				       .attr("width", width)
-				       .attr("fill", "yellow")
-				       .attr("opacity", 0.3);
+		raster_rect[i] = raster.append('rect')
+				       .attr('x', plot_x)
+				       .attr('y', y_offset)
+				       .attr('height', height)
+				       .attr('width', width)
+				       .attr('fill', 'yellow')
+				       .attr('opacity', 0.3);
 	    }
 	}
 	else
 	{
-	    if (typeof raster_rect[i] != "undefined")
+	    if (typeof raster_rect[i] != 'undefined')
 	    {
 		raster_rect[i].remove();
 		delete raster_rect[i];
@@ -700,7 +701,7 @@ function show_up_to(stage) {
 
 function encode_array_8(arr) {
     /* Converts an array of 8 bit values to a base64 encoded string */
-    var str = "";
+    var str = '';
     for(var i = 0; i < arr.length; ++i)
     {
 	str += String.fromCharCode(arr[i]);
@@ -710,7 +711,7 @@ function encode_array_8(arr) {
 
 function encode_array_16(arr) {
     /* Converts an array of 16 bit values to a base64 encoded string */
-    var str = "";
+    var str = '';
     for(var i = 0; i < arr.length; ++i)
     {
 	str += String.fromCharCode(arr[i] >> 8);
@@ -722,7 +723,7 @@ function encode_array_16(arr) {
 function decode_array_8(data) {
     /* Takes a base64 encoded string and outputs an array of numbers, each
        representing 8 bit of the base64 encoded data */
-    var u8 = new Uint8Array(atob(data).split("").map(
+    var u8 = new Uint8Array(atob(data).split('').map(
 	function(c) {
 	    return c.charCodeAt(0);
 	}));
@@ -751,9 +752,9 @@ function draw_image_rgb_scaled(canvas, img, w, h, c_w, c_h, alpha) {
     if (typeof(alpha) === 'undefined')
 	alpha = 255;
 
-    var temp_canvas = $("<canvas>")
-	.attr("width", w).attr("height", h)[0];
-    var temp_ctx = temp_canvas.getContext("2d");
+    var temp_canvas = $('<canvas>')
+	.attr('width', w).attr('height', h)[0];
+    var temp_ctx = temp_canvas.getContext('2d');
     var imgData = temp_ctx.createImageData(w, h)
     
     for (var i = 0; i < w*h; ++i) {
@@ -765,8 +766,8 @@ function draw_image_rgb_scaled(canvas, img, w, h, c_w, c_h, alpha) {
 
     temp_ctx.putImageData(imgData, 0, 0);
 
-    var ctx = canvas.getContext("2d");
-    if (typeof c_w == "undefined")
+    var ctx = canvas.getContext('2d');
+    if (typeof c_w == 'undefined')
     {
 	c_w = canvas.width;
 	c_h = canvas.height;
@@ -786,7 +787,7 @@ function draw_image_pixel_per_um(canvas, x, y, img_width, pixel_per_um) {
 	msd = msd/10;
     }
     pixel_length = img_width * msd/(img_width/pixel_per_um);
-    ctx.clearRect(x, y-5, pixel_length, 50);
+    ctx.clearRect(0, y-5, img_width, 100);
 		  
     ctx.beginPath();
     ctx.moveTo(x,y);
@@ -803,15 +804,15 @@ function draw_image_pixel_per_um(canvas, x, y, img_width, pixel_per_um) {
     ctx.lineTo(x+pixel_length,y-5);
     ctx.stroke();
 
-    ctx.font = "16px Arial";
-    ctx.fillText(msd + "um", x, y + 20);
+    ctx.font = '16px Arial';
+    ctx.fillText(msd + 'um', x, y + 20);
 }
 
 function draw_image_neurons_number(canvas, roi, width, height, c_w, c_h) {
     var ctx = canvas.getContext('2d');
     ctx.save();
     ctx.fillStyle = 'white';
-    for (var i = 1; i <= Math.max(...roi); i++) {
+    for (var i = 1; i <= arrayMax(roi); i++) {
 	var idx = roi.indexOf(i);
 	var x = (idx % width) * c_w/width + 10;
 	var y = (Math.floor(idx / width)) * c_h/height + 10;
@@ -830,9 +831,9 @@ function draw_image_rgba_scaled(canvas, img, w, h, c_w, c_h) {
          img(w*h*4 Array): An array of length W*H*4 with values from 0-255
 	 w, h: Size of the source image
     */
-    var temp_canvas = $("<canvas>")
-	.attr("width", w).attr("height", h)[0];
-    var temp_ctx = temp_canvas.getContext("2d");
+    var temp_canvas = $('<canvas>')
+	.attr('width', w).attr('height', h)[0];
+    var temp_ctx = temp_canvas.getContext('2d');
     var imgData = temp_ctx.createImageData(w, h)
     
     for (var i = 0; i < w*h*4; ++i) {
@@ -841,8 +842,8 @@ function draw_image_rgba_scaled(canvas, img, w, h, c_w, c_h) {
 
     temp_ctx.putImageData(imgData, 0, 0);
 
-    var ctx = canvas.getContext("2d");
-    if (typeof c_w == "undefined")
+    var ctx = canvas.getContext('2d');
+    if (typeof c_w == 'undefined')
     {
 	c_w = canvas.width;
 	c_h = canvas.height;
@@ -932,7 +933,7 @@ function color_roi_borders(roi, borders, w, h) {
 function editor_roi_overlay(roi, w, h, index, r, g, b, a) {
     /* Create an rgba image, where everything is transparent except for the roi
        indicated by index, which is in the color given by r,g,b and a */
-    if(typeof editor_overlay == "undefined") {
+    if(typeof editor_overlay == 'undefined') {
 	editor_overlay = new Uint8Array(w*h*4);
     }
     editor_overlay.fill(0);
@@ -950,7 +951,7 @@ function editor_roi_overlay(roi, w, h, index, r, g, b, a) {
 function statistics_roi_overlay(roi, w, h, index, r, g, b, a) {
     /* Create an rgba image, where everything is transparent except for the roi
        indicated by index, which is in the color given by r,g,b and a */
-    if(typeof statistics_overlay == "undefined") {
+    if(typeof statistics_overlay == 'undefined') {
 	statistics_overlay = new Uint8Array(w*h*4);
     }
     statistics_overlay.fill(0);
