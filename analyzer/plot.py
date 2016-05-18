@@ -58,7 +58,7 @@ def plot_spikes(activity, spikes):
     return fig
 
 
-def plot_rasterplot(spikes, exposure_time, nr_bins):
+def plot_rasterplot(spikes, exposure_time, time_per_bin):
     pyplot.style.use('seaborn-deep')
     fig = pyplot.figure(figsize=(10, 5))
     gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
@@ -75,11 +75,16 @@ def plot_rasterplot(spikes, exposure_time, nr_bins):
     ax1.set_ylabel('Neuron')
     ax1.set_xlabel('time [s]')
     ax1.set_xlim(0, ceil(max_time * exposure_time))
+    cut_time = max_time*exposure_time - ((max_time*exposure_time) %
+                                         time_per_bin)
     total_spikes = []
     for spike in spikes:
         for value in spike:
-            total_spikes.append(value*exposure_time)
-    n, bins, patches = ax2.hist(total_spikes, nr_bins)
+            if value * exposure_time < cut_time:
+                total_spikes.append(value*exposure_time)
+    nr_bins = max_time*exposure_time//time_per_bin
+    bins = numpy.linspace(0, cut_time, nr_bins+1)
+    n, bins, patches = ax2.hist(total_spikes, bins)
     # pyplot.plot(n)
     ax2.set_ylabel('spikes')
     ax2.set_xlabel('time [s]')

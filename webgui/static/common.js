@@ -124,8 +124,8 @@ function run_clicked() {
 }
 
 function create_run_clicked() {
-    run = $('#runname').val();
-    $.post('/create_run/' + videoname + '/' + run, {},
+    run_t = $('#runname').val();
+    $.post('/create_run/' + videoname + '/' + run_t, {},
 	   display_runs, 'json');
     
 }
@@ -417,8 +417,8 @@ function calculate_statistics_clicked() {
 $(document).ready(function() {
     $('#bin_form').submit(function(event) {
 	event.preventDefault();
-	var nr_bins = $('#nr_bins').val();
-	$.getJSON('/get_statistics_rasterplot/' + videoname + '/' + run + '/' + nr_bins,
+	var time_per_bin = $('#time_per_bin').val();
+	$.getJSON('/get_statistics_rasterplot/' + videoname + '/' + run + '/' + time_per_bin,
 		  function( data ) {
 		      fig_raster = data['rasterplot'];
 		      $('#rasterplot').empty();

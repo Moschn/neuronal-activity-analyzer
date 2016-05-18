@@ -34,9 +34,7 @@ def get_statistics(videoname, run):
     spike_detection_start = time.time()
     spikes = analyzer.detect_spikes(activities, config)
     spike_detection_time = time.time() - spike_detection_start
-    fig_raster = analyzer.plot.plot_rasterplot(spikes, loader.exposure_time,
-                                               floor(len(activities) *
-                                                     loader.exposure_time))
+    fig_raster = analyzer.plot.plot_rasterplot(spikes, loader.exposure_time, 1)
     fig_roi = analyzer.plot.plot_roi(segmentation['editor'],
                                      segmentation['source'],
                                      loader.pixel_per_um)
@@ -60,14 +58,14 @@ def get_statistics(videoname, run):
     return jsonify(**response)
 
 
-@statistics.route('/get_statistics_rasterplot/<path:videoname>/<run>/<nr_bins>')
-def get_statistics_rasterplot(videoname, run, nr_bins):
+@statistics.route('/get_statistics_rasterplot/<path:videoname>/<run>/<time_per_bin>')
+def get_statistics_rasterplot(videoname, run, time_per_bin):
     g.run = run
     statistics = run_load(videoname, 'statistics')
     exposure_time = run_load(videoname, 'exposure_time')
     fig_raster = analyzer.plot.plot_rasterplot(statistics['spikes'],
                                                exposure_time,
-                                               int(nr_bins))
+                                               float(time_per_bin))
     response = {}
     response['rasterplot'] = mpld3.fig_to_dict(fig_raster)
     return jsonify(**response)

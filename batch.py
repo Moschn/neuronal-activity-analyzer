@@ -102,8 +102,7 @@ def analyze_file(filename, directory):
 
     # plot rasterplot
     fname = '{}/{}_rasterplot.svg'.format(root, filename)
-    fig = analyzer.plot.plot_rasterplot(spikes, time_frame,
-                                        math.floor(len(activities) * time_frame))
+    fig = analyzer.plot.plot_rasterplot(spikes, time_frame, 1.0)
     # print(mpld3.fig_to_html(fig))
     analyzer.plot.save(fig, fname)
             
