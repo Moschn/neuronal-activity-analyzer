@@ -94,6 +94,8 @@ def set_segmentation_params(videoname, runname):
         response['height'] = segmented['source'].shape[1]
         for k in segmented:
             response[k] = segmented[k].flatten().tolist()
+        pixel_per_um = run_load(videoname, 'pixel_per_um')
+        response['pixel_per_um'] = pixel_per_um
         return jsonify(response)
     except Exception as e:
         return jsonify({'fail': str(e)})
@@ -103,6 +105,7 @@ def set_segmentation_params(videoname, runname):
 def get_segmentation(videoname, runname):
     g.run = runname
     segmented = run_load(videoname, 'segmentation')
+    pixel_per_um = run_load(videoname, 'pixel_per_um')
 
     # Convert numpy arrays to flat lists
     response = {}
@@ -110,6 +113,7 @@ def get_segmentation(videoname, runname):
     response['height'] = segmented['source'].shape[1]
     for k in segmented:
         response[k] = segmented[k].flatten().tolist()
+    response['pixel_per_um'] = pixel_per_um
 
     return jsonify(response)
 

@@ -120,8 +120,7 @@
 		      <h3>Source image</h3>
 		      <p style="text-align: justify;">Choose what data to use for segmentation. Mean is bad if some neurons are rarely active, but filters noise very well. Variance should yield good results, but might also show noise.</p>
 		      
-		      <canvas id="source_image" width="400" height="400" class="col-md-8"></canvas>
-
+		      <canvas id="source_image" width="400" height="470" class="col-md-8"></canvas>
 		      <div class="col-md-4">
 			  <form>
 			      <label for="seg_select">Source for segmentation: </label>
@@ -137,7 +136,7 @@
 		      <p style="text-align: justify;">Here we filter noise, so random light pixels do not appear as small neurons. Increase, if axons are recognised as neurons<br>
 			  Decrease, if small neurons disappear
 		      </p>
-		      <canvas id="filtered_image" width="400" height="400" class="col-md-8"></canvas>
+		      <canvas id="filtered_image" width="400" height="470" class="col-md-8"></canvas>
 		      <div class="col-md-4">
 			  
 			  <label for="gauss_radius"> Sigma radius: </label>
@@ -164,7 +163,7 @@
 	      </div>
 	      <div class="row">
 		  <div class="col-md-6">
-		      <canvas id="thresholded_image" width="400" height="400" class="col-md-8"></canvas>
+		      <canvas id="thresholded_image" width="400" height="470" class="col-md-8"></canvas>
 		      <div class="col-md-4">
 			  
 			  <label for="threshold">Threshold(Percent of dynamic range):</label>
@@ -179,7 +178,7 @@
 		      </div>
 		  </div>
 		  <div class="col-md-6">
-		      <canvas id="segmented_image" width="400" height="400" class="col-md-8"></canvas>
+		      <canvas id="segmented_image" width="400" height="470" class="col-md-8"></canvas>
 		      <div class="col-md-4">
 			  <form>
 			      <label for="seg_algo">Algorithm: </label>
@@ -296,18 +295,26 @@
 	  </div>
 	  
 	  <div id="statistics" style="display: none;">
-	    <h2 style="text-align: center">Statistics</h2>
-	    <div class="row">
-	      <div class="col-md-5">
-		<div id="overview" style="position: relative; width:400px; height:400px">
-		  <canvas id='statistics_layer0' width="400px" height="400px"
-			  style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
-		  <canvas id='statistics_layer1' width="400px" height="400px"
-			  style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
-		</div>
+	      <h2 style="text-align: center">Statistics</h2>
+	      <div class="row">
+		  <div class="col-md-5">
+		      <div id="overview" style="position: relative; width:400px; height:440px">
+			  <canvas id='statistics_layer0' width="400px" height="440px"
+				  style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
+			  <canvas id='statistics_layer1' width="400px" height="440px"
+				  style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+		      </div>
+		  </div>
+		  <div class="col-md-7">
+		      <div class="row">
+			  <div id="plot_hovered" class="col-md-12" style="height:200px"></div>
+			  <div id="plot_active" class="col-md-12" style="height:200px"></div>
+		      </div>
+		      
+		  </div>
 	      </div>
-	      <div class="col-md-7">
-		  <div id="rasterplot"></div>
+	      <div style="text-align: center">
+		  <div id="rasterplot" style="display: inline-block"></div>
 		  <form class="form-inline" id="bin_form">
 		      <div class="form-group">
 			  <label for="nr_bins">Number of bins</label>
@@ -316,12 +323,7 @@
 		      <button type="submit" id="bin_button" class="btn btn-default">Update</button>
 		  </form>
 	      </div>
-	    </div>
-	    <!-- <p id="testcoords"> </p> -->
-	    <div class="row">
-	      <div id="plot_hovered" class="col-md-12" style="height:400px"></div>
-	      <div id="plot_active" class="col-md-12" style="height:400px"></div>
-	    </div>
+	      
 	    <hr>
 	  </div>
 	  

@@ -10,6 +10,10 @@ var segmentation = undefined;
 var activities = undefined;
 var spikes = undefined;
 
+// editor overlay
+var editor_overlay = undefined;
+var statistics_overlay = undefined;
+
 // Info line
 var segmentation_time = undefined;
 var activity_calculation_time = undefined;
@@ -42,7 +46,7 @@ var label_colors = [
     [0xff, 0x80, 0x80]
 ]
 
-/* 
+7/* 
  * Run management
  */
 
@@ -87,7 +91,7 @@ $(document).ready(function() {
 	show_up_to('file_select');
 	
 	// Update the list of runs for that file
-	$.getJSON("/get_runs/" + videoname, display_runs);
+	$.getJSON('/get_runs/' + videoname, display_runs);
 	
     });
 });
@@ -98,6 +102,7 @@ function display_runs(data) {
         options_as_string += '<option>' + data['runs'][i] + '</option>';
     }
     $('#runselect').html(options_as_string);
+    $('#runselect').click(run_clicked);
 }
 
 $(document).ready(function(){
@@ -105,7 +110,7 @@ $(document).ready(function(){
 });
 
 function run_clicked() {
-    var new_run = $('#runselect').find(":selected").text();
+    var new_run = $('#runselect').find(':selected').text();
     if (new_run == run) {
 	return;
     }
@@ -119,8 +124,8 @@ function run_clicked() {
 }
 
 function create_run_clicked() {
-    run_t = $('#runname').val();
-    $.post("/create_run/" + videoname + "/" + run_t, {},
+    run = $('#runname').val();
+    $.post('/create_run/' + videoname + '/' + run, {},
 	   display_runs, 'json');
     
 }
@@ -128,7 +133,7 @@ function create_run_clicked() {
 function delete_run_clicked() {
     if(window.confirm('Are you sure you want to delete the run "'
 		      + run + '"?')) {
-	$.post("/delete_run/" + videoname + "/" + run, {},
+	$.post('/delete_run/' + videoname + '/' + run, {},
 	       display_runs, 'json');
     }
     return false;
@@ -159,26 +164,33 @@ function receive_segmentations(data) {
     var w = data['width'];
     var h = data['height'];
 
+    var c_w = $('#source_image')[0].width;
+    var c_h = $('#source_image')[0].height;
+
     draw_image_rgb_scaled($('#source_image')[0],
 			  greyscale16_to_normrgb(data.source, w, h),
-			  w, h);
+			  w, h, c_w, c_h-70);
+    draw_image_pixel_per_um($('#source_image')[0], 0, h-100, w, data.pixel_per_um)
     draw_image_rgb_scaled($('#filtered_image')[0],
 			  greyscale16_to_normrgb(data.filtered, w, h),
-			  w, h);
+			  w, h, c_w, c_h-70);
+    draw_image_pixel_per_um($('#filtered_image')[0], 0, h-100, w, data.pixel_per_um)
     draw_image_rgb_scaled($('#thresholded_image')[0],
 			  greyscale16_to_normrgb(data.thresholded, w, h),
-			  w, h);
-
+			  w, h, c_w, c_h-70);
+    draw_image_pixel_per_um($('#thresholded_image')[0], 0, h-100, w, data.pixel_per_um)
     draw_image_rgb_scaled($('#segmented_image')[0],
 			  greyscale16_to_normrgb(data.source, w, h),
-			  w, h);
+			  w, h, c_w, c_h-70);
+    draw_image_pixel_per_um($('#segmented_image')[0], 0, h-100, w, data.pixel_per_um)
     draw_image_rgba_scaled($('#segmented_image')[0],
 			   color_roi_borders(data.segmented, data.borders, w, h),
-			   w, h);
+			   w, h, c_w, c_h-70);
     
-    $.getJSON("/get_thresholds/" + videoname + '/' + run,
+    $.getJSON('/get_thresholds/' + videoname + '/' + run,
               function(data) { thresholds = data; });
 
+    draw_editor();
     redraw_editor();
 }
 
@@ -212,9 +224,9 @@ function segmentation_parameters_changed() {
 	show_up_to('roi_editor');
     }
     // clear plots in statisctics
-    $('#summary2').html("");
-    $('#rasterplot').html("");
-    $('#plot').html("");
+    $('#summary2').html('');
+    $('#rasterplot').html('');
+    $('#plot').html('');
     statistics_active_neurons = [];
     $.post('/set_segmentation_params/' + videoname + '/' + run,
 	   {
@@ -238,15 +250,15 @@ var editor_undo_stack = Array();
 var editor_saved = true;
 
 function editor_not_saved() {
-    $('#editor_save').html("Unsaved changes!");
-    $('#editor_save')[0].className = "btn btn-danger";
+    $('#editor_save').html('Unsaved changes!');
+    $('#editor_save')[0].className = 'btn btn-danger';
     editor_saved = false;
 }
 
 function changes_saved() {
     /* Show that the changes have been saved */
-    $('#editor_save').html("Changes saved!");
-    $('#editor_save')[0].className = "btn btn-success";
+    $('#editor_save').html('Changes saved!');
+    $('#editor_save')[0].className = 'btn btn-success';
     editor_saved = true;
     show_up_to('roi_editor');
 }
@@ -254,22 +266,35 @@ function changes_saved() {
 function editor_save() {
     /* Send the current segmentation in the editor to the server */
     var encoded_data = encode_array_8(segmentation.editor);
-    $('#summary2').html("");
-    $('#rasterplot').html("");
-    $('#plot').html("");
+    $('#summary2').html('');
+    $('#rasterplot').html('');
+    $('#plot').html('');
     statistics_active_neurons = [];
     $.post('/set_edited_segmentation/' + videoname + '/' + run,
 	   { edited_segmentation: encoded_data },
 	   changes_saved);
-    $.getJSON("/get_borders/" + videoname + '/' + run,
+    $.getJSON('/get_borders/' + videoname + '/' + run,
               function(data) { segmentation.borders = data; });
     var w = segmentation['width'];
     var h = segmentation['height'];
     draw_image_rgba_scaled($('#segmented_image')[0],
 			   color_roi_borders(segmentation.segmented,
 					     segmentation.borders, w, h),
-			   w, h);
+			   w, h, $('#segmented_image')[0].width,
+			   $('#segmented_image')[0].height-70);
 
+}
+
+function draw_editor() {
+    var layer0 = $('#editor_layer0')[0];
+    var layer1 = $('#editor_layer1')[0];
+    var w = segmentation['width'];
+    var h = segmentation['height'];
+    draw_image_rgb_scaled(layer0,
+			  greyscale16_to_normrgb(segmentation.source, w, h),
+			  w, h);
+    draw_image_rgba_scaled(layer0,
+			   color_roi(segmentation.editor, w, h),w, h);
 }
 
 function redraw_editor() {
@@ -278,22 +303,16 @@ function redraw_editor() {
     var w = segmentation['width'];
     var h = segmentation['height'];
     
-    draw_image_rgb_scaled(layer0,
-			  greyscale16_to_normrgb(segmentation.source, w, h),
-			  w, h);
-    draw_image_rgba_scaled(layer0,
-			   color_roi(segmentation.editor, w, h),w, h);
-
-    var layer1_ctx = layer1.getContext("2d");
+    var layer1_ctx = layer1.getContext('2d');
     layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
     if(editor_active_neuron > 0) {
-	var overlay = roi_overlay(segmentation.editor, w, h,
+	var overlay = editor_roi_overlay(segmentation.editor, w, h,
 				  editor_active_neuron,
 				  255, 255, 255, 80);
 	draw_image_rgba_scaled(layer1, overlay, w, h);
     }
     if(editor_hovered_neuron > 0) {
-	var hov_overlay = roi_overlay(segmentation.editor, w, h,
+	var hov_overlay = editor_roi_overlay(segmentation.editor, w, h,
 				  editor_hovered_neuron,
 				  255, 255, 255, 50);
 	draw_image_rgba_scaled(layer1, hov_overlay, w, h);
@@ -308,7 +327,7 @@ function editor_clicked(e) {
     var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
     var seg_y = Math.floor(y * segmentation['height'] / $(this)[0].offsetHeight);
     editor_active_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
-    
+
     redraw_editor();
 }
 $(document).ready(function() {
@@ -344,6 +363,7 @@ function editor_keypress(e) {
 		}
 	    }
 	    editor_not_saved();
+	    draw_editor();
 	    redraw_editor();
 	}
     } else if(key == 'd') {
@@ -356,12 +376,14 @@ function editor_keypress(e) {
 		}
 	    }
 	    editor_not_saved();
+	    sraw_editor();
 	    redraw_editor();
 	}
     } else if(key == 'u') {
 	if(editor_undo_stack.length > 0) {
 	    segmentation.editor = editor_undo_stack.pop();
 	    editor_not_saved();
+	    draw_editor();
 	    redraw_editor();
 	}
     }
@@ -379,7 +401,7 @@ var statistics_hovered_neuron = -1;
 
 function calculate_statistics_clicked() {
     if(!editor_saved) {
-	if(!confirm("You have unsaved changes in the ROI editor? Calculate statistics anyway?")) {
+	if(!confirm('You have unsaved changes in the ROI editor? Calculate statistics anyway?')) {
 	    return;
 	}
     }
@@ -388,48 +410,62 @@ function calculate_statistics_clicked() {
     $.getJSON('/get_statistics/' + videoname + '/' + run, receive_statistics);
     
     var button = $('#statistics-button');
-    button.html("Calculating...");
+    button.html('Calculating...');
     button[0].disabled = 'disabled';
 }
 
 $(document).ready(function() {
     $('#bin_form').submit(function(event) {
 	event.preventDefault();
-	var nr_bins = $("#nr_bins").val();
+	var nr_bins = $('#nr_bins').val();
 	$.getJSON('/get_statistics_rasterplot/' + videoname + '/' + run + '/' + nr_bins,
 		  function( data ) {
 		      fig_raster = data['rasterplot'];
-		      $("#rasterplot").empty();
-		      mpld3.draw_figure("rasterplot", fig_raster);
+		      $('#rasterplot').empty();
+		      mpld3.draw_figure('rasterplot', fig_raster);
 		  });
     });
 });
+
+function statistics_draw_overview() {
+    var layer0 = $('#statistics_layer0')[0];
+    var layer1 = $('#statistics_layer1')[0];
+    var w = segmentation['width'];
+    var h = segmentation['height'];
+    var c_w = layer0.width;
+    var c_h = layer0.height - 70;
+    draw_image_rgb_scaled(layer0,
+			  greyscale16_to_normrgb(segmentation.source, w, h),
+			  w, h, c_w, c_h);
+    draw_image_rgba_scaled(layer0,
+			   color_roi_borders(segmentation.editor,
+					     segmentation.borders, w, h),
+			   w, h, c_w, c_h);
+    draw_image_pixel_per_um(layer0, 0, c_h+15, w, segmentation['pixel_per_um']);
+    draw_image_neurons_number(layer0, segmentation.editor, w, h, c_w, c_h);
+}
 
 function statistics_redraw_overview() {
     var layer0 = $('#statistics_layer0')[0];
     var layer1 = $('#statistics_layer1')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
-    draw_image_rgb_scaled(layer0,
-			  greyscale16_to_normrgb(segmentation.source, w, h),
-			  w, h);
-    draw_image_rgba_scaled(layer0,
-			   color_roi_borders(segmentation.editor,
-					     segmentation.borders, w, h), w, h);
-
-    var layer1_ctx = layer1.getContext("2d");
+    var c_w = layer0.width;
+    var c_h = layer0.height - 70;
+    
+    var layer1_ctx = layer1.getContext('2d');
     layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
     if(statistics_hovered_neuron > 0) {
-	var overlay = roi_overlay(segmentation.editor, w, h,
+	var overlay = statistics_roi_overlay(segmentation.editor, w, h,
 				  statistics_hovered_neuron,
 				  255, 255, 255, 80);
-	draw_image_rgba_scaled(layer1, overlay, w, h);
+	draw_image_rgba_scaled(layer1, overlay, w, h, c_w, c_h);
     }
     statistics_active_neurons.forEach(function (neuron) {
-	var hov_overlay = roi_overlay(segmentation.editor, w, h,
+	var hov_overlay = statistics_roi_overlay(segmentation.editor, w, h,
 				  neuron,
 				  255, 255, 255, 50);
-	draw_image_rgba_scaled(layer1, hov_overlay, w, h);
+	draw_image_rgba_scaled(layer1, hov_overlay, w, h, c_w, c_h);
     })
 }
 
@@ -439,8 +475,9 @@ function statistics_overview_clicked(e) {
     var x = e.pageX - offset.left;
     var y = e.pageY - offset.top;
     var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
-    var seg_y = Math.floor(y * segmentation['height'] / $(this)[0].offsetHeight);
+    var seg_y = Math.floor(y * segmentation['height'] / ($(this)[0].offsetHeight-70));
     neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
+    if (neuron == 0) return;
 
     var index = statistics_active_neurons.indexOf(neuron);
     if(index != -1) {
@@ -464,7 +501,7 @@ function statistics_overview_hovered(e) {
     var x = e.pageX - offset.left;
     var y = e.pageY - offset.top;
     var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
-    var seg_y = Math.floor(y * segmentation['height'] / $(this)[0].offsetHeight);
+    var seg_y = Math.floor(y * segmentation['height'] / ($(this)[0].offsetHeight-70));
     statistics_hovered_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
     statistics_redraw_overview();
     plot_hovered_neuron(statistics_hovered_neuron);
@@ -480,20 +517,20 @@ function receive_statistics(data) {
 
     // Reset button and show statistics area
     var button = $('#statistics-button');
-    button.html("Calculate statistics");
+    button.html('Calculate statistics');
     button[0].disabled = '';
     show_up_to('statistics');
 
     // create plots
     //fig_roi = segmentation['roi']
-    //mpld3.draw_figure("summary2", fig_roi)
+    //mpld3.draw_figure('summary2', fig_roi)
     
     fig_raster = data['rasterplot']
-    mpld3.draw_figure("rasterplot", fig_raster)
-    raster = d3.select(".mpld3-figure");
+    mpld3.draw_figure('rasterplot', fig_raster)
+    raster = d3.select('.mpld3-figure');
     raster_rect = Array(activities.length)
     
-
+    statistics_draw_overview();
     statistics_redraw_overview();
 
     // Show statistics in info line
@@ -602,25 +639,25 @@ function redraw_rasterplot()
 	// magic offset 8
 	var bbox = fig_raster.axes[0].bbox;
 	var y_offset = (1-bbox[1]-bbox[3])*img_h + (bbox[3]*img_h-4)/activities.length*(activities.length-i-1);
-	var plot_x = bbox[0] * img_w - 8;
-	var width = bbox[2] * img_w - plot_x - 24;
+	var plot_x = bbox[0] * img_w;
+	var width = bbox[2] * img_w;
 	var height = bbox[3] * img_h / activities.length;
 	if (statistics_active_neurons.indexOf(i+1) != -1)
 	{
-	    if (typeof raster_rect[i] == "undefined")
+	    if (typeof raster_rect[i] == 'undefined')
 	    {
-		raster_rect[i] = raster.append("rect")
-				       .attr("x", plot_x)
-				       .attr("y", y_offset)
-				       .attr("height", height)
-				       .attr("width", width)
-				       .attr("fill", "yellow")
-				       .attr("opacity", 0.3);
+		raster_rect[i] = raster.append('rect')
+				       .attr('x', plot_x)
+				       .attr('y', y_offset)
+				       .attr('height', height)
+				       .attr('width', width)
+				       .attr('fill', 'yellow')
+				       .attr('opacity', 0.3);
 	    }
 	}
 	else
 	{
-	    if (typeof raster_rect[i] != "undefined")
+	    if (typeof raster_rect[i] != 'undefined')
 	    {
 		raster_rect[i].remove();
 		delete raster_rect[i];
@@ -684,7 +721,7 @@ function show_up_to(stage) {
 
 function encode_array_8(arr) {
     /* Converts an array of 8 bit values to a base64 encoded string */
-    var str = "";
+    var str = '';
     for(var i = 0; i < arr.length; ++i)
     {
 	str += String.fromCharCode(arr[i]);
@@ -694,7 +731,7 @@ function encode_array_8(arr) {
 
 function encode_array_16(arr) {
     /* Converts an array of 16 bit values to a base64 encoded string */
-    var str = "";
+    var str = '';
     for(var i = 0; i < arr.length; ++i)
     {
 	str += String.fromCharCode(arr[i] >> 8);
@@ -706,7 +743,7 @@ function encode_array_16(arr) {
 function decode_array_8(data) {
     /* Takes a base64 encoded string and outputs an array of numbers, each
        representing 8 bit of the base64 encoded data */
-    var u8 = new Uint8Array(atob(data).split("").map(
+    var u8 = new Uint8Array(atob(data).split('').map(
 	function(c) {
 	    return c.charCodeAt(0);
 	}));
@@ -720,60 +757,7 @@ function decode_array_16(data) {
     return new Uint16Array(u8.buffer);
 }
 
-function draw_axis(ctx, xmin, xmax, ymin, ymax, xlabel, ylabel, w, h) {
-    ctx.save();
-    ctx.rotate(-Math.PI/2);
-
-    draw_x_axis(ctx, ymin, ymax, ylabel, w, h);
-    
-    ctx.restore();
-    draw_x_axis(ctx, xmin, xmax, xlabel, w, h);
-}
-function draw_x_axis(ctx, xmin, xmax, xlabel, w, h) {
-    ctx.textAlign = "center";
-    ctx.fillText(xlabel, (w+30)/2, 0);
-    // draw axis
-    ctx.beginPath();
-    ctx.moveTo(15, h);
-    ctx.lineTo(2, h);
-    ctx.stroke();
-    // draw ticks
-    var ticks = 10;
-    var ticks_loc = get_ticks(xmin, xmax);
-    for (var i = 0; i < ticks_loc.length; i++)
-    {
-	var tick_pixel = (ticks_loc[i] - xmin) * (xmax-xmin)/ticks_loc.length;
-	ctx.beginPath();
-	ctx.moveTo(30 + tick_pixel, h-10);
-	ctx.lineTo(30 + tick_pixel, h+10);
-	ctx.stroke();
-    }
-}
-
-function get_ticks(min, max) {
-    var length = max - min;
-    var significant_digit = Math.floor(length/Math.pow(10,Math.floor(Math.log10(length))-1))/10;
-
-    var scale = 0;
-    if (significant_digit > 5) {
-	scale = Math.pow(10, Math.floor(Math.log10(length)));
-    }
-    else if (significant_digit <= 5 && significant_digit > 2.5) {
-	scale = Math.pow(10, Math.floor(Math.log10(length)))/2;
-    }
-    else if (significant_digit <= 2.5) {
-	scale = Math.pow(10, Math.floor(Math.log10(length)))/4;
-    }
-    var result = []
-    var curr = Math.ceil(min / scale)*scale;
-    while (curr <= max) {
-	result.push(curr);
-	curr += scale;
-    }
-    return result;
-}
-
-function draw_image_rgb_scaled(canvas, img, w, h, alpha) {
+function draw_image_rgb_scaled(canvas, img, w, h, c_w, c_h, alpha) {
     /* Takes a w*h*3 long array of 24 bit RGB pixel data and draws
        it on the canvas with an alpha value. The image is scaled to the size of
        the canvas.
@@ -782,14 +766,15 @@ function draw_image_rgb_scaled(canvas, img, w, h, alpha) {
          canvas: A canvas object as returned by getDocumentById or $('#id')[0]
          img(w*h*3 Array): An array of length W*H*3 with values from 0-255
 	 w, h: Size of the source image
+         c_w, c_h: Size of the drawing space inside of the canvas
 	 alpha: transparency to use while drawing, defaults to 255 (opaque)
     */
     if (typeof(alpha) === 'undefined')
 	alpha = 255;
 
-    var temp_canvas = $("<canvas>")
-	.attr("width", w).attr("height", h)[0];
-    var temp_ctx = temp_canvas.getContext("2d");
+    var temp_canvas = $('<canvas>')
+	.attr('width', w).attr('height', h)[0];
+    var temp_ctx = temp_canvas.getContext('2d');
     var imgData = temp_ctx.createImageData(w, h)
     
     for (var i = 0; i < w*h; ++i) {
@@ -801,14 +786,63 @@ function draw_image_rgb_scaled(canvas, img, w, h, alpha) {
 
     temp_ctx.putImageData(imgData, 0, 0);
 
-    var ctx = canvas.getContext("2d");
-    ctx.scale((canvas.width) / w, (canvas.height) / h);
+    var ctx = canvas.getContext('2d');
+    if (typeof c_w == 'undefined')
+    {
+	c_w = canvas.width;
+	c_h = canvas.height;
+    }
+    ctx.scale(c_w / w, c_h / h);
     ctx.drawImage(temp_canvas, 0, 0);
     
     ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
 }
 
-function draw_image_rgba_scaled(canvas, img, w, h) {
+function draw_image_pixel_per_um(canvas, x, y, img_width, pixel_per_um) {
+    var ctx = canvas.getContext('2d');
+    
+    var msd = Math.pow(10, Math.floor(Math.log10(img_width/pixel_per_um)));
+    if ((img_width/pixel_per_um)/msd < 2)
+    {
+	msd = msd/10;
+    }
+    pixel_length = img_width * msd/(img_width/pixel_per_um);
+    ctx.clearRect(0, y-5, img_width, 100);
+		  
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.lineTo(x+pixel_length,y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x,y+5);
+    ctx.lineTo(x,y-5);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x+pixel_length,y+5);
+    ctx.lineTo(x+pixel_length,y-5);
+    ctx.stroke();
+
+    ctx.font = '16px Arial';
+    ctx.fillText(msd + 'um', x, y + 20);
+}
+
+function draw_image_neurons_number(canvas, roi, width, height, c_w, c_h) {
+    var ctx = canvas.getContext('2d');
+    ctx.save();
+    ctx.fillStyle = 'white';
+    for (var i = 1; i <= arrayMax(roi); i++) {
+	var idx = roi.indexOf(i);
+	var x = (idx % width) * c_w/width + 10;
+	var y = (Math.floor(idx / width)) * c_h/height + 10;
+	
+	ctx.fillText(i, x, y);
+    }
+    ctx.restore();
+}
+
+function draw_image_rgba_scaled(canvas, img, w, h, c_w, c_h) {
     /* Takes a w*h*4 long array of 32 bit RGBA pixel data and draws
        it on the canvas. The image is scaled to the size of the canvas.
 
@@ -817,9 +851,9 @@ function draw_image_rgba_scaled(canvas, img, w, h) {
          img(w*h*4 Array): An array of length W*H*4 with values from 0-255
 	 w, h: Size of the source image
     */
-    var temp_canvas = $("<canvas>")
-	.attr("width", w).attr("height", h)[0];
-    var temp_ctx = temp_canvas.getContext("2d");
+    var temp_canvas = $('<canvas>')
+	.attr('width', w).attr('height', h)[0];
+    var temp_ctx = temp_canvas.getContext('2d');
     var imgData = temp_ctx.createImageData(w, h)
     
     for (var i = 0; i < w*h*4; ++i) {
@@ -828,8 +862,13 @@ function draw_image_rgba_scaled(canvas, img, w, h) {
 
     temp_ctx.putImageData(imgData, 0, 0);
 
-    var ctx = canvas.getContext("2d");
-    ctx.scale(canvas.width / w, canvas.height / h);
+    var ctx = canvas.getContext('2d');
+    if (typeof c_w == 'undefined')
+    {
+	c_w = canvas.width;
+	c_h = canvas.height;
+    }
+    ctx.scale(c_w / w, c_h / h);
     ctx.drawImage(temp_canvas, 0, 0);
     ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
 }
@@ -911,19 +950,40 @@ function color_roi_borders(roi, borders, w, h) {
     return img;
 }
 
-function roi_overlay(roi, w, h, index, r, g, b, a) {
+function editor_roi_overlay(roi, w, h, index, r, g, b, a) {
     /* Create an rgba image, where everything is transparent except for the roi
        indicated by index, which is in the color given by r,g,b and a */
-    var img = new Uint8Array(w*h*4).fill(0);
+    if(typeof editor_overlay == 'undefined') {
+	editor_overlay = new Uint8Array(w*h*4);
+    }
+    editor_overlay.fill(0);
     for(var i = 0; i < w*h; ++i) {
 	if(roi[i] == index) {
-	    img[4*i] = r;
-	    img[4*i + 1] = g;
-	    img[4*i + 2] = b;
-	    img[4*i + 3] = a;
+	    editor_overlay[4*i] = r;
+	    editor_overlay[4*i + 1] = g;
+	    editor_overlay[4*i + 2] = b;
+	    editor_overlay[4*i + 3] = a;
 	}
     }
-    return img;
+    return editor_overlay;
+}
+
+function statistics_roi_overlay(roi, w, h, index, r, g, b, a) {
+    /* Create an rgba image, where everything is transparent except for the roi
+       indicated by index, which is in the color given by r,g,b and a */
+    if(typeof statistics_overlay == 'undefined') {
+	statistics_overlay = new Uint8Array(w*h*4);
+    }
+    statistics_overlay.fill(0);
+    for(var i = 0; i < w*h; ++i) {
+	if(roi[i] == index) {
+	    statistics_overlay[4*i] = r;
+	    statistics_overlay[4*i + 1] = g;
+	    statistics_overlay[4*i + 2] = b;
+	    statistics_overlay[4*i + 3] = a;
+	}
+    }
+    return statistics_overlay;
 }
 
 function arrayMin(arr) {
