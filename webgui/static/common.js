@@ -100,6 +100,10 @@ function display_runs(data) {
     $('#runselect').html(options_as_string);
 }
 
+$(document).ready(function(){
+    $(document).on('click', '#runselect', run_clicked);
+});
+
 function run_clicked() {
     var new_run = $('#runselect').find(":selected").text();
     if (new_run == run) {
@@ -111,12 +115,14 @@ function run_clicked() {
 
     $.getJSON('/get_segmentation/' + videoname + '/' + run,
 	      receive_segmentations);
+    $.getJSON('/get_config/' + videoname + '/' + run, recieve_config);
 }
 
 function create_run_clicked() {
-    run = $('#runname').val();
-    $.post("/create_run/" + videoname + "/" + run, {},
+    run_t = $('#runname').val();
+    $.post("/create_run/" + videoname + "/" + run_t, {},
 	   display_runs, 'json');
+    
 }
 
 function delete_run_clicked() {
@@ -126,6 +132,16 @@ function delete_run_clicked() {
 	       display_runs, 'json');
     }
     return false;
+}
+
+function recieve_config(data) {
+    // set the webgui to the current config of the run
+    $("input[id='seg_source_" + data['segmentation_source'] + "'][name='segmentation_source']").prop('checked', true);
+    $("#gauss_radius").val(data['gauss_radius']);
+    $("#threshold").val(data['threshold']);
+    $("input[id='seg_algo_" + data['segmentation_algorithm'] + "'][name='segmentation_algorithm']").prop('checked', true);
+    $("input[id='spike_algo_" + data['spike_detection_algorithm'] + "'][name='spike_algorithm']").prop('checked', true);
+    $("#nSD_n").val(data['nSD_n']);
 }
 
 /* 
@@ -183,6 +199,8 @@ function segmentation_parameters_changed() {
     var gauss_radius = $('#gauss_radius').val();
     var threshold = $('#threshold').val();
     var algorithm = $("input[name='segmentation_algorithm']:checked").val();
+    var spike_algo = $("input[name='spike_algorithm']:checked").val();
+    var nSD_n = $("#nSD_n").val();
 
     if (current_stage != 'segmentation') {
 	if(!window.confirm('Changing the segmentation parameters regenerates the'
@@ -203,7 +221,9 @@ function segmentation_parameters_changed() {
 	       segmentation_source: source,
 	       gauss_radius: gauss_radius,
 	       threshold: threshold,
-	       segmentation_algorithm: algorithm
+	       segmentation_algorithm: algorithm,
+	       spike_detection_algorithm: spike_algo,
+	       nSD_n: nSD_n
 	   },
 	   receive_segmentations, 'json');
 }

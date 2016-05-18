@@ -4,5 +4,6 @@ default_config = {
     'gauss_radius': 2,
     'threshold': 'li',
     'segmentation_algorithm': 'watershed',
-    'spike_detection_algorithm': 'wavelet'
+    'spike_detection_algorithm': 'wavelet',
+    'nSD_n': 3
 }

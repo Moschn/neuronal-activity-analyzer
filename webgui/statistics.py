@@ -23,7 +23,8 @@ def get_statistics(videoname, run):
     loader = analyzer.loader.open(
         os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
     segmentation = run_load(videoname, 'segmentation')
-
+    config = run_load(videoname, 'config')
+    
     integration_start = time.time()
     integrator = analyzer.integrator_sum.Integrator_sum(
         segmentation['editor'])
@@ -31,8 +32,7 @@ def get_statistics(videoname, run):
     integration_time = time.time() - integration_start
 
     spike_detection_start = time.time()
-    spikes = analyzer.detect_spikes(activities,
-                                    {'spike_detection_algorithm': 'wavelet'})
+    spikes = analyzer.detect_spikes(activities, config)
     spike_detection_time = time.time() - spike_detection_start
     fig_raster = analyzer.plot.plot_rasterplot(spikes, loader.exposure_time,
                                                floor(len(activities) *

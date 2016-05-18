@@ -1,6 +1,7 @@
 import os
 import shelve
 import numpy
+import time
 from base64 import b64decode
 
 from flask import current_app, g
@@ -32,10 +33,14 @@ def run_load(videoname, key):
     print(path)
     if not os.path.isfile(path):
         return None
-    with shelve.open(path) as shelf:
-        if key in shelf:
-            return shelf[key]
-        return None
+    try:
+        with shelve.open(path) as shelf:
+            if key in shelf:
+                return shelf[key]
+            return None
+    except:
+        time.sleep(0.3)
+        return run_load(videoname, key)
 
 
 def list_runs(videoname):
@@ -72,5 +77,4 @@ def make_tree(path_arg):
                 tree['children'].append(make_tree(fn))
             else:
                 tree['children'].append(dict(name=name))
-    print(tree)
     return tree

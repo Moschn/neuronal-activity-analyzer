@@ -95,7 +95,7 @@
 			  <input class="btn btn-danger" type="submit" value="Delete run" onclick="delete_run_clicked()">
 		      </div>
 		      <select id="runselect" name="runselect" size="10"
-			      class="form-control" onclick="run_clicked()" style="margin-top:10px">
+			      class="form-control" style="margin-top:10px">
 		      </select>
 		  </div>
 	      </div>
@@ -125,9 +125,9 @@
 		      <div class="col-md-4">
 			  <form>
 			      <label for="seg_select">Source for segmentation: </label>
-			      <input id="seg_select" type="radio" name="segmentation_source" value="first_frame" onclick="segmentation_parameters_changed()">First frame<br>
-			      <input type="radio" name="segmentation_source" value="mean" onclick="segmentation_parameters_changed()" checked>Mean of frames<br>
-			      <input type="radio" name="segmentation_source" value="variance" onclick="segmentation_parameters_changed()">Variance of pixels<br>
+			      <input type="radio" name="segmentation_source" value="first_frame" id="seg_source_first_frame" onclick="segmentation_parameters_changed()">First frame<br>
+			      <input type="radio" name="segmentation_source" value="mean" id="seg_source_mean" onclick="segmentation_parameters_changed()" checked>Mean of frames<br>
+			      <input type="radio" name="segmentation_source" value="variance" id="seg_source_variance" onclick="segmentation_parameters_changed()">Variance of pixels<br>
 			  </form>
 		      </div>
 		  </div>
@@ -142,8 +142,8 @@
 			  
 			  <label for="gauss_radius"> Sigma radius: </label>
 			  <div class="form-inline">
-			      <input type="text" id="gauss_radius" name="gauss_radius" value="2.0" style="width: 100%">
-			      <input type="submit" onclick="segmentation_parameters_changed()" value="go">
+			      <input type="text" class="form-control" id="gauss_radius" name="gauss_radius" value="2.0" style="width: 100%">
+			      <input type="submit" class="form-control" onclick="segmentation_parameters_changed()" value="go">
 			  </div>
 			  
 		      </div>
@@ -168,7 +168,7 @@
 		      <div class="col-md-4">
 			  
 			  <label for="threshold">Threshold(Percent of dynamic range):</label>
-			  <input type="text" id="threshold" name="threshold" value="li">
+			  <input type="text" class="form-control" id="threshold" name="threshold" value="li">
 			  <div class="form-group btn-group">
 			      <input class="btn btn-default" type="submit" onclick="apply_li()" value="Li">
 			      <input class="btn btn-default" type="submit" onclick="apply_otsu()" value="Otsu">
@@ -184,16 +184,17 @@
 			  <form>
 			      <label for="seg_algo">Algorithm: </label>
 			      <div class="form-group" id="seg_algo">
-				  <input type="radio" name="segmentation_algorithm" value="watershed" onclick="segmentation_parameters_changed()" checked>Watershed<br>
-				  <input type="radio" name="segmentation_algorithm" value="randomwalk" onclick="segmentation_parameters_changed()">Random walk<br>
-				  <input type="radio" name="segmentation_algorithm" value="kmeans" onclick="segmentation_parameters_changed()">K means<br>
-				  <input type="radio" name="segmentation_algorithm" value="fill" onclick="segmentation_parameters_changed()">Fill<br>
+				  <input type="radio" name="segmentation_algorithm" value="watershed" id="seg_algo_watershed" onclick="segmentation_parameters_changed()" checked>Watershed<br>
+				  <input type="radio" name="segmentation_algorithm" value="randomwalk" id="seg_algo_randomwalk" onclick="segmentation_parameters_changed()">Random walk<br>
+				  <input type="radio" name="segmentation_algorithm" value="kmeans" id="seg_algo_kmeans" onclick="segmentation_parameters_changed()">K means<br>
+				  <input type="radio" name="segmentation_algorithm" value="fill" id="seg_algo_fill" onclick="segmentation_parameters_changed()">Fill<br>
 			      </div>
 			  </form>
 		      </div>
 		      
 		  </div>
 	      </div>
+	      
 	      <hr>
 	  </div>
 
@@ -260,16 +261,38 @@
 	     -- Statistics
 	     --
 	     -------------------------------------------------------------------------->
-	  
 	  <div id="statistics-button-container" style="display: none;">
-	    <div class="row">
-	      <div class="col-md-12" style="text-align: center;">
-		<button id="statistics-button" class="btn btn-primary" onclick="calculate_statistics_clicked()">
-		  Calculate statistics
-		</button>
+	      <div class="row">
+		  <div class="col-md-12">
+		      <form>
+			  <label for="spike_algo"> Spike detection algorithm: </label>
+			  <div class="form-horizontal" id="spike_algo">
+			      <div class="form-group">
+				  <div class="col-sm-offset-1 col-sm-11">
+				      <input type="radio" name="spike_algorithm" id="spike_algo_wavelet" value="wavelet" onclick="segmentation_parameters_changed()" checked>Wavelet spike detection<br>
+
+				      <input type="radio" name="spike_algorithm" id="spike_algo_nSD" value="nSD" onclick="segmentation_parameters_changed()" checked>N times standard deviation
+				  </div>
+			      </div>
+			      <div class="form-group" >
+				  <label for="nSD_n" class="col-sm-1 control-label"> n:   </label>
+				  <div class="col-sm-11">
+				      <input type="text" class="form-control" id="nSD_n" value="1.0" onchange="segmentation_parameters_changed()">
+				  </div>
+			      </div>
+			      <br>
+			  </div>
+		      </form>
+		  </div>
 	      </div>
-	    </div>
-	    <hr>
+	      <div class="row">
+		  <div class="col-md-12">
+		      <button id="statistics-button" class="btn btn-primary" style="text-align: center" onclick="calculate_statistics_clicked()">
+			  Calculate statistics
+		      </button>
+		  </div>
+	      </div>
+	      <hr>
 	  </div>
 	  
 	  <div id="statistics" style="display: none;">

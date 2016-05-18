@@ -7,7 +7,7 @@ from math import floor
 class SD_spike_detection(Spike_detection):
 
     def __init__(self, n):
-        self.n = n
+        self.n = float(n)
 
     def detect_spikes(self, dataset):
         # correct the bleaching

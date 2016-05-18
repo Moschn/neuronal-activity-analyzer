@@ -80,7 +80,8 @@ def set_segmentation_params(videoname, runname):
 
         config = run_load(videoname, 'config')
         for key in ['segmentation_source', 'gauss_radius', 'threshold',
-                    'segmentation_algorithm']:
+                    'segmentation_algorithm', 'spike_detection_algorithm',
+                    'nSD_n']:
             config[key] = request.values.get(key, config[key])
         run_save(videoname, 'config', config)
 
@@ -146,6 +147,13 @@ def get_thresholds(videoname, runname):
     segmented = run_load(videoname, 'segmentation')
     thresholds = analyzer.get_thresholds(segmented['filtered'])
     return jsonify(**thresholds)
+
+
+@segmentation_page.route('/get_config/<path:videoname>/<runname>')
+def get_config(videoname, runname):
+    g.run = runname
+    config = run_load(videoname, 'config')
+    return jsonify(config)
 
 
 @segmentation_page.route('/get_borders/<path:videoname>/<runname>')
