@@ -48,7 +48,6 @@ def run_save(videoname, key, value):
 
 def run_load(videoname, key):
     path = run_path(videoname, g.run)
-    print(path)
     if not os.path.isfile(path):
         return None
     if path.endswith(".db"):

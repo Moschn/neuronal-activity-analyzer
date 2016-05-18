@@ -5,6 +5,8 @@ from matplotlib import pyplot
 from matplotlib import gridspec
 from skimage import segmentation
 from math import ceil
+import os
+import analyzer.loader
 
 
 def save(figure, filename):
@@ -15,7 +17,7 @@ def save(figure, filename):
 def show_plot(figure):
     figure.show()
 
-
+    
 def plot_roi_bg(roi, bg, fg, pixel_per_um):
     bg_norm = _normalize8_img(bg)
     fg_norm = _normalize8_img(fg)
@@ -42,6 +44,35 @@ def plot_roi_bg(roi, bg, fg, pixel_per_um):
     pyplot.ylabel("[um]")
     pyplot.tight_layout()
     return figure
+
+
+def save_roi(roi, frame, pixel_per_um, filename, analysis_folder):
+    improved_roi = False
+    directory = os.path.dirname(filename)
+    if directory == '':
+        directory = '.'
+    files = [f for f in os.listdir(directory) if
+             os.path.isfile(os.path.join(directory, f))]
+    for f in files:
+        fn = os.path.join(directory, f)
+        try:
+            if f.endswith(".tif") and os.stat(fn).st_size < 100000000:
+                loader2 = analyzer.loader.open(fn)
+                fg_frame = loader2.get_frame(0)
+                bg_frame = loader2.get_frame(1)
+
+                figure = plot_roi_bg(roi, bg_frame, fg_frame, pixel_per_um)
+                fname = os.path.join(analysis_folder, 'roi.svg')
+                save(figure, fname)
+                improved_roi = True
+        except:
+            print("No seperate imagefile with background/foreground found")
+            print("Only basic plot of ROIs will be generated!")
+
+    if not improved_roi:
+        fname = os.path.join(analysis_folder, 'roi.svg')
+        fig = plot_roi(roi, frame, pixel_per_um)
+        save(fig, fname)
 
 
 def plot_roi(roi, frame, pixel_per_um):

@@ -1,12 +1,12 @@
 from flask import Blueprint, g, current_app, jsonify
 import os.path
 import time
-from math import floor
 
 from .util import run_load, run_save
 import analyzer
 import analyzer.integrator_sum
 import mpld3
+
 
 statistics = Blueprint('statistics', __name__,
                        template_folder='templates')
@@ -38,7 +38,8 @@ def get_statistics(videoname, run):
     fig_roi = analyzer.plot.plot_roi(segmentation['editor'],
                                      segmentation['source'],
                                      loader.pixel_per_um)
-
+    run_save(videoname, 'time_per_bin', 1)
+    
     spikes = [l.tolist() for l in spikes]
 
     response = {}
@@ -66,6 +67,28 @@ def get_statistics_rasterplot(videoname, run, time_per_bin):
     fig_raster = analyzer.plot.plot_rasterplot(statistics['spikes'],
                                                exposure_time,
                                                float(time_per_bin))
+    run_save(videoname, 'time_per_bin', time_per_bin)
     response = {}
     response['rasterplot'] = mpld3.fig_to_dict(fig_raster)
     return jsonify(**response)
+
+
+@statistics.route('/save_plots/<path:videoname>/<run>', methods=['POST'])
+def save_plots(videoname, run):
+    g.run = run
+    analysis_folder = os.path.join(current_app.config['VIDEO_FOLDER'],
+                                   os.path.dirname(videoname),
+                                   os.path.basename(videoname) + "-analysis")
+    segmentation = run_load(videoname, 'segmentation')
+    pixel_per_um = run_load(videoname, 'pixel_per_um')
+
+    time_per_bin = run_load(videoname, 'time_per_bin')
+    statistics = run_load(videoname, 'statistics')
+    exposure_time = run_load(videoname, 'exposure_time')
+
+    analyzer.save_results(segmentation['editor'], segmentation['source'],
+                          pixel_per_um, exposure_time,
+                          statistics['activities'], statistics['spikes'],
+                          time_per_bin, os.path.basename(videoname), analysis_folder)
+    response = {'done': True}
+    return jsonify(response)

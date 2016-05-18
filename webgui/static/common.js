@@ -539,6 +539,15 @@ function receive_statistics(data) {
     update_info_line();
 }
 
+$(document).ready(function() {
+    $('#save_button').on('click', function() {
+	var btn = $(this).button('loading');
+	$.post('/save_plots/' + videoname + "/" + run, function(){
+	    btn.button('reset');
+	});
+    });
+});
+
 function plot_active_neurons() {
     data = [];
     statistics_active_neurons.forEach(function (neuron) {

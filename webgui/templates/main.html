@@ -314,15 +314,21 @@
 		      
 		  </div>
 	      </div>
-	      <div style="text-align: center">
-		  <div id="rasterplot" style="display: inline-block"></div>
-		  <form class="form-inline" id="bin_form">
-		      <div class="form-group">
-			  <label for="nr_bins">Time per bin in seconds</label>
-			  <input type="text" class="form-control" id="time_per_bin" value="1.0">
-		      </div>
-		      <button type="submit" id="bin_button" class="btn btn-default">Update</button>
-		  </form>
+	      <div class="row" style="display: flex; align-items: center">
+		  <div class="col-md-10">
+		      <div id="rasterplot"></div>
+		      <form class="form-inline" id="bin_form">
+			  <div class="form-group">
+			      <label for="nr_bins">Time per bin in seconds</label>
+			      <input type="text" class="form-control" id="time_per_bin" value="1.0">
+			  </div>
+			  <button type="submit" id="bin_button" class="btn btn-default">Update</button>
+		      </form>
+		  </div>
+		  
+		  <div class="col-md-2">
+		      <button class="btn btn-primary" id="save_button" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Saving Plots">Save to NAS </button>
+		  </div>
 	      </div>
 	      
 	    <hr>

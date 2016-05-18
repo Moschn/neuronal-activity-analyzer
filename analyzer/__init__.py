@@ -6,6 +6,9 @@ from analyzer.nsd_spike import SD_spike_detection
 import analyzer.segmentation
 import analyzer.plot
 import analyzer.util
+import os
+import csv
+import numpy
 
 register_loader_class(analyzer.pillow_loader.PILLoader)
 register_loader_class(analyzer.bioformat_loader.BioFormatLoader)
@@ -103,3 +106,61 @@ def detect_spikes(activity, config):
         spikes = algo.detect_spikes_parallel(activity)
 
     return spikes
+
+
+def save_results(roi, frame, pixel_per_um, exposure_time, activities, spikes,
+                 time_per_bin, videoname, analysis_folder):
+    if not os.path.exists(analysis_folder):
+        os.makedirs(analysis_folder)
+
+    activities = numpy.array(activities)
+
+    analyzer.plot.save_roi(roi, frame, pixel_per_um,
+                           videoname, analysis_folder)
+
+    fig_raster = analyzer.plot.plot_rasterplot(spikes,
+                                               exposure_time,
+                                               float(time_per_bin))
+    analyzer.plot.save(fig_raster, os.path.join(analysis_folder,
+                                                'rasterplot.svg'))
+
+    with open(os.path.join(analysis_folder, 'activity.csv'), 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        for neuron_activity in activities:
+            writer.writerow(neuron_activity)
+
+    total_spikes = 0
+
+    summary_peaks = []
+    with open(os.path.join(analysis_folder, 'activity_spikes.csv'),
+              'w') as csvfile:
+        writer = csv.writer(csvfile)
+        idx = 1
+        for maxima_time in spikes:
+            neuron_activity = activities[idx-1]
+            fname = os.path.join(analysis_folder, 'neuron_plots',
+                                 'neuron_{}.svg'.format(idx))
+            if not os.path.exists(os.path.dirname(fname)):
+                os.makedirs(os.path.dirname(fname))
+            fig = analyzer.plot.plot_spikes(neuron_activity, maxima_time)
+            analyzer.plot.save(fig, fname)
+
+            writer.writerow(maxima_time)
+
+            peaks_time = round(len(maxima_time) /
+                               (exposure_time*len(activities.T)),
+                               4)
+            total_spikes += len(maxima_time)
+            summary_peaks.append("Neuron {}: \t{} peaks/s".format(idx,
+                                                                  peaks_time))
+            idx += 1
+
+    with open(os.path.join(analysis_folder, 'summary.txt'), 'w') as summary:
+        summary.write("Summary of analysis of {}\n".format(videoname))
+        summary.write("Number of neurons found: {}\n".format(numpy.max(roi)))
+        for line in summary_peaks:
+            summary.write(line + "\n")
+        peaks_time = total_spikes/(exposure_time *
+                                   len(activities.T))/numpy.max(roi)
+        summary.write("Total number of spikes per second per neuron: {}".
+                      format(peaks_time))
