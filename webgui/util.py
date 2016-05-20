@@ -46,7 +46,7 @@ def run_save(videoname, key, value):
         shelf[key] = value
 
 
-def run_load(videoname, key):
+def run_load(videoname, key, n=0):
     path = run_path(videoname, g.run)
     if not os.path.isfile(path):
         return None
@@ -60,7 +60,9 @@ def run_load(videoname, key):
     except:
         # ugly hack. Shelve sometimes say resource not available :(
         time.sleep(0.3)
-        return run_load(videoname, key)
+        if n > 50:
+            raise Exception("shelve did not open")
+        return run_load(videoname, key, n+1)
 
 
 def list_runs(videoname):
