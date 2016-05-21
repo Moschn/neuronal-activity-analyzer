@@ -92,7 +92,7 @@ def list_runs(videoname):
     for filename in os.listdir(path):
         if check_extension(filename) and basename in filename:
             complete_name = (strip_allowed_extension(os.path.basename(filename))
-                             [0:-3])
+                             [0:-4])
             runs.append(complete_name.split(".")[-1])
     return runs
 
