@@ -112,7 +112,6 @@ def save_results(roi, frame, pixel_per_um, exposure_time, activities, spikes,
                  time_per_bin, videoname, analysis_folder):
     if not os.path.exists(analysis_folder):
         os.makedirs(analysis_folder)
-        os.fchmod(analysis_folder, 0o660)
 
     activities = numpy.array(activities)
 
@@ -129,7 +128,6 @@ def save_results(roi, frame, pixel_per_um, exposure_time, activities, spikes,
         writer = csv.writer(csvfile)
         for neuron_activity in activities:
             writer.writerow(neuron_activity)
-    os.chmod(os.path.join(analysis_folder, 'activity.csv'), 0o660)
 
     total_spikes = 0
 
@@ -157,7 +155,6 @@ def save_results(roi, frame, pixel_per_um, exposure_time, activities, spikes,
             summary_peaks.append("Neuron {}: \t{} peaks/s".format(idx,
                                                                   peaks_time))
             idx += 1
-    os.chmod(os.path.join(analysis_folder, 'activity_spikes.csv'), 0o660)
 
     with open(os.path.join(analysis_folder, 'summary.txt'), 'w') as summary:
         summary.write("Summary of analysis of {}\n".format(videoname))
@@ -168,4 +165,3 @@ def save_results(roi, frame, pixel_per_um, exposure_time, activities, spikes,
                                    len(activities.T))/numpy.max(roi)
         summary.write("Total number of spikes per second per neuron: {}".
                       format(peaks_time))
-    os.chmod(os.path.join(analysis_folder, 'summary.txt'), 0o660)
