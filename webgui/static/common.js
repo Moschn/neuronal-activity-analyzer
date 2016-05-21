@@ -383,7 +383,7 @@ function editor_keypress(e) {
 		}
 	    }
 	    editor_not_saved();
-	    sraw_editor();
+	    draw_editor();
 	    redraw_editor();
 	}
     } else if(key == 'u') {

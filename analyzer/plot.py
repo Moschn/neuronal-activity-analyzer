@@ -12,11 +12,11 @@ import analyzer.loader
 def save(figure, filename):
     figure.savefig(filename, bbox_inches='tight')
     pyplot.close(figure)
+    os.chmod(filename, 0o660)
 
 
 def show_plot(figure):
     figure.show()
-
     
 def plot_roi_bg(roi, bg, fg, pixel_per_um):
     bg_norm = _normalize8_img(bg)
