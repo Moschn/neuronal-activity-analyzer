@@ -9,6 +9,7 @@ from flask import current_app, g
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 ALLOWED_EXTENSIONS = {".run", ".run.db", ".run.dat"}
+STRIPED_EXTENSIONS = {".db", ".dat"}
 
 
 def check_extension(filename):
@@ -20,10 +21,10 @@ def check_extension(filename):
 
 
 def strip_allowed_extension(filename):
-    for extension in ALLOWED_EXTENSIONS:
+    for extension in STRIPED_EXTENSIONS:
         if filename.endswith(extension):
             return filename[0:-len(extension)]
-    return False
+    return filename
 
 
 def run_path(videoname, runname):
@@ -50,8 +51,7 @@ def run_load(videoname, key, n=0):
     path = run_path(videoname, g.run)
     if not os.path.isfile(path):
         return None
-    if path.endswith(".db"):
-        path = path[0:-3]
+    path = strip_allowed_extension(path)
     try:
         with shelve.open(path) as shelf:
             if key in shelf:
@@ -69,8 +69,7 @@ def run_load_multiple(videoname, keys, n=0):
     path = run_path(videoname, g.run)
     if not os.path.isfile(path):
         return None
-    if path.endswith(".db"):
-        path = path[0:-3]
+    path = strip_allowed_extension(path)
     try:
         with shelve.open(path) as shelf:
             result = {}
