@@ -58,12 +58,32 @@ def run_load(videoname, key, n=0):
                 return shelf[key]
             return None
     except:
-        # ugly hack. Shelve sometimes say resource not available :(
+        # ugly hack. Shelve sometimes says resource not available :(
         time.sleep(0.3)
         if n > 50:
-            raise Exception("shelve did not open")
+            raise Exception("shelve could not open file")
         return run_load(videoname, key, n+1)
 
+
+def run_load_multiple(videoname, keys, n=0):
+    path = run_path(videoname, g.run)
+    if not os.path.isfile(path):
+        return None
+    if path.endswith(".db"):
+        path = path[0:-3]
+    try:
+        with shelve.open(path) as shelf:
+            result = {}
+            for key in keys:
+                if key in shelf:
+                    result[key] = shelf[key]
+            return result
+    except:
+        # ugly hack. Shelve sometimes says resource not available :(
+        time.sleep(0.3)
+        if n > 50:
+            raise Exception("shelve could not open file")
+        return run_load_multiple(videoname, keys, n+1)
 
 def list_runs(videoname):
     path = os.path.join(current_app.config['DATA_FOLDER'],

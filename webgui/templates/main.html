@@ -262,37 +262,37 @@
 	     -------------------------------------------------------------------------->
 	  <div id="statistics-button-container" style="display: none;">
 	       <h2 style="text-align: center">Spike Detection</h2>
-	      <div class="row">
-		<div class="col-md-12">
-		      <form>
-			  <label for="spike_algo" class="col-sm-offset-1 col-sm-11">Algorithm: </label>
-			  <div class="form-horizontal" id="spike_algo">
-			      <div class="form-group">
-				  <div class="col-sm-offset-1 col-sm-11">
-				      <input type="radio" name="spike_algorithm" id="spike_algo_wavelet" value="wavelet" onclick="segmentation_parameters_changed()"> Wavelet spike detection<br>
-
-				      <input type="radio" name="spike_algorithm" id="spike_algo_nSD" value="nSD" onclick="segmentation_parameters_changed()"> N times standard deviation
-				  </div>
-			      </div>
-			      <div class="form-group" >
-				  <label for="nSD_n" class="col-sm-1 control-label"> n:   </label>
-				  <div class="col-sm-11">
-				      <input type="text" class="form-control" id="nSD_n" value="1.0" onchange="segmentation_parameters_changed()">
-				  </div>
-			      </div>
-			      <br>
-			  </div>
-		      </form>
-		  </div>
-	      </div>
-	      <div class="row">
-		  <div class="col-md-12">
-		      <button id="statistics-button" class="btn btn-primary" style="text-align: center" onclick="calculate_statistics_clicked()">
-			  Calculate statistics
-		      </button>
-		  </div>
-	      </div>
-	      <hr>
+	       <div class="row">
+		 <div class="col-md-12">
+		   <form>
+		     <label for="spike_algo" class="col-sm-offset-1 col-sm-11">Algorithm: </label>
+		     <div class="form-horizontal" id="spike_algo">
+		       <div class="form-group">
+			 <div class="col-sm-offset-1 col-sm-11">
+			   <input type="radio" name="spike_algorithm" id="spike_algo_wavelet" value="wavelet" onclick="segmentation_parameters_changed()"> Wavelet spike detection<br>
+			   
+			   <input type="radio" name="spike_algorithm" id="spike_algo_nSD" value="nSD" onclick="segmentation_parameters_changed()"> N times standard deviation
+			 </div>
+		       </div>
+		       <div class="form-group" >
+			 <label for="nSD_n" class="col-sm-1 control-label"> n:   </label>
+			 <div class="col-sm-11">
+			   <input type="text" class="form-control" id="nSD_n" value="1.0" onchange="segmentation_parameters_changed()">
+			 </div>
+		       </div>
+		       <br>
+		     </div>
+		   </form>
+		 </div>
+	       </div>
+	       <div class="row">
+		 <div class="col-md-12">
+		   <button id="statistics-button" class="btn btn-primary" style="text-align: center" onclick="calculate_statistics_clicked()">
+		     Calculate statistics
+		   </button>
+		 </div>
+	       </div>
+	       <hr>
 	  </div>
 	  
 	  <div id="statistics" style="display: none;">

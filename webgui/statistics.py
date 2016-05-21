@@ -2,7 +2,7 @@ from flask import Blueprint, g, current_app, jsonify
 import os.path
 import time
 
-from .util import run_load, run_save
+from .util import run_load, run_save, run_load_multiple
 import analyzer
 import analyzer.integrator_sum
 import mpld3
@@ -16,14 +16,17 @@ statistics = Blueprint('statistics', __name__,
 def get_statistics(videoname, run):
     g.run = run
 
-    response = run_load(videoname, 'statistics')
+    stored = run_load_multiple(videoname, ['statistics', 'segmentation',
+                                           'config'])
+    response = stored['statistics']
+    segmentation = stored['segmentation']
+    config = stored['config']
+    
     if response is not None:
         return jsonify(**response)
 
     loader = analyzer.loader.open(
         os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
-    segmentation = run_load(videoname, 'segmentation')
-    config = run_load(videoname, 'config')
     
     integration_start = time.time()
     integrator = analyzer.integrator_sum.Integrator_sum(
@@ -62,8 +65,9 @@ def get_statistics(videoname, run):
 @statistics.route('/get_statistics_rasterplot/<path:videoname>/<run>/<time_per_bin>')
 def get_statistics_rasterplot(videoname, run, time_per_bin):
     g.run = run
-    statistics = run_load(videoname, 'statistics')
-    exposure_time = run_load(videoname, 'exposure_time')
+    stored = run_load_multiple(videoname, ['statistics', 'exposure_time'])
+    statistics = stored['statistics']
+    exposure_time = stored['exposure_time']
     fig_raster = analyzer.plot.plot_rasterplot(statistics['spikes'],
                                                exposure_time,
                                                float(time_per_bin))
@@ -79,12 +83,15 @@ def save_plots(videoname, run):
     analysis_folder = os.path.join(current_app.config['VIDEO_FOLDER'],
                                    os.path.dirname(videoname),
                                    os.path.basename(videoname) + "-analysis")
-    segmentation = run_load(videoname, 'segmentation')
-    pixel_per_um = run_load(videoname, 'pixel_per_um')
+    stored = run_load_multiple(videoname, ['segmentation', 'pixel_per_um',
+                                           'time_per_bin', 'statistics',
+                                           'exposure_time'])
+    segmentation = stored['segmentation']
+    pixel_per_um = stored['pixel_per_um']
 
-    time_per_bin = run_load(videoname, 'time_per_bin')
-    statistics = run_load(videoname, 'statistics')
-    exposure_time = run_load(videoname, 'exposure_time')
+    time_per_bin = stored['time_per_bin']
+    statistics = stored['statistics']
+    exposure_time = stored['exposure_time']
 
     analyzer.save_results(segmentation['editor'], segmentation['source'],
                           pixel_per_um, exposure_time,

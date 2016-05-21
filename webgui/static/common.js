@@ -120,7 +120,6 @@ function run_clicked() {
 
     $.getJSON('/get_segmentation/' + videoname + '/' + run,
 	      receive_segmentations);
-    $.getJSON('/get_config/' + videoname + '/' + run, recieve_config);
 }
 
 function create_run_clicked() {
@@ -139,16 +138,6 @@ function delete_run_clicked() {
     return false;
 }
 
-function recieve_config(data) {
-    // set the webgui to the current config of the run
-    $("input[id='seg_source_" + data['segmentation_source'] + "'][name='segmentation_source']").prop('checked', true);
-    $("#gauss_radius").val(data['gauss_radius']);
-    $("#threshold").val(data['threshold']);
-    $("input[id='seg_algo_" + data['segmentation_algorithm'] + "'][name='segmentation_algorithm']").prop('checked', true);
-    $("input[id='spike_algo_" + data['spike_detection_algorithm'] + "'][name='spike_algorithm']").prop('checked', true);
-    $("#nSD_n").val(data['nSD_n']);
-}
-
 /* 
  * Segmentation
  */
@@ -159,36 +148,54 @@ function receive_segmentations(data) {
     /* Callback for an ajax query to get_segmentations, which displays the
        retrived images */
 
-    segmentation = data;
+    segmentation = data['segmentation'];
+    config = data['config'];
     
-    var w = data['width'];
-    var h = data['height'];
+    var w = segmentation['width'];
+    var h = segmentation['height'];
 
     var c_w = $('#source_image')[0].width;
     var c_h = $('#source_image')[0].height;
 
     draw_image_rgb_scaled($('#source_image')[0],
-			  greyscale16_to_normrgb(data.source, w, h),
+			  greyscale16_to_normrgb(segmentation.source, w, h),
 			  w, h, c_w, c_h-70);
-    draw_image_pixel_per_um($('#source_image')[0], 0, h-100, w, data.pixel_per_um)
+    draw_image_pixel_per_um($('#source_image')[0], 0, h-100, w,
+			    segmentation.pixel_per_um);
     draw_image_rgb_scaled($('#filtered_image')[0],
-			  greyscale16_to_normrgb(data.filtered, w, h),
+			  greyscale16_to_normrgb(segmentation.filtered, w, h),
 			  w, h, c_w, c_h-70);
-    draw_image_pixel_per_um($('#filtered_image')[0], 0, h-100, w, data.pixel_per_um)
+    draw_image_pixel_per_um($('#filtered_image')[0], 0, h-100, w,
+			    segmentation.pixel_per_um);
     draw_image_rgb_scaled($('#thresholded_image')[0],
-			  greyscale16_to_normrgb(data.thresholded, w, h),
+			  greyscale16_to_normrgb(segmentation.thresholded, w, h),
 			  w, h, c_w, c_h-70);
-    draw_image_pixel_per_um($('#thresholded_image')[0], 0, h-100, w, data.pixel_per_um)
+    draw_image_pixel_per_um($('#thresholded_image')[0], 0, h-100, w,
+			    segmentation.pixel_per_um);
     draw_image_rgb_scaled($('#segmented_image')[0],
-			  greyscale16_to_normrgb(data.source, w, h),
+			  greyscale16_to_normrgb(segmentation.source, w, h),
 			  w, h, c_w, c_h-70);
-    draw_image_pixel_per_um($('#segmented_image')[0], 0, h-100, w, data.pixel_per_um)
+    draw_image_pixel_per_um($('#segmented_image')[0], 0, h-100, w,
+			    segmentation.pixel_per_um);
     draw_image_rgba_scaled($('#segmented_image')[0],
-			   color_roi_borders(data.segmented, data.borders, w, h),
+			   color_roi_borders(segmentation.segmented,
+					     segmentation.borders, w, h),
 			   w, h, c_w, c_h-70);
-    
-    $.getJSON('/get_thresholds/' + videoname + '/' + run,
-              function(data) { thresholds = data; });
+
+    // set the webgui to the current config of the run
+    $("input[id='seg_source_" + config['segmentation_source'] +
+      "'][name='segmentation_source']").prop('checked', true);
+    $("#gauss_radius").val(config['gauss_radius']);
+    $("#threshold").val(config['threshold']);
+    $("input[id='seg_algo_" + config['segmentation_algorithm'] +
+      "'][name='segmentation_algorithm']").prop('checked', true);
+    $("input[id='spike_algo_" + config['spike_detection_algorithm'] +
+      "'][name='spike_algorithm']").prop('checked', true);
+    $("#nSD_n").val(config['nSD_n']);
+
+    thresholds = data['thresholds']
+    //$.getJSON('/get_thresholds/' + videoname + '/' + run,
+    //          function(data) { thresholds = data; });
 
     draw_editor();
     redraw_editor();
@@ -524,7 +531,7 @@ function receive_statistics(data) {
     // create plots
     //fig_roi = segmentation['roi']
     //mpld3.draw_figure('summary2', fig_roi)
-    
+    $('#rasterplot').empty();
     fig_raster = data['rasterplot']
     mpld3.draw_figure('rasterplot', fig_raster)
     raster = d3.select('.mpld3-figure');
@@ -723,7 +730,7 @@ function show_up_to(stage) {
     } else if (stage =='statistics') {
 	$('#segmentation')[0].style.display = '';
 	$('#roi_editor')[0].style.display = '';
-	$('#statistics-button-container')[0].style.display = 'none';
+	$('#statistics-button-container')[0].style.display = '';
 	$('#statistics')[0].style.display = '';
     }
 }

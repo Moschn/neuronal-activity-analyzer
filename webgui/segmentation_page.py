@@ -9,7 +9,7 @@ from werkzeug import secure_filename
 
 import analyzer
 from .util import check_extension, run_save, run_load, list_runs, run_delete
-from .util import decode_array_8, make_tree
+from .util import decode_array_8, make_tree, run_load_multiple
 
 import mpld3
 
@@ -78,7 +78,9 @@ def set_segmentation_params(videoname, runname):
     try:
         g.run = runname
 
-        config = run_load(videoname, 'config')
+        stored = run_load_multiple(videoname, ['config', 'pixel_per_um'])
+        config = stored['config']
+        pixel_per_um = stored['pixel_per_um']
         for key in ['segmentation_source', 'gauss_radius', 'threshold',
                     'segmentation_algorithm', 'spike_detection_algorithm',
                     'nSD_n']:
@@ -89,13 +91,18 @@ def set_segmentation_params(videoname, runname):
 
         # Convert numpy arrays to flat lists
         response = {}
-        response['success'] = 'Segmentation generated'
-        response['width'] = segmented['source'].shape[0]
-        response['height'] = segmented['source'].shape[1]
+        response['segmentation'] = {}
+        response['segmentation']['success'] = 'Segmentation generated'
+        response['segmentation']['width'] = segmented['source'].shape[0]
+        response['segmentation']['height'] = segmented['source'].shape[1]
         for k in segmented:
-            response[k] = segmented[k].flatten().tolist()
-        pixel_per_um = run_load(videoname, 'pixel_per_um')
-        response['pixel_per_um'] = pixel_per_um
+            response['segmentation'][k] = segmented[k].flatten().tolist()
+        
+        response['segmentation']['pixel_per_um'] = pixel_per_um
+        response['config'] = config
+        thresholds = analyzer.get_thresholds(segmented['filtered'])
+        response['thresholds'] = thresholds
+        
         return jsonify(response)
     except Exception as e:
         return jsonify({'fail': str(e)})
@@ -104,16 +111,23 @@ def set_segmentation_params(videoname, runname):
 @segmentation_page.route('/get_segmentation/<path:videoname>/<runname>')
 def get_segmentation(videoname, runname):
     g.run = runname
-    segmented = run_load(videoname, 'segmentation')
-    pixel_per_um = run_load(videoname, 'pixel_per_um')
+    stored = run_load_multiple(videoname, ['segmentation', 'pixel_per_um',
+                                           'config'])
+    segmented = stored['segmentation']
+    pixel_per_um = stored['pixel_per_um']
+    config = stored['config']
 
     # Convert numpy arrays to flat lists
     response = {}
-    response['width'] = segmented['source'].shape[0]
-    response['height'] = segmented['source'].shape[1]
+    response['segmentation'] = {}
+    response['segmentation']['width'] = segmented['source'].shape[0]
+    response['segmentation']['height'] = segmented['source'].shape[1]
     for k in segmented:
-        response[k] = segmented[k].flatten().tolist()
-    response['pixel_per_um'] = pixel_per_um
+        response['segmentation'][k] = segmented[k].flatten().tolist()
+    response['segmentation']['pixel_per_um'] = pixel_per_um
+    response['config'] = config
+    thresholds = analyzer.get_thresholds(segmented['filtered'])
+    response['thresholds'] = thresholds
 
     return jsonify(response)
 
