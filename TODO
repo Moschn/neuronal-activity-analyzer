@@ -1,38 +1,7 @@
 TODO:
 
-Config file
-windows?
-batch processing - better summary
-spike detection n*std deviation
-more spike detection?
-save roi in .roi file! load roi?
-
-rasterplot bins?
-merge in gui?
-.roi
-config file per video
+1. Batch
+2. ImageJ Import Button
+3. Correlation statistics
 
 UNISOTROPIC DIFFUSION
-
-
-New:
-
-1. NAS connection
-2. Batch
-3. CSV export
-4. Axes labels for JS plots
-5. Change bin size
-6. Numbers on plot
-7. Correlation statistics
-8. Windows fix
-
-Outlines for plot
-n times std switch
-ImageJ Import Button
-
-
-MATHIAS:
-Simon alders
-webserver + apache proxy
-domain
-htaccess
