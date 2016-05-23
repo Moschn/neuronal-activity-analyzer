@@ -108,7 +108,7 @@ def decode_array_8(data, w, h):
 
 
 def make_tree(path_arg):
-    tree = dict(name=os.path.basename(path_arg), children=[])
+    tree = dict(text=os.path.basename(path_arg), nodes=[])
     try:
         lst = os.listdir(path_arg)
     except OSError:
@@ -120,11 +120,10 @@ def make_tree(path_arg):
             if os.path.isdir(fn):
                 subtree = make_tree(fn)
                 if subtree:
-                    tree['children'].append(subtree)
+                    tree['nodes'].append(subtree)
             else:
                 if name.endswith(".tif") or name.endswith(".cxd"):
-                    tree['children'].append(dict(name=name))
-    if not tree['children']:
+                    tree['nodes'].append(dict(text=name))
+    if not tree['nodes']:
         return {}
-    print(tree)
     return tree

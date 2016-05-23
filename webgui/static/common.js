@@ -64,6 +64,7 @@ var label_colors = [
 // }
 
 $(document).ready(function() {
+    
     $('#tree').on('nodeSelected', function(event, data) {
 	
 	var new_videoname = ""
@@ -95,6 +96,20 @@ $(document).ready(function() {
 	
     });
 });
+
+$(document).ready(function() {
+    update_tree();
+});
+
+function update_tree() {
+    $.getJSON('/get_tree/', receive_tree);
+}
+
+function receive_tree(data) {
+    tree = data.nodes;
+    $('#tree').treeview({data: tree});
+    $('#tree').treeview('collapseAll', { silent: true });
+}
 
 function display_runs(data) {
     var options_as_string = '';

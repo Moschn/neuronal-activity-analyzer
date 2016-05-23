@@ -182,6 +182,11 @@ def get_borders(videoname, runname):
     return jsonify({'borders': borders})
 
 
+@segmentation_page.route('/get_tree/')
+def get_tree():
+    return jsonify(make_tree(current_app.config['VIDEO_FOLDER']))
+
+
 @segmentation_page.route('/upload', methods=['POST'])
 def upload_file():
     file = request.files['uploaded_file']
@@ -198,5 +203,4 @@ def upload_file():
 def main_page():
     files = listdir(current_app.config['VIDEO_FOLDER'])
     return render_template('main.html',
-                           files=files,
-                           tree=make_tree(current_app.config['VIDEO_FOLDER']))
+                           files=files)
