@@ -118,7 +118,13 @@ def make_tree(path_arg):
         for name in lst:
             fn = os.path.join(path_arg, name)
             if os.path.isdir(fn):
-                tree['children'].append(make_tree(fn))
+                subtree = make_tree(fn)
+                if subtree:
+                    tree['children'].append(subtree)
             else:
-                tree['children'].append(dict(name=name))
+                if name.endswith(".tif") or name.endswith(".cxd"):
+                    tree['children'].append(dict(name=name))
+    if not tree['children']:
+        return {}
+    print(tree)
     return tree
