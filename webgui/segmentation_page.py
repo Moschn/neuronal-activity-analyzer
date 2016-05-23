@@ -154,9 +154,23 @@ def delete_run(videoname, runname):
         return jsonify({'fail': str(e)})
 
 
+@segmentation_page.route('/convert/<path:videoname>')
+def convert(videoname):
+    # We convert by opening the file
+    analyzer.loader.open(
+        os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
+
+    return jsonify({'success': True})
+
+
 @segmentation_page.route('/get_runs/<path:videoname>')
 def get_runs(videoname):
-    return jsonify({'runs': list_runs(videoname)})
+    if videoname.endswith('.tif'):
+        return jsonify({'runs': list_runs(videoname)})
+    elif videoname.endswith('.cxd'):
+        return jsonify({'error': 'need_conversion'})
+    else:
+        return jsonify({'error': 'is_folder'})
 
 
 @segmentation_page.route('/get_thresholds/<path:videoname>/<runname>')

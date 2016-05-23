@@ -57,6 +57,9 @@
 				      <input id="file-selector" type="file" name="uploaded_file">
 				  </div>
 				  <button type="submit" class="btn btn-primary">Upload</button>
+				  <button id="convert-button" type="submit"
+					  class="btn" disabled="1" onclick="convert_clicked()">
+				    Convert to tif</button>
 			      </div>
 			      <!-- <select id="fileselect" name="fileselect" size="10" -->
 			      <!-- 	      class="form-control" onclick="videoname_clicked()" style="margin-top:10px"> -->
@@ -76,7 +79,7 @@
 			  <input class="btn btn-primary" type="submit" value="Create run" onclick="create_run_clicked()">
 			  <input class="btn btn-danger" type="submit" value="Delete run" onclick="delete_run_clicked()">
 		      </div>
-		      <select id="runselect" name="runselect" size="10"
+		      <select id="runselect" name="runselect" size="10" disabled="1"
 			      class="form-control" style="margin-top:10px">
 		      </select>
 		  </div>

@@ -50,19 +50,6 @@ var label_colors = [
  * Run management
  */
 
-// function videoname_clicked() {
-//     var new_videoname = $('#fileselect').find(":selected").text();
-//     if (new_videoname == videoname) {
-// 	return;
-//     }
-//     videoname = new_videoname;
-    
-//     show_up_to('file_select');
-    
-//     // Update the list of runs for that file
-//     $.getJSON("/get_runs/" + videoname, display_runs);
-// }
-
 $(document).ready(function() {
     
     $('#tree').on('nodeSelected', function(event, data) {
@@ -92,7 +79,7 @@ $(document).ready(function() {
 	show_up_to('file_select');
 	
 	// Update the list of runs for that file
-	$.getJSON('/get_runs/' + videoname, display_runs);
+	$.getJSON('/get_runs/' + videoname, receive_runs);
 	
     });
 });
@@ -111,14 +98,30 @@ function receive_tree(data) {
     $('#tree').treeview('collapseAll', { silent: true });
 }
 
-function display_runs(data) {
-    var options_as_string = '';
-    for(var i = 0; i < data['runs'].length; ++i) {
-        options_as_string += '<option>' + data['runs'][i] + '</option>';
+function receive_runs(data) {
+    if(data.runs !== undefined) {
+	var options_as_string = '';
+	for(var i = 0; i < data['runs'].length; ++i) {
+            options_as_string += '<option>' + data['runs'][i] + '</option>';
+	}
+	$('#runselect').html(options_as_string);
+
+	$('#runselect')[0].disabled = 0;
+	$('#convert-button')[0].disabled = 1;
+	$('#runselect').click(run_clicked);
+    } else if(data.error === 'need_conversion') {
+	$('#runselect')[0].disabled = 1;
+	$('#convert-button')[0].disabled = 0;
+    } else {
+	$('#runselect')[0].disabled = 1;
+	$('#convert-button')[0].disabled = 1;
     }
-    $('#runselect').html(options_as_string);
-    $('#runselect').click(run_clicked);
 }
+
+function convert_clicked() {
+    $.postJSON('/convert/' + videoname);
+}
+
 
 $(document).ready(function(){
     $(document).on('click', '#runselect', run_clicked);
@@ -140,7 +143,7 @@ function run_clicked() {
 function create_run_clicked() {
     run_t = $('#runname').val();
     $.post('/create_run/' + videoname + '/' + run_t, {},
-	   display_runs, 'json');
+	   receive_runs, 'json');
     
 }
 
@@ -148,7 +151,7 @@ function delete_run_clicked() {
     if(window.confirm('Are you sure you want to delete the run "'
 		      + run + '"?')) {
 	$.post('/delete_run/' + videoname + '/' + run, {},
-	       display_runs, 'json');
+	       receive_runs, 'json');
     }
     return false;
 }
