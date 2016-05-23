@@ -170,8 +170,58 @@
 		      
 		  </div>
 	      </div>
-	      
+	      <h2 style="text-align: center">Spike Detection</h2>
+	      <div class="row">
+		  <div class="col-md-8">
+		      <form>
+			  <label for="spike_algo" class="col-sm-offset-1 col-sm-11">Algorithm: </label>
+			  <div class="form-horizontal" id="spike_algo">
+			      <div class="form-group">
+				  <div class="col-sm-offset-1 col-sm-11">
+				      <input type="radio" name="spike_algorithm" id="spike_algo_wavelet" value="wavelet" onclick="segmentation_parameters_changed()"> Wavelet spike detection<br>
+
+				      <input type="radio" name="spike_algorithm" id="spike_algo_nSD" value="nSD" onclick="segmentation_parameters_changed()"> N times standard deviation
+				  </div>
+			      </div>
+			      <div class="form-group" >
+				  <label for="nSD_n" class="col-sm-1 control-label"> n:   </label>
+				  <div class="col-sm-11">
+				      <input type="text" class="form-control" id="nSD_n" value="1.0" onchange="segmentation_parameters_changed()">
+				  </div>
+			      </div>
+			      <br>
+			  </div>
+		      </form>
+		  </div>
+	      </div>
+	      <div class="row">
+		  <div class="col-md-4"></div>
+		  <div class="col-md-4" style="text-align: center;">
+		      <button class="btn-lg btn-primary" data-toggle="modal" data-target="#batchFolderChooser">
+			  Use settings for batch processing
+		      </button>
+		  </div>
+		  <div class="col-md-4"></div>
+	      </div>
 	      <hr>
+	  </div>
+
+	  <div class="modal fade" id="batchFolderChooser" role="dialog">
+	      <div class="modal-dialog">
+		  <div class="modal-content">
+		      <div class="modal-header">
+			  <button type="button" class="close" data-dismiss="modal">&times;</button>
+			  <h4 class="modal-title">Choose folder to run batch on</h4>
+		      </div>
+		      <div class="modal-body">
+			  <div id="batchTree"></div>
+		      </div>
+		      <div class="modal-footer">
+			  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+			  <button type="button" class="btn btn-success">Run batch</button>
+		      </div>
+		  </div>
+	      </div>
 	  </div>
 
 	  <!--------------------------------------------------------------------------
@@ -238,30 +288,6 @@
 	     --
 	     -------------------------------------------------------------------------->
 	  <div id="statistics-button-container" style="display: none;">
-	       <h2 style="text-align: center">Spike Detection</h2>
-	       <div class="row">
-		 <div class="col-md-12">
-		   <form>
-		     <label for="spike_algo" class="col-sm-offset-1 col-sm-11">Algorithm: </label>
-		     <div class="form-horizontal" id="spike_algo">
-		       <div class="form-group">
-			 <div class="col-sm-offset-1 col-sm-11">
-			   <input type="radio" name="spike_algorithm" id="spike_algo_wavelet" value="wavelet" onclick="segmentation_parameters_changed()"> Wavelet spike detection<br>
-			   
-			   <input type="radio" name="spike_algorithm" id="spike_algo_nSD" value="nSD" onclick="segmentation_parameters_changed()"> N times standard deviation
-			 </div>
-		       </div>
-		       <div class="form-group" >
-			 <label for="nSD_n" class="col-sm-1 control-label"> n:   </label>
-			 <div class="col-sm-11">
-			   <input type="text" class="form-control" id="nSD_n" value="1.0" onchange="segmentation_parameters_changed()">
-			 </div>
-		       </div>
-		       <br>
-		     </div>
-		   </form>
-		 </div>
-	       </div>
 	       <div class="row">
 		 <div class="col-md-12">
 		   <button id="statistics-button" class="btn btn-primary" style="text-align: center" onclick="calculate_statistics_clicked()">

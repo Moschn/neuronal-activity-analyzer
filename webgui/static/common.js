@@ -58,24 +58,30 @@ function update_tree() {
     $.getJSON('/get_tree/', receive_tree);
 }
 
-function node_selected(event, data) {
-    var new_videoname = ""
-    if (typeof $('#tree').treeview('getParent', data.nodeId).nodeId == "undefined")
+function get_selected_file_from_tree(tree, node) {
+    var path = ""
+    if (typeof tree.treeview('getParent', node.nodeId).nodeId == "undefined")
     {
-	new_videoname = data.text;
+	path = node.text;
     }
     else
     {
-	new_videoname = data.text;
-	var node_id = $('#tree').treeview('getParent', data.nodeId).nodeId;
-	var node_text = $('#tree').treeview('getParent', data.nodeId).text;
+	path = node.text;
+	var node_id = tree.treeview('getParent', node.nodeId).nodeId;
+	var node_text = tree.treeview('getParent', node.nodeId).text;
 	while(typeof node_id != "undefined")
 	{
-	    node_text = $('#tree').treeview('getNode', node_id).text;
-	    new_videoname = node_text + "/" + new_videoname;
-	    node_id = $('#tree').treeview('getParent', node_id).nodeId;
+	    node_text = tree.treeview('getNode', node_id).text;
+	    path = node_text + "/" + path;
+	    node_id = tree.treeview('getParent', node_id).nodeId;
 	}
     }
+    return path;
+}
+
+function node_selected(event, node) {
+    var new_videoname = get_selected_file_from_tree($('#tree'), node);
+
     if (new_videoname == videoname) {
 	return;
     }
@@ -87,12 +93,22 @@ function node_selected(event, data) {
     $.getJSON('/get_runs/' + videoname, receive_runs);
 }
 
-function receive_tree(data) {
-    tree = data.nodes;
-    $('#tree').treeview({data: tree});
-    $('#tree').treeview('collapseAll', { silent: true });
+function batch_node_selected(event, node) {
+    var path = get_selected_file_from_tree($('#batchTree'), node);
 
+    batch_path = path;
+}
+
+function receive_tree(data) {
+    treeData = data.nodes;
+    $('#tree').treeview({data: treeData});
+    $('#tree').treeview('collapseAll', { silent: true });
     $('#tree').on('nodeSelected', node_selected);
+
+    // Repeat for the batch path choosing tree
+    $('#batchTree').treeview({data: treeData});
+    $('#batchTree').treeview('collapseAll', { silent: true });
+    $('#batchTree').on('nodeSelected', batch_node_selected);
 }
 
 function receive_runs(data) {
@@ -277,7 +293,7 @@ var editor_undo_stack = Array();
 var editor_saved = true;
 
 function editor_not_saved() {
-    $('#editor_save').html('Unsaved changes!');
+    $('#editor_save').html('Save unsaved changes!');
     $('#editor_save')[0].className = 'btn btn-danger';
     editor_saved = false;
 }
