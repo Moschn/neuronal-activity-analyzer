@@ -154,7 +154,7 @@ def delete_run(videoname, runname):
         return jsonify({'fail': str(e)})
 
 
-@segmentation_page.route('/convert/<path:videoname>')
+@segmentation_page.route('/convert/<path:videoname>', methods=['POST'])
 def convert(videoname):
     # We convert by opening the file
     analyzer.loader.open(

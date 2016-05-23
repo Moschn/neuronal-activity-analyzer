@@ -84,15 +84,20 @@ def run_load_multiple(videoname, keys, n=0):
             raise Exception("shelve could not open file")
         return run_load_multiple(videoname, keys, n+1)
 
+
 def list_runs(videoname):
     path = os.path.join(current_app.config['DATA_FOLDER'],
                         os.path.dirname(videoname))
+
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     runs = []
     basename = os.path.basename(videoname)
     for filename in os.listdir(path):
         if check_extension(filename) and basename in filename:
-            complete_name = (strip_allowed_extension(os.path.basename(filename))
-                             [0:-4])
+            complete_name = (strip_allowed_extension(
+                os.path.basename(filename))[0:-4])
             runs.append(complete_name.split(".")[-1])
     return runs
 

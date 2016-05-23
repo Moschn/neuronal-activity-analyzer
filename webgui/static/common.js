@@ -51,40 +51,6 @@ var label_colors = [
  */
 
 $(document).ready(function() {
-    
-    $('#tree').on('nodeSelected', function(event, data) {
-	
-	var new_videoname = ""
-	if (typeof $('#tree').treeview('getParent', data.nodeId).nodeId == "undefined")
-	{
-	    new_videoname = data.text;
-	}
-	else
-	{
-	    new_videoname = data.text;
-	    var node_id = $('#tree').treeview('getParent', data.nodeId).nodeId;
-	    var node_text = $('#tree').treeview('getParent', data.nodeId).text;
-	    while(typeof node_id != "undefined")
-	    {
-		node_text = $('#tree').treeview('getNode', node_id).text;
-		new_videoname = node_text + "/" + new_videoname;
-		node_id = $('#tree').treeview('getParent', node_id).nodeId;
-	    }
-	}
-	if (new_videoname == videoname) {
-	    return;
-	}
-	videoname = new_videoname;
-	
-	show_up_to('file_select');
-	
-	// Update the list of runs for that file
-	$.getJSON('/get_runs/' + videoname, receive_runs);
-	
-    });
-});
-
-$(document).ready(function() {
     update_tree();
 });
 
@@ -92,10 +58,41 @@ function update_tree() {
     $.getJSON('/get_tree/', receive_tree);
 }
 
+function node_selected(event, data) {
+    var new_videoname = ""
+    if (typeof $('#tree').treeview('getParent', data.nodeId).nodeId == "undefined")
+    {
+	new_videoname = data.text;
+    }
+    else
+    {
+	new_videoname = data.text;
+	var node_id = $('#tree').treeview('getParent', data.nodeId).nodeId;
+	var node_text = $('#tree').treeview('getParent', data.nodeId).text;
+	while(typeof node_id != "undefined")
+	{
+	    node_text = $('#tree').treeview('getNode', node_id).text;
+	    new_videoname = node_text + "/" + new_videoname;
+	    node_id = $('#tree').treeview('getParent', node_id).nodeId;
+	}
+    }
+    if (new_videoname == videoname) {
+	return;
+    }
+    videoname = new_videoname;
+
+    show_up_to('file_select');
+
+    // Update the list of runs for that file
+    $.getJSON('/get_runs/' + videoname, receive_runs);
+}
+
 function receive_tree(data) {
     tree = data.nodes;
     $('#tree').treeview({data: tree});
     $('#tree').treeview('collapseAll', { silent: true });
+
+    $('#tree').on('nodeSelected', node_selected);
 }
 
 function receive_runs(data) {
@@ -106,20 +103,25 @@ function receive_runs(data) {
 	}
 	$('#runselect').html(options_as_string);
 
-	$('#runselect')[0].disabled = 0;
+	$('#runselect-container *').removeAttr('disabled');
 	$('#convert-button')[0].disabled = 1;
 	$('#runselect').click(run_clicked);
     } else if(data.error === 'need_conversion') {
-	$('#runselect')[0].disabled = 1;
+	$('#runselect-container *').attr('disabled', 'disabled');
 	$('#convert-button')[0].disabled = 0;
     } else {
-	$('#runselect')[0].disabled = 1;
+	$('#runselect-container *').attr('disabled', 'disabled');
 	$('#convert-button')[0].disabled = 1;
     }
 }
 
 function convert_clicked() {
-    $.postJSON('/convert/' + videoname);
+    $.post('/convert/' + videoname, {}, function() {
+	$('#convert-button').html('Convert');
+	update_tree();
+    }, 'json');
+    $('#convert-button')[0].disabled = 1;
+    $('#convert-button').html('Converting...');
 }
 
 
