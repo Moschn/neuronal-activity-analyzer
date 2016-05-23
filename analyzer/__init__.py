@@ -142,7 +142,6 @@ def save_results(roi, frame, pixel_per_um, exposure_time, activities, spikes,
                                  'neuron_{}.svg'.format(idx))
             if not os.path.exists(os.path.dirname(fname)):
                 os.makedirs(os.path.dirname(fname))
-                os.chmod(os.path.dirname(fname), 0o660)
             fig = analyzer.plot.plot_spikes(neuron_activity, maxima_time)
             analyzer.plot.save(fig, fname)
 
