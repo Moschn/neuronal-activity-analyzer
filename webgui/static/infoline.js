@@ -6,6 +6,7 @@
 var segmentation_time = undefined;
 var activity_calculation_time = undefined;
 var spike_detection_time = undefined;
+var correlation_time = undefined;
 
 function update_info_line() {
     var text = '';
@@ -18,6 +19,9 @@ function update_info_line() {
     }
     if (spike_detection_time != undefined) {
 	text += 'Spike detection time: ' + spike_detection_time + 's | '
+    }
+    if (correlation_time != undefined) {
+	text += 'Correlation time: ' + correlation_time + 's | '
     }
 
     text += 'Developed at Laboratory for Biosensors and Bioelectronics';

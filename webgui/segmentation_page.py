@@ -139,7 +139,7 @@ def set_segmentation_params(videoname, runname):
         response['segmentation']['height'] = segmented['source'].shape[1]
         for k in segmented:
             response['segmentation'][k] = segmented[k].flatten().tolist()
-        
+
         response['segmentation']['pixel_per_um'] = pixel_per_um
         response['config'] = config
         thresholds = analyzer.get_thresholds(segmented['filtered'])

@@ -121,8 +121,10 @@ $(document).ready(function() {
 function receive_statistics(data) {
     if (data.success !== undefined) {
 	// Save the data
-	activities = data['activities'];
-	spikes = data['spikes'];
+	activities = data.activities;
+	spikes = data.spikes;
+	correlations = data.correlations;
+	exposure_time = data.exposure_time;
 
 	// show statistics area
 	show_up_to('statistics');
@@ -143,8 +145,10 @@ function receive_statistics(data) {
 	statistics_redraw_overview_overlays();
 
 	// Show statistics in info line
-	activity_calculation_time = data['time']['activity_calculation'];
-	spike_detection_time = data['time']['spike_detection'];
+	activity_calculation_time = data.time.activity_calculation;
+	spike_detection_time = data.time.spike_detection;
+	correlation_time = data.time.correlation;
+	
 	update_info_line();
     } else {
 	show_popup('Calculating statistics failed!', data.fail);

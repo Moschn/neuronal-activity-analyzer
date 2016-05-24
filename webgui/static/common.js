@@ -7,6 +7,7 @@ var current_stage = 'segmentation';
 var videoname = "";
 var run = "";
 
+var exposure_time = undefined;
 var segmentation = undefined;
 var activities = undefined;
 var spikes = undefined;
