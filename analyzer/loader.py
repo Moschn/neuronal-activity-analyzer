@@ -98,7 +98,7 @@ def register_loader_class(cls):
     loader_types.append(cls)
 
 
-def open(path, type=None):
+def open(path, typ=None):
     """ Open a video from a path(file/directory)
     This will try to choose the correct implementation
 
@@ -107,13 +107,12 @@ def open(path, type=None):
     guessed. More formats can be implemented by
     subclassing the Loader class.
     @return: A Loader object which can output frames"""
-
-    if not type:
+    if typ is None:
         for c in loader_types:
             if c.can_open(path):
-                type = c
+                typ = c
 
-    if not type:
+    if typ is None:
         raise OSError('No loader for the type of %s' % path)
 
-    return type(path)
+    return typ(path)
