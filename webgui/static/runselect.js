@@ -24,16 +24,23 @@ function receive_runs(data) {
 	}
 	$('#runselect').html(options_as_string);
 
-	$('#runselect-container *').removeAttr('disabled');
-	$('#convert-button')[0].disabled = 1;
+	enable('#runselect-container *');
+	disable('#convert-button');
 	$('#runselect').click(run_clicked);
+
+	enable('#create-run-button');
     } else if(data.error === 'need_conversion') {
-	$('#runselect-container *').attr('disabled', 'disabled');
-	$('#convert-button')[0].disabled = 0;
+	disable('#runselect-container *');
+	enable('#convert-button');
+    } else if(data.error === 'is_folder') {
+	disable('#runselect-container *');
+	enable('#convert-button');
     } else {
-	$('#runselect-container *').attr('disabled', 'disabled');
-	$('#convert-button')[0].disabled = 1;
+	show_popup("Error while getting runs!", data.error);
     }
+
+    // Reset button text
+    $('#create-run-button').html('Create run');
 }
 
 function convert_clicked() {
@@ -41,7 +48,7 @@ function convert_clicked() {
 	$('#convert-button').html('Convert');
 	update_tree();
     }, 'json');
-    $('#convert-button')[0].disabled = 1;
+    disable('#convert-button');
     $('#convert-button').html('Converting...');
 }
 
@@ -57,6 +64,9 @@ function run_clicked() {
     //}
     run = new_run;
 
+    if(run === "")
+	return;
+    
     show_up_to('roi_editor');
 
     $.getJSON('/get_segmentation/' + videoname + '/' + run,
@@ -67,7 +77,9 @@ function create_run_clicked() {
     run_t = $('#runname').val();
     $.post('/create_run/' + videoname + '/' + run_t, {},
 	   receive_runs, 'json');
-    
+
+    disable('#create-run-button');
+    $('#create-run-button').html('Creating run...');    
 }
 
 function delete_run_clicked() {

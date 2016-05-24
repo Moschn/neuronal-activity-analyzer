@@ -207,12 +207,15 @@ def convert(videoname):
 
 @segmentation_page.route('/get_runs/<path:videoname>')
 def get_runs(videoname):
-    if videoname.endswith('.tif'):
-        return jsonify({'runs': list_runs(videoname)})
-    elif videoname.endswith('.cxd'):
-        return jsonify({'error': 'need_conversion'})
-    else:
-        return jsonify({'error': 'is_folder'})
+    try:
+        if videoname.endswith('.tif'):
+            return jsonify({'runs': list_runs(videoname)})
+        elif videoname.endswith('.cxd'):
+            return jsonify({'error': 'need_conversion'})
+        else:
+            return jsonify({'error': 'is_folder'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 
 @segmentation_page.route('/get_thresholds/<path:videoname>/<runname>')

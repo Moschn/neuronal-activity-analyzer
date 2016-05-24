@@ -64,6 +64,14 @@ function show_up_to(stage) {
     }
 }
 
+function enable(obj) {
+    $(obj).removeAttr('disabled');
+}
+
+function disable(obj) {
+    $(obj).attr('disabled', 'disabled');
+}
+
 /*
  * encoding during transfer
  */

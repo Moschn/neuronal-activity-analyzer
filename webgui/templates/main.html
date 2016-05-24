@@ -112,9 +112,16 @@
 		  </div>
 		  <div id="runselect-container" class="col-md-6">
 		      <div class="form-inline">
-			  <input class="form-control" type="text" id="runname" name="runname" value="default" disabled>
-			  <input class="btn btn-primary" type="submit" value="Create run" onclick="create_run_clicked()" disabled>
-			  <input class="btn btn-danger" type="submit" value="Delete run" onclick="delete_run_clicked()" disabled>
+			  <input class="form-control" type="text" id="runname"
+				 name="runname" value="default" disabled>
+			  <button id="create-run-button" class="btn btn-primary"
+				  onclick="create_run_clicked()" disabled>
+			      Create run
+			  </button>
+			  <button id="delete-run-button" class="btn btn-danger"
+				  onclick="delete_run_clicked()" disabled>
+			      Delete run
+			  </button>
 		      </div>
 		      <select id="runselect" name="runselect" size="10"
 			      class="form-control" style="margin-top:10px" disabled>
