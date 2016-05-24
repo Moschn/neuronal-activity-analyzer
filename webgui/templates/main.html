@@ -3,14 +3,13 @@
   <head>
     <title>Neuronal activity analyzer</title>
     <script src="{{ url_for('static', filename='jquery-2.2.3.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='common.js') }}"></script>
     <script src="{{ url_for('static', filename='d3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='mpld3.v0.2.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap-treeview.js') }}"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
     <script src="http://code.highcharts.com/modules/offline-exporting.js"></script>
-
+    
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
@@ -19,7 +18,16 @@
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-    
+
+    <script src="{{ url_for('static', filename='functions.js') }}"></script>
+    <script src="{{ url_for('static', filename='graphics.js') }}"></script>
+    <script src="{{ url_for('static', filename='common.js') }}"></script>
+    <script src="{{ url_for('static', filename='batch.js') }}"></script>        
+    <script src="{{ url_for('static', filename='runselect.js') }}"></script>    
+    <script src="{{ url_for('static', filename='segmentation.js') }}"></script>
+    <script src="{{ url_for('static', filename='roi_editor.js') }}"></script>
+    <script src="{{ url_for('static', filename='statistics.js') }}"></script>
+    <script src="{{ url_for('static', filename='infoline.js') }}"></script>
   </head>
 
   <body>
