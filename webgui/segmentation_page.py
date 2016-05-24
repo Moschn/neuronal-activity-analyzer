@@ -243,17 +243,6 @@ def get_tree():
     return jsonify(make_tree(current_app.config['VIDEO_FOLDER']))
 
 
-@segmentation_page.route('/upload', methods=['POST'])
-def upload_file():
-    file = request.files['uploaded_file']
-    if file and check_extension(file.filename,
-                                current_app.config['ALLOWED_EXTENSIONS']):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(current_app.config['VIDEO_FOLDER'], filename))
-        flash('File %s was uploaded!' % filename)
-        return redirect(url_for('segmentation.main_page'))
-
-
 @segmentation_page.route('/')
 @segmentation_page.route('/segmentation')
 def main_page():
