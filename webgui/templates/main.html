@@ -38,6 +38,49 @@
 	  {% endif %}
 	  {% endwith %}
 
+	  <div class="modal fade" id="popup" role="dialog">
+	      <div class="modal-dialog">
+		  <div class="modal-content">
+		      <div class="modal-header">
+			  <button type="button" class="close" data-dismiss="modal">&times;</button>
+			  <h4 id="popup-title" class="modal-title"></h4>
+		      </div>
+		      <div class="modal-body">
+			  <p id="popup-content"></p>
+		      </div>
+		      <div class="modal-footer">
+			  <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+		      </div>
+		  </div>
+	      </div>
+	  </div>
+
+	  <!--------------------------------------------------------------------------
+	     --
+	     -- Batch status
+	     --
+	     -------------------------------------------------------------------------->
+	  <div id="batch-status" style="display: none;">
+	      <div class="row">
+	          <div class="col-md-2" style="text-align: right;">
+		    Batch status:
+		  </div>
+		  <div class="col-md-8">
+                      <div class="progress">
+			  <div id="batch-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="70"
+			       aria-valuemin="0" aria-valuemax="100" style="width:70%">
+			  </div>
+		      </div>
+		  </div>
+		  <div class="col-md-2" style="text-align: left;">
+		      <button id="batch-stop-button" class="btn btn-danger" onclick="stop_batch_clicked()">Stop batch</button>
+		  </div>
+	      </div>
+	      <div class="well" id="batch-errors">
+	      </div>
+	      <hr/>
+	  </div>
+	  
 	  <!--------------------------------------------------------------------------
 	     --
 	     -- Run creation
@@ -218,7 +261,8 @@
 		      </div>
 		      <div class="modal-footer">
 			  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-			  <button type="button" class="btn btn-success">Run batch</button>
+			  <button id="batch-start-button" type="button" class="btn btn-success"
+				  onclick="start_batch_clicked()">Run batch</button>
 		      </div>
 		  </div>
 	      </div>

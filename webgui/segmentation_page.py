@@ -10,6 +10,7 @@ from werkzeug import secure_filename
 import analyzer
 from .util import check_extension, run_save, run_load, list_runs, run_delete
 from .util import decode_array_8, make_tree, run_load_multiple
+import webgui.batch
 
 import mpld3
 
@@ -20,6 +21,47 @@ segmentation_page = Blueprint('segmentation', __name__,
 # calculating the segmentation. Just the first should calculate, the rest
 # should get it from cache
 segmentation_lock = Lock()
+
+
+@segmentation_page.route('/start_batch/<path:videoname>/<runname>', methods=['POST'])
+def start_batch(videoname, runname):
+    try:
+        g.run = runname
+    
+        folder = os.path.join(current_app.config['VIDEO_FOLDER'],
+                              request.form['batch_folder'])
+        config = run_load(videoname, 'config')
+        
+        webgui.batch.start_batch(folder, config)
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'fail': str(e)})
+
+
+@segmentation_page.route('/stop_batch', methods=['POST'])
+def stop_batch():
+    """ Endpoint to stop the runnning batch process. Notice, that this just
+    messages the batch thread to stop, but the batch process can only process
+    the message after finishing the current file it is working on """
+    print("Stopping batch...")
+    try:
+        webgui.batch.stop_batch()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'fail': str(e)})
+
+
+@segmentation_page.route('/get_batch_progress')
+def get_batch_progress():
+    try:
+        processed, num_files, errors = webgui.batch.get_progress()
+        return jsonify({'success': True,
+                        'num_files': num_files,
+                        'processed_files': processed,
+                        'errors': errors})
+    except Exception as e:
+        return jsonify({'fail': str(e)})
 
 
 @segmentation_page.route('/set_edited_segmentation/<path:videoname>/<runname>',
