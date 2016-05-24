@@ -1,5 +1,6 @@
 """ Base class for a spike detection algorithm """
 
+from .settings import THREAD_COUNT
 
 class Spike_detection(object):
     """ Base class for a spike detection algorithm. Implementations must
@@ -22,7 +23,7 @@ class Spike_detection(object):
             from concurrent.futures import ThreadPoolExecutor
             act = activities.T
             spikes = []
-            with ThreadPoolExecutor(max_workers=4) as executor:
+            with ThreadPoolExecutor(max_workers=THREAD_COUNT) as executor:
                 futures = [executor.submit(self.detect_spikes, activity)
                            for activity in act]
             for future in futures:

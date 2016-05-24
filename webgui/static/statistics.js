@@ -37,7 +37,6 @@ $(document).ready(function() {
 
 function statistics_draw_overview() {
     var layer0 = $('#statistics_layer0')[0];
-    var layer1 = $('#statistics_layer1')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
     var c_w = layer0.width;
@@ -53,13 +52,12 @@ function statistics_draw_overview() {
     draw_image_neurons_number(layer0, segmentation.editor, w, h, c_w, c_h);
 }
 
-function statistics_redraw_overview() {
-    var layer0 = $('#statistics_layer0')[0];
+function statistics_redraw_overview_overlays() {
     var layer1 = $('#statistics_layer1')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
-    var c_w = layer0.width;
-    var c_h = layer0.height - 70;
+    var c_w = layer1.width;
+    var c_h = layer1.height - 70;
     
     var layer1_ctx = layer1.getContext('2d');
     layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
@@ -97,7 +95,7 @@ function statistics_overview_clicked(e) {
 	// If neuron is not active add it to active list
 	statistics_active_neurons.push(neuron);
     }
-    statistics_redraw_overview();
+    statistics_redraw_overview_overlays();
     plot_active_neurons();
     redraw_rasterplot();
 }
@@ -113,7 +111,7 @@ function statistics_overview_hovered(e) {
     var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
     var seg_y = Math.floor(y * segmentation['height'] / ($(this)[0].offsetHeight-70));
     statistics_hovered_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
-    statistics_redraw_overview();
+    statistics_redraw_overview_overlays();
     plot_hovered_neuron(statistics_hovered_neuron);
 }
 $(document).ready(function() {
@@ -121,38 +119,39 @@ $(document).ready(function() {
 });
 
 function receive_statistics(data) {
-    // Save the data
-    activities = data['activities'];
-    spikes = data['spikes'];
+    if (data.success !== undefined) {
+	// Save the data
+	activities = data['activities'];
+	spikes = data['spikes'];
 
-    // Reset button and show statistics area
-    var button = $('#statistics-button');
-    button.html('Calculate statistics');
-    button[0].disabled = '';
-    show_up_to('statistics');
+	// show statistics area
+	show_up_to('statistics');
 
-    // Remove old data which might still be there
-    $('#summary2').html('');
-    $('#rasterplot').html('');
-    $('#plot').html('');
-    statistics_active_neurons = [];
+	// Remove old data which might still be there
+	$('#summary2').empty();
+	$('#plot').empty();
+	$('#rasterplot').empty();
+	statistics_active_neurons = [];
+
+	// create plots
+	fig_raster = data['rasterplot']
+	mpld3.draw_figure('rasterplot', fig_raster)
+	raster = d3.select('.mpld3-figure');
+	raster_rect = Array(activities.length)
     
-    // create plots
-    //fig_roi = segmentation['roi']
-    //mpld3.draw_figure('summary2', fig_roi)
-    $('#rasterplot').empty();
-    fig_raster = data['rasterplot']
-    mpld3.draw_figure('rasterplot', fig_raster)
-    raster = d3.select('.mpld3-figure');
-    raster_rect = Array(activities.length)
-    
-    statistics_draw_overview();
-    statistics_redraw_overview();
+	statistics_draw_overview();
+	statistics_redraw_overview_overlays();
 
-    // Show statistics in info line
-    activity_calculation_time = data['time']['activity_calculation'];
-    spike_detection_time = data['time']['spike_detection'];
-    update_info_line();
+	// Show statistics in info line
+	activity_calculation_time = data['time']['activity_calculation'];
+	spike_detection_time = data['time']['spike_detection'];
+	update_info_line();
+    } else {
+	show_popup('Calculating statistics failed!', data.fail);
+    }
+
+    enable('#statistics-button');
+    $('#statistics-button').html('Calculate statistics');
 }
 
 $(document).ready(function() {

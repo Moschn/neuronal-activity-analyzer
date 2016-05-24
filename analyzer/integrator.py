@@ -2,6 +2,8 @@
 from threading import Lock
 import numpy
 
+from .settings import THREAD_COUNT
+
 
 class Integrator(object):
     """ Base class for an algorithm that sums or integrates (or anything does
@@ -28,7 +30,7 @@ class Integrator(object):
             frame_count = loader.frame_count()
             activities = numpy.zeros((frame_count, numpy.max(self.roi)))
             loader.lock = Lock()
-            with ThreadPoolExecutor(max_workers=4) as executor:
+            with ThreadPoolExecutor(max_workers=THREAD_COUNT) as executor:
                 futures = [executor.submit(self._load_process_frame, loader, i)
                            for i in range(0, frame_count)]
                 for future in futures:
