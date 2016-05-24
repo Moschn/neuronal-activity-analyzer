@@ -13,6 +13,9 @@ import numpy
 register_loader_class(analyzer.pillow_loader.PILLoader)
 register_loader_class(analyzer.bioformat_loader.BioFormatLoader)
 
+# Min spike width in seconds
+MIN_SPIKE_WIDTH = 0.3
+MAX_SPIKE_WIDTH = 4
 
 def get_thresholds(image):
     """ Returns a dictionary of the li, otsu and yen thresholds for an image
@@ -85,9 +88,10 @@ def segment(loader, config):
     }
 
 
-def detect_spikes(activity, config):
+def detect_spikes(activity, config, exposure_time):
     if config['spike_detection_algorithm'] == 'wavelet':
-        algo = WDM(50, 700)  # TODO: adaptive min/max spike width
+        algo = WDM(int(5*MIN_SPIKE_WIDTH/exposure_time),
+                   int(5*MAX_SPIKE_WIDTH/exposure_time))
         spikes = algo.detect_spikes_parallel(activity)
     elif config['spike_detection_algorithm'] == 'nSD':
         if 'nSD_n' in config:

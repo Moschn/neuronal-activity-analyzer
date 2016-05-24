@@ -75,20 +75,21 @@ class Loader(object):
         """Calculates average frame and variance"""
         # We reserve space for statistics_frame_count frames
         firstFrame = self.get_frame(0)
-        frames = numpy.zeros((statistics_frame_count,
-                              firstFrame.shape[0],
-                              firstFrame.shape[1]),
-                             numpy.uint16)
 
         # Now we will load equidistant frames of that number
         steps = min(self.frame_count(), statistics_frame_count)
         step_size = int(self.frame_count() / steps)
 
-        for i in range(step_size, steps, step_size):
-            frames[i, :, :] = self.get_frame(i)
+        frames = numpy.zeros((steps,
+                              firstFrame.shape[0],
+                              firstFrame.shape[1]),
+                             numpy.uint16)
 
-        self.mean = numpy.mean(frames, 0)
-        self.variance = numpy.var(frames, 0)
+        for i in range(0, steps):
+            frames[i, :, :] = self.get_frame(i*step_size)
+
+        self.mean = numpy.mean(frames, axis=0)
+        self.variance = numpy.var(frames, axis=0)
 
 loader_types = []
 

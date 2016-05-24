@@ -36,7 +36,7 @@ def plot_roi_bg(roi, bg, fg, pixel_per_um):
     y_axis_end = roi.shape[1] * 1/pixel_per_um
     pyplot.imshow(frame_rgb, extent=[0, x_axis_end, 0, y_axis_end])
     for i in range(1, numpy.amax(roi)+1):
-        coordinates_neuron = numpy.where(roi[::-1] == i)
+        coordinates_neuron = numpy.where(roi == i)
         pyplot.text((coordinates_neuron[1][0]+10) * 1/pixel_per_um,
                     (coordinates_neuron[0][0]+10) * 1/pixel_per_um,
                     i, fontsize=20, color='white')
@@ -91,7 +91,7 @@ def plot_spikes(activity, spikes):
 
 def plot_rasterplot(spikes, exposure_time, time_per_bin):
     pyplot.style.use('seaborn-deep')
-    fig = pyplot.figure(figsize=(10, 5))
+    fig = pyplot.figure(figsize=(9, 5))
     gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
     ax1 = pyplot.subplot(gs[0])
     ax2 = pyplot.subplot(gs[1])

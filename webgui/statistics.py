@@ -17,10 +17,11 @@ def get_statistics(videoname, run):
     g.run = run
 
     stored = run_load_multiple(videoname, ['statistics', 'segmentation',
-                                           'config'])
+                                           'config', 'exposure_time'])
     response = stored['statistics']
     segmentation = stored['segmentation']
     config = stored['config']
+    exposure_time = stored['exposure_time']
     
     if response is not None:
         return jsonify(**response)
@@ -35,7 +36,7 @@ def get_statistics(videoname, run):
     integration_time = time.time() - integration_start
 
     spike_detection_start = time.time()
-    spikes = analyzer.detect_spikes(activities, config)
+    spikes = analyzer.detect_spikes(activities, config, exposure_time)
     spike_detection_time = time.time() - spike_detection_start
     fig_raster = analyzer.plot.plot_rasterplot(spikes, loader.exposure_time, 1)
     fig_roi = analyzer.plot.plot_roi(segmentation['editor'],

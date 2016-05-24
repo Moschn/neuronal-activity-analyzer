@@ -13,7 +13,7 @@ t = WDM(60, 350)
 
 plt.figure(1)
 plt.subplot(411)
-plt.plot(numpy.arange(0, 1, 1/60), t.wavelet_ricker(60))
+plt.plot(numpy.arange(0, 1, 1/150), t.wavelet_ricker(150))
 plt.subplot(412)
 plt.plot(numpy.arange(0, 1, 1/70), t.wavelet_ricker(70))
 plt.subplot(413)

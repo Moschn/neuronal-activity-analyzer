@@ -28,7 +28,7 @@ def analyze_file(filename, directory, config):
     print("\tdetecting spikes...")
     summary_peaks = []
 
-    spikes = analyzer.detect_spikes(activities, config)
+    spikes = analyzer.detect_spikes(activities, config, time_frame)
     print("\tplotting results...")
 
     analyzer.save_results(roi, frame, pixel_per_um, time_frame,

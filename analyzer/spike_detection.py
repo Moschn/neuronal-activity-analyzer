@@ -25,9 +25,9 @@ class Spike_detection(object):
             with ThreadPoolExecutor(max_workers=4) as executor:
                 futures = [executor.submit(self.detect_spikes, activity)
                            for activity in act]
-                for future in futures:
-                    maxima_time = future.result()
-                    spikes.append(maxima_time)
+            for future in futures:
+                maxima_time = future.result()
+                spikes.append(maxima_time)
             return spikes
         except ImportError:
             act = activities.T
