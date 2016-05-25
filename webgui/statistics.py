@@ -60,7 +60,7 @@ def get_statistics(videoname, run):
         correlations = [l.tolist() for l in correlations]
 
         response = {}
-        response['activities'] = activities.T.tolist()
+        response['activities'] = activities.tolist()
         response['spikes'] = spikes
         response['correlations'] = correlations
 
