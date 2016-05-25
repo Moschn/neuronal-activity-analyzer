@@ -133,6 +133,7 @@ function receive_statistics(data) {
 	$('#summary2').empty();
 	$('#plot').empty();
 	$('#rasterplot').empty();
+	$('#correlation-heatmap').empty();
 	statistics_active_neurons = [];
 
 	// create plots
@@ -143,6 +144,22 @@ function receive_statistics(data) {
     
 	statistics_draw_overview();
 	statistics_redraw_overview_overlays();
+	plot_active_neurons();
+	plot_hovered_neuron();
+
+	// correlation heatmap
+	correlation_maximas = new Array();
+	for(var i = 0; i < activities.length; ++i) {
+	    var subarr = new Array();
+	    for(var j = 0; j < activities.length; ++j) {
+		var maxIndex = arrayMaxIndex(correlations[i][j]);
+		subarr.push([correlation_frame_index_to_time(maxIndex[0]),
+			    maxIndex[1]]);
+	    }
+	    correlation_maximas.push(subarr);
+	}
+	draw_correlation_heatmap();
+	draw_correlation_function(1,2);
 
 	// Show statistics in info line
 	activity_calculation_time = data.time.activity_calculation;
@@ -292,4 +309,143 @@ function redraw_rasterplot()
 	    }
 	}
     }
+}
+
+function draw_correlation_heatmap() {
+    data = new Array();
+    for(var i = 0; i < correlation_maximas.length; ++i) {
+	for(var j = 0; j < correlation_maximas.length; ++j) {
+	    data.push([i, j, correlation_maximas[i][j][1]]);
+	}
+    }
+
+    $('#correlation-heatmap').highcharts({
+        chart: {
+            type: 'heatmap',
+            marginTop: 40,
+            marginBottom: 80,
+            plotBorderWidth: 1
+        },
+
+        title: {
+            text: 'Maximum of correlation function of a neuron activity pair'
+        },
+
+        xAxis: {
+            title: "First neuron",
+	    tickInterval: 1
+        },
+
+        yAxis: {
+            title: "Second neuron",
+	    tickInterval: 1
+        },
+
+        colorAxis: {
+	    max: 1,
+            minColor: '#FFFFFF',
+            maxColor: Highcharts.getOptions().colors[0]
+        },
+
+        legend: {
+            align: 'right',
+            layout: 'vertical',
+            margin: 0,
+            verticalAlign: 'top',
+            y: 25,
+            symbolHeight: 280
+        },
+
+	credits: {
+	    enabled: false
+	},
+
+        tooltip: {
+            formatter: function () {
+                return ('Maxium correlation of <b>neuron ' + this.point.x
+			+ '</b> with a delayed <b>neuron ' + this.point.y
+			+ '</b><br>: ' + this.point.value
+			+ '<br>Delay of second neuron is [s]: '
+			+ correlation_maximas[this.point.x][this.point.y][0]
+		       );
+            }
+        },
+
+        series: [{
+            name: 'Maximum of correlation function',
+            borderWidth: 1,
+            data: data,
+            dataLabels: {
+		format: '{point.value:.2f}',
+                enabled: true,
+                color: '#000000'
+            },
+	    events: {
+		click: heatmap_clicked
+	    }
+        }],
+    });
+}
+
+function draw_correlation_function(neuron1, neuron2) {
+
+    var n_shifts = correlations[neuron1][neuron2].length;
+    var data = new Array();
+    for(var i = 0; i < n_shifts; ++i)
+    {
+	data.push([correlation_frame_index_to_time(i),
+		   correlations[neuron1][neuron2][i]]);
+    }
+
+    chart = $('#correlation-function').highcharts({
+        title: {
+            text: ('Correlation of neuron ' + neuron1
+		   + ' and delayed neuron ' + neuron2),
+            x: -20 //center
+        },
+        xAxis: {
+            title: {
+                text: 'delay of neuron ' + neuron2
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'correlation of activity'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+	legend: {
+	    enable: false
+	},
+	credits: {
+	    enabled: false
+	},
+	tooltip: {
+            formatter: function () {
+                return ('delay [s]: ' + this.point.x + '<br>corr: ' + this.point.y);
+            }
+        },
+        series: [{
+	    name: ('Correlation function (neuron ' + neuron1 +
+		   ' and ' + neuron2 + ')'),
+            data: data
+        }]
+    });
+    chart.highcharts().xAxis[0].addPlotLine({
+	color: 'red',
+	value: correlation_maximas[neuron1][neuron2][0],
+	width: 2
+    });
+}
+
+function heatmap_clicked(event) {
+    draw_correlation_function(event.point.x, event.point.y);
+}
+
+function correlation_frame_index_to_time(index) {
+    return (index - correlations[0][0].length / 2) * exposure_time;
 }

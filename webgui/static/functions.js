@@ -139,3 +139,16 @@ function arrayMax(arr) {
     }
     return max;
 }
+
+function arrayMaxIndex(arr) {
+    var len = arr.length;
+    var max_index = -1;
+    var max = -Infinity;
+    while (len--) {
+	if (arr[len] > max) {
+	    max_index = len;
+	    max = arr[len];
+	}
+    }
+    return [max_index, max];
+}

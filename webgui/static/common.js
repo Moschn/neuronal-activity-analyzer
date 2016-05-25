@@ -11,6 +11,8 @@ var exposure_time = undefined;
 var segmentation = undefined;
 var activities = undefined;
 var spikes = undefined;
+var correlations = undefined;  // correlation functions for each neuron pair
+var correlation_maximas = undefined;  // maximums of those functions
 
 
 /*

@@ -7,6 +7,7 @@
     <script src="{{ url_for('static', filename='mpld3.v0.2.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap-treeview.js') }}"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
     <script src="http://code.highcharts.com/modules/exporting.js"></script>
     <script src="http://code.highcharts.com/modules/offline-exporting.js"></script>
     
@@ -386,7 +387,16 @@
 		      <button class="btn btn-primary" id="save_button" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Saving Plots">Save to NAS </button>
 		  </div>
 	      </div>
-	      
+	      <div class="row">
+		  <div class="col-md-12">
+		      <div id="correlation-heatmap" style="width: 1000px; height: 1000px"></div>
+		  </div>
+	      </div>
+	      <div class="row">
+		  <div class="col-md-12">
+		      <div id="correlation-function" style="width: 600px; height: 600px"></div>
+		  </div>
+	      </div>
 	    <hr>
 	  </div>
 	  
