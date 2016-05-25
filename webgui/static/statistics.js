@@ -430,12 +430,12 @@ function draw_correlation_function(neuron1, neuron2) {
     chart = $('#correlation-function').highcharts({
         title: {
             text: ('Correlation of neuron ' + neuron1
-		   + ' and delayed neuron ' + neuron2),
+		   + ' and neuron ' + neuron2),
             x: -20 //center
         },
         xAxis: {
             title: {
-                text: 'delay of neuron ' + neuron2
+                text: 'Assumed delay to neuron ' + neuron2
             }
         },
         yAxis: {
