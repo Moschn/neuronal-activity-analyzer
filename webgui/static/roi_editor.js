@@ -97,6 +97,10 @@ $(document).ready(function() {
 });
 
 function editor_hovered(e) {
+    if(segmentation === undefined) {
+	return;
+    }
+
     var offset = $(this).offset();
     // Get coordinates on whole image
     var x = e.pageX - offset.left;
