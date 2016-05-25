@@ -5,6 +5,7 @@ import analyzer.util
 import analyzer.plot
 import os
 from analyzer.integrator_sum import Integrator_sum
+from analyzer.normalize import normalize
 
 
 def analyze_file(filename, directory, config):
@@ -21,18 +22,17 @@ def analyze_file(filename, directory, config):
     roi = segmented['segmented']
     frame = segmented['source']
 
-    sum_roi = Integrator_sum(roi)
     print("\tanalyzing all frames...")
+    sum_roi = Integrator_sum(roi)
     activities = sum_roi.process_parallel_frames(loader)
+    activities = normalize(activities)
 
     print("\tdetecting spikes...")
-    summary_peaks = []
-
     spikes = analyzer.detect_spikes(activities, config, time_frame)
-    print("\tplotting results...")
 
+    print("\tplotting results...")
     analyzer.save_results(roi, frame, pixel_per_um, time_frame,
-                          activities.T, spikes, 1, videoname, analysis_folder)
+                          activities, spikes, 1, videoname, analysis_folder)
 
 
 def analyze_all_in_folder(path, config):

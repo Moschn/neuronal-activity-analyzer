@@ -204,7 +204,7 @@ function plot_active_neurons() {
         },
         yAxis: {
             title: {
-                text: 'brightness [max 65535]'
+                text: 'brightness [in std deviations]'
             },
             plotLines: [{
                 value: 0,
@@ -238,7 +238,7 @@ function plot_hovered_neuron(neuron_index) {
         },
         yAxis: {
             title: {
-                text: 'brightness [max 65535]'
+                text: 'brightness [in std deviations]'
             },
             plotLines: [{
                 value: 0,

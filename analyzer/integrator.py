@@ -36,7 +36,7 @@ class Integrator(object):
                 for future in futures:
                     (index, activity) = future.result()
                     activities[index, :] = activity
-            return activities
+            return activities.T
         except ImportError:
             frame_count = loader.frame_count()
             activities = numpy.zeros((frame_count, numpy.max(self.roi)))
@@ -44,7 +44,7 @@ class Integrator(object):
             for i in range(0, frame_count):
                 index, activity = self._load_process_frame(loader, i)
                 activities[index, :] = activity
-            return activities
+            return activities.T
 
     def _load_process_frame(self, loader, idx):
         with loader.lock:

@@ -36,6 +36,7 @@ def get_statistics(videoname, run):
         integrator = analyzer.integrator_sum.Integrator_sum(
             segmentation['editor'])
         activities = integrator.process_parallel_frames(loader)
+        activities = normalize(activities)
         integration_time = time.time() - integration_start
 
         spike_detection_start = time.time()
@@ -43,8 +44,6 @@ def get_statistics(videoname, run):
         spike_detection_time = time.time() - spike_detection_start
 
         correlations_start = time.time()
-        activities = activities.T
-        activities = normalize(activities)
         correlations = correlate_activities(activities, exposure_time)
         correlation_time = time.time() - correlations_start
 
