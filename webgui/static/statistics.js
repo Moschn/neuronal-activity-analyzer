@@ -3,7 +3,8 @@
  */
 
 var statistics_active_neurons = [];
-var statistics_hovered_neuron = -1;
+var statistics_hovered_neuron = undefined;
+var statistics_last_hovered_neuron = 1;
 
 var statistics_overlay = undefined;
 
@@ -111,8 +112,13 @@ function statistics_overview_hovered(e) {
     var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
     var seg_y = Math.floor(y * segmentation['height'] / ($(this)[0].offsetHeight-70));
     statistics_hovered_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
+
+    if(statistics_hovered_neuron !== 0
+       && statistics_hovered_neuron !== statistics_last_hovered_neuron) {
+	statistics_last_hovered_neuron = statistics_hovered_neuron;
+	redraw_single_activity_plot();
+    }
     statistics_redraw_overview_overlays();
-    plot_hovered_neuron(statistics_hovered_neuron);
 }
 $(document).ready(function() {
     $('#overview').mousemove(statistics_overview_hovered);
@@ -135,6 +141,8 @@ function receive_statistics(data) {
 	$('#rasterplot').empty();
 	$('#correlation-heatmap').empty();
 	statistics_active_neurons = [];
+	statistics_hovered_neuron = undefined;
+	statistics_last_clicked_neuron = 1;
 
 	// create plots
 	fig_raster = data['rasterplot']
@@ -145,7 +153,7 @@ function receive_statistics(data) {
 	statistics_draw_overview();
 	statistics_redraw_overview_overlays();
 	plot_active_neurons();
-	plot_hovered_neuron();
+	redraw_single_activity_plot();
 
 	// correlation heatmap
 	correlation_maximas = new Array();
@@ -185,11 +193,15 @@ $(document).ready(function() {
 });
 
 function plot_active_neurons() {
-    data = [];
+    data = new Array();
     statistics_active_neurons.forEach(function (neuron) {
+	var points = new Array();
+	for(var i = 0; i < activities[neuron-1].length; ++i) {
+	    points.push([i * exposure_time, activities[neuron-1][i]]);
+	}
 	data.push({
 	    name: 'Neuron ' + neuron,
-	    data: activities[neuron-1]
+	    data: points
 	});
     })
     chart = $('#plot_active').highcharts({
@@ -199,7 +211,7 @@ function plot_active_neurons() {
         },
         xAxis: {
             title: {
-                text: 'frame'
+                text: 'time [s]'
             }
         },
         yAxis: {
@@ -223,9 +235,27 @@ function plot_active_neurons() {
 	},
         series: data
     });
+
+    var c_index = 0;
+    statistics_active_neurons.forEach(function (neuron) {
+	for(var i = 0; i < spikes[neuron-1].length; ++i) {
+            chart.highcharts().xAxis[0].addPlotLine({
+		color: Highcharts.getOptions().colors[c_index],
+		value: exposure_time * spikes[neuron-1][i],
+		width: 2
+	    });
+	}
+	c_index++;
+    });
 }
 
-function plot_hovered_neuron(neuron_index) {
+function redraw_single_activity_plot() {
+    var neuron = statistics_last_hovered_neuron;
+
+    var points = new Array();
+    for(var i = 0; i < activities[neuron-1].length; ++i) {
+	points.push([exposure_time * i, activities[neuron-1][i]]);
+    }
     chart = $('#plot_hovered').highcharts({
         title: {
             text: 'Activity of hovered neuron',
@@ -233,7 +263,7 @@ function plot_hovered_neuron(neuron_index) {
         },
         xAxis: {
             title: {
-                text: 'frame'
+                text: 'time [s]'
             }
         },
         yAxis: {
@@ -256,16 +286,16 @@ function plot_hovered_neuron(neuron_index) {
             borderWidth: 0
         },
         series: [{
-            name: 'Neuron ' + neuron_index,
-            data: activities[neuron_index-1]
+            name: 'Neuron ' + neuron,
+            data: points
         }]
     });
-    if (typeof spikes[neuron_index-1] != 'undefined')
+    if (typeof spikes[neuron-1] != 'undefined')
     {
-	for(var i = 0; i < spikes[neuron_index-1].length; ++i) {
+	for(var i = 0; i < spikes[neuron-1].length; ++i) {
             chart.highcharts().xAxis[0].addPlotLine({
 		color: 'red',
-		value: spikes[neuron_index-1][i],
+		value: exposure_time * spikes[neuron-1][i],
 		width: 2
 	    });
 	}
