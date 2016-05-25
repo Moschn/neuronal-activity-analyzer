@@ -136,8 +136,8 @@ def set_segmentation_params(videoname, runname):
         response = {}
         response['segmentation'] = {}
         response['segmentation']['success'] = 'Segmentation generated'
-        response['segmentation']['width'] = segmented['source'].shape[0]
-        response['segmentation']['height'] = segmented['source'].shape[1]
+        response['segmentation']['width'] = segmented['source'].shape[1]
+        response['segmentation']['height'] = segmented['source'].shape[0]
         for k in segmented:
             response['segmentation'][k] = segmented[k].flatten().tolist()
 
@@ -163,8 +163,8 @@ def get_segmentation(videoname, runname):
     # Convert numpy arrays to flat lists
     response = {}
     response['segmentation'] = {}
-    response['segmentation']['width'] = segmented['source'].shape[0]
-    response['segmentation']['height'] = segmented['source'].shape[1]
+    response['segmentation']['width'] = segmented['source'].shape[1]
+    response['segmentation']['height'] = segmented['source'].shape[0]
     for k in segmented:
         response['segmentation'][k] = segmented[k].flatten().tolist()
     response['segmentation']['pixel_per_um'] = pixel_per_um

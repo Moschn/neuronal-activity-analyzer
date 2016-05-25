@@ -62,17 +62,32 @@ function draw_image_rgb_scaled(canvas, img, w, h, c_w, c_h, alpha) {
     }
 
     temp_ctx.putImageData(imgData, 0, 0);
-
+    
     var ctx = canvas.getContext('2d');
     if (typeof c_w == 'undefined')
     {
 	c_w = canvas.width;
 	c_h = canvas.height;
     }
-    ctx.scale(c_w / w, c_h / h);
-    ctx.drawImage(temp_canvas, 0, 0);
+    var scale_factor_w = c_w / w;
+    var scale_factor_h = c_h / h;
+    console.log("scale w:" + scale_factor_w + " | scale h:" + scale_factor_h);
+    var scale_factor = Math.min(scale_factor_w, scale_factor_h);
+    console.log(scale_factor);
+    ctx.scale(scale_factor, scale_factor);
+    if (scale_factor_w > scale_factor_h) {
+	ctx.drawImage(temp_canvas, c_w/scale_factor/2-w/2, 0);
+	ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
+	return c_w/2-w/2*scale_factor;
+    }
+    else {
+	ctx.drawImage(temp_canvas, 0, 0);
+	ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
+	return 0;
+    }
+   
     
-    ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
+    
 }
 
 function draw_image_pixel_per_um(canvas, x, y, img_width, pixel_per_um) {
@@ -145,9 +160,23 @@ function draw_image_rgba_scaled(canvas, img, w, h, c_w, c_h) {
 	c_w = canvas.width;
 	c_h = canvas.height;
     }
-    ctx.scale(c_w / w, c_h / h);
-    ctx.drawImage(temp_canvas, 0, 0);
-    ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
+    var scale_factor_w = c_w / w;
+    var scale_factor_h = c_h / h;
+    console.log("scale w:" + scale_factor_w + " | scale h:" + scale_factor_h);
+    var scale_factor = Math.min(scale_factor_w, scale_factor_h);
+    console.log(scale_factor);
+    ctx.scale(scale_factor, scale_factor);
+    if (scale_factor_w > scale_factor_h) {
+	ctx.drawImage(temp_canvas, c_w/scale_factor/2-w/2, 0);
+	ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
+	return c_w/2-w/2*scale_factor;
+    }
+    else {
+	ctx.drawImage(temp_canvas, 0, 0);
+	ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
+	return 0;
+    }
+    
 }
 
 /*
