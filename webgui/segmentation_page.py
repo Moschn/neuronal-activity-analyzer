@@ -23,17 +23,18 @@ segmentation_page = Blueprint('segmentation', __name__,
 segmentation_lock = Lock()
 
 
-@segmentation_page.route('/start_batch/<path:videoname>/<runname>', methods=['POST'])
+@segmentation_page.route('/start_batch/<path:videoname>/<runname>',
+                         methods=['POST'])
 def start_batch(videoname, runname):
     try:
         g.run = runname
-    
+
         folder = os.path.join(current_app.config['VIDEO_FOLDER'],
                               request.form['batch_folder'])
         config = run_load(videoname, 'config')
-        
+
         webgui.batch.start_batch(folder, config)
-        
+
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'fail': str(e)})
@@ -144,7 +145,7 @@ def set_segmentation_params(videoname, runname):
         response['config'] = config
         thresholds = analyzer.get_thresholds(segmented['filtered'])
         response['thresholds'] = thresholds
-        
+
         return jsonify(response)
     except Exception as e:
         return jsonify({'fail': str(e)})
