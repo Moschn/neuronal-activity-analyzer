@@ -89,5 +89,6 @@ def k_means(frame):
                                sigma=0)
     return labels
 
+
 def get_borders(roi):
-    return segmentation.find_boundaries(roi);
+    return segmentation.find_boundaries(roi)

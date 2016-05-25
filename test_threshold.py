@@ -19,9 +19,7 @@ image = image.astype('int64')
 image = scipy.ndimage.filters.gaussian_filter(
             image, 3, mode='nearest')
 
-image = image/800
-for i in range(0, 799):
-    image = image + loader.next_frame()/1000
+image = loader.get_mean()
 
 global_thresh = threshold_otsu(image)
 binary_global = image > global_thresh
