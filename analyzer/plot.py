@@ -34,7 +34,7 @@ def plot_roi_bg(roi, bg, fg, pixel_per_um):
     figure = pyplot.figure(figsize=(5, 5))
     x_axis_end = roi.shape[0] * 1/pixel_per_um
     y_axis_end = roi.shape[1] * 1/pixel_per_um
-    pyplot.imshow(frame_rgb, extent=[0, x_axis_end, 0, y_axis_end])
+    pyplot.imshow(frame_rgb, extent=[0, y_axis_end, 0, x_axis_end])
     for i in range(1, numpy.amax(roi)+1):
         coordinates_neuron = numpy.where(roi == i)
         pyplot.text((coordinates_neuron[1][0]+10) * 1/pixel_per_um,
