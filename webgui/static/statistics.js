@@ -345,7 +345,7 @@ function draw_correlation_heatmap() {
     data = new Array();
     for(var i = 0; i < correlation_maximas.length; ++i) {
 	for(var j = 0; j < correlation_maximas.length; ++j) {
-	    data.push([i, j, correlation_maximas[i][j][1]]);
+	    data.push([i+1, j+1, correlation_maximas[i][j][1]]);
 	}
     }
 
@@ -419,12 +419,12 @@ function draw_correlation_heatmap() {
 
 function draw_correlation_function(neuron1, neuron2) {
 
-    var n_shifts = correlations[neuron1][neuron2].length;
+    var n_shifts = correlations[neuron1-1][neuron2-1].length;
     var data = new Array();
     for(var i = 0; i < n_shifts; ++i)
     {
 	data.push([correlation_frame_index_to_time(i),
-		   correlations[neuron1][neuron2][i]]);
+		   correlations[neuron1-1][neuron2-1][i]]);
     }
 
     chart = $('#correlation-function').highcharts({
@@ -467,7 +467,7 @@ function draw_correlation_function(neuron1, neuron2) {
     });
     chart.highcharts().xAxis[0].addPlotLine({
 	color: 'red',
-	value: correlation_maximas[neuron1][neuron2][0],
+	value: correlation_maximas[neuron1-1][neuron2-1][0],
 	width: 2
     });
 }
