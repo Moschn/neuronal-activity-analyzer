@@ -160,9 +160,13 @@ function receive_statistics(data) {
 	for(var i = 0; i < activities.length; ++i) {
 	    var subarr = new Array();
 	    for(var j = 0; j < activities.length; ++j) {
-		var maxIndex = arrayMaxIndex(correlations[i][j]);
-		subarr.push([correlation_frame_index_to_time(maxIndex[0]),
-			    maxIndex[1]]);
+		var absCorrelations = new Array();
+		for(var k = 0; k < correlations[i][j].length; ++k) {
+		    absCorrelations.push(Math.abs(correlations[i][j][k]));
+		}
+		var maxIndex = arrayMaxIndex(absCorrelations);
+		subarr.push([correlation_frame_index_to_time(maxIndex),
+			    correlations[i][j][maxIndex]]);
 	    }
 	    correlation_maximas.push(subarr);
 	}

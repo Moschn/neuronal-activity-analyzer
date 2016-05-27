@@ -150,5 +150,5 @@ function arrayMaxIndex(arr) {
 	    max = arr[len];
 	}
     }
-    return [max_index, max];
+    return max_index;
 }
