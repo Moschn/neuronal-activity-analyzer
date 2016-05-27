@@ -373,8 +373,8 @@ function draw_correlation_heatmap() {
 
         colorAxis: {
 	    max: 1,
-            minColor: '#FFFFFF',
-            maxColor: Highcharts.getOptions().colors[0]
+            minColor: '#0000FF',
+            maxColor: '#FF0000'
         },
 
         legend: {
@@ -405,11 +405,6 @@ function draw_correlation_heatmap() {
             name: 'Maximum of correlation function',
             borderWidth: 1,
             data: data,
-            dataLabels: {
-		format: '{point.value:.2f}',
-                enabled: true,
-                color: '#000000'
-            },
 	    events: {
 		click: heatmap_clicked
 	    }
