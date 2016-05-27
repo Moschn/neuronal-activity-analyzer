@@ -400,7 +400,7 @@ function draw_correlation_heatmap() {
 			+ '</b> with a delayed <b>neuron ' + this.point.y
 			+ '</b><br>: ' + this.point.value
 			+ '<br>Delay of second neuron is [s]: '
-			+ correlation_maximas[this.point.x][this.point.y][0]
+			+ correlation_maximas[this.point.x-1][this.point.y-1][0]
 		       );
             }
         },
