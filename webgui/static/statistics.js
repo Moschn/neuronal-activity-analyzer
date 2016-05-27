@@ -237,6 +237,11 @@ function plot_active_neurons() {
 	credits: {
 	    enabled: false
 	},
+	plotOptions: {
+	    series: {
+		animation: false
+	    }
+	},
         series: data
     });
 
@@ -282,6 +287,11 @@ function redraw_single_activity_plot() {
         },
 	credits: {
 	    enabled: false
+	},
+	plotOptions: {
+	    series: {
+		animation: false
+	    }
 	},
         legend: {
             layout: 'vertical',
