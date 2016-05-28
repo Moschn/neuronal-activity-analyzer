@@ -173,3 +173,25 @@ def find_impl(package, name):
 
     raise Exception("module %s does not contain any class named %s" %
                     (module.__name__, name))
+
+
+def list_implementations(package, base_class):
+    """ Given a package(or a module containing modules) list all subclasses of
+    base_class implemented in those submodules """
+    impls = []
+    searchpath = package.__path__._path
+
+    for _, mod_name, _ in pkgutil.iter_modules(searchpath):
+        module = getattr(
+                __import__(package.__name__, globals(), locals(), [mod_name]),
+                mod_name)
+
+        for attr_name, attr in module.__dict__.items():
+            if not isinstance(attr, type):
+                continue
+            if(issubclass(attr, base_class) and
+               attr != base_class and
+               attr_name not in impls):
+                impls.append(attr_name)
+
+    return impls
