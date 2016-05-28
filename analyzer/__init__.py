@@ -7,6 +7,9 @@ import analyzer.spike_detection
 import analyzer.segmentation
 import analyzer.thresholds
 import analyzer.thresholds.threshold
+import analyzer.spike_detection.spike_detection
+import analyzer.integrater
+import analyzer.integrater.integrater
 import analyzer
 import os
 import csv
@@ -79,6 +82,16 @@ def segment(loader, config):
         'borders': borders,
         'segmented': segmented,
     }
+
+
+def calculate_activities(loader, segmented, config):
+    integrater_class = analyzer.util.find_impl(
+        analyzer.integrater,
+        analyzer.integrater.integrater.Integrater,
+        config['integrater'])
+
+    integrater = integrater_class(segmented)
+    return integrater.process_parallel_frames(loader)
 
 
 def detect_spikes(activity, config, exposure_time):

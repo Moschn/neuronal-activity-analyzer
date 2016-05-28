@@ -1,12 +1,11 @@
-from analyzer.integrator import Integrator
+from analyzer.integrater.integrater import Integrater
 import numpy
 
 
-class Integrator_sum(Integrator):
+class Mean(Integrater):
 
     def __init__(self, roi):
         self.roi = roi
-        # self.sizes = numpy.bincount(self.roi.flatten())
 
     def process_frame(self, frame):
         activity = []  # list containing the brightness sum of each ROI

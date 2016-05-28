@@ -4,7 +4,6 @@ import time
 
 from .runs import Run
 import analyzer
-import analyzer.integrator_sum
 from analyzer.normalize import normalize
 from analyzer.correlation import correlate_activities
 import mpld3
@@ -33,9 +32,8 @@ def get_statistics(videoname, runname):
 
         # Calculate the activities
         integration_start = time.time()
-        integrator = analyzer.integrator_sum.Integrator_sum(
-            segmentation['editor'])
-        activities = integrator.process_parallel_frames(loader)
+        activities = analyzer.calculate_activities(
+            loader, segmentation['editor'], config)
         activities = normalize(activities)
         integration_time = time.time() - integration_start
 

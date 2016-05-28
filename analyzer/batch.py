@@ -3,7 +3,6 @@ import analyzer.segmentation
 import analyzer.util
 import analyzer.plot
 import os
-from analyzer.integrator_sum import Integrator_sum
 from analyzer.normalize import normalize
 
 
@@ -22,8 +21,7 @@ def analyze_file(filename, directory, config):
     frame = segmented['source']
 
     print("\tanalyzing all frames...")
-    sum_roi = Integrator_sum(roi)
-    activities = sum_roi.process_parallel_frames(loader)
+    activities = analyzer.extract_activities(loader, roi, config)
     activities = normalize(activities)
 
     print("\tdetecting spikes...")

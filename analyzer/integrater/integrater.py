@@ -2,10 +2,10 @@
 from threading import Lock
 import numpy
 
-from .settings import THREAD_COUNT
+from analyzer.settings import THREAD_COUNT
 
 
-class Integrator(object):
+class Integrater(object):
     """ Base class for an algorithm that sums or integrates (or anything does
     anything else) the brightness of the regions of interest (ROIs) """
 
@@ -13,7 +13,6 @@ class Integrator(object):
         """ Contructor. An array representing the various ROIs is needed.
         The array contains a number at every ROI. The number represents the
         unique nmumber of the respective ROI """
-        self.roi = roi
         raise NotImplemented
 
     def process_frame(self, frame):
