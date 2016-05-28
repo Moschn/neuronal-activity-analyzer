@@ -1,4 +1,4 @@
-from flask import Blueprint, g, current_app, jsonify
+from flask import Blueprint, g, current_app, jsonify, request
 import os.path
 import time
 
@@ -86,14 +86,15 @@ def get_statistics(videoname, runname):
 
 
 @statistics.route(
-    '/get_statistics_rasterplot/<path:videoname>/<runname>/<float:time_per_bin>')
-def get_statistics_rasterplot(videoname, runname, time_per_bin):
-    g.run = Run(videoname, runname)
-    g.run['time_per_bin'] = time_per_bin
+    '/get_statistics_rasterplot/<path:videoname>/<runname>',
+    methods=['POST'])
+def get_statistics_rasterplot(videoname, runname):
+    with Run(videoname, runname) as run:
+        run['time_per_bin'] = float(request.form['time_per_bin'])
 
-    fig_raster = analyzer.plot.plot_rasterplot(g.run['statistics']['spikes'],
-                                               g.run['exposure_time'],
-                                               time_per_bin)
+        fig_raster = analyzer.plot.plot_rasterplot(run['statistics']['spikes'],
+                                                   run['exposure_time'],
+                                                   run['time_per_bin'])
     rasterplot = mpld3.fig_to_dict(fig_raster)
     return jsonify(rasterplot=rasterplot)
 

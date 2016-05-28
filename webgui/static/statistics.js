@@ -27,12 +27,14 @@ $(document).ready(function() {
     $('#bin_form').submit(function(event) {
 	event.preventDefault();
 	var time_per_bin = $('#time_per_bin').val();
-	$.getJSON('/get_statistics_rasterplot/' + videoname + '/' + run + '/' + time_per_bin,
-		  function( data ) {
-		      fig_raster = data['rasterplot'];
-		      $('#rasterplot').empty();
-		      mpld3.draw_figure('rasterplot', fig_raster);
-		  });
+	$.post('/get_statistics_rasterplot/' + videoname + '/' + run,
+	       {time_per_bin: time_per_bin},
+	       function( data ) {
+		   fig_raster = data['rasterplot'];
+		   $('#rasterplot').empty();
+		   mpld3.draw_figure('rasterplot', fig_raster);
+	       },
+	      'json');
     });
 });
 
