@@ -2,8 +2,12 @@ from flask import Flask
 from flask.ext.compress import Compress
 import os
 
-from .segmentation_page import segmentation_page
-from .statistics import statistics
+from .main import main_blueprint
+from .file_select import file_select_blueprint
+from .segmentation import segmentation_blueprint
+from .roi_editor import roi_editor_blueprint
+from .batch import batch_blueprint
+from .statistics import statistics_blueprint
 
 compress = Compress()
 
@@ -28,8 +32,12 @@ def create_app():
         if not os.path.isdir(folder):
             os.mkdir(folder)
 
-    app.register_blueprint(segmentation_page)
-    app.register_blueprint(statistics)
+    app.register_blueprint(main_blueprint)
+    app.register_blueprint(file_select_blueprint)
+    app.register_blueprint(segmentation_blueprint)
+    app.register_blueprint(roi_editor_blueprint)
+    app.register_blueprint(statistics_blueprint)
+    app.register_blueprint(batch_blueprint)
 
     app.after_request(disable_cache)
 

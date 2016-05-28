@@ -1,4 +1,4 @@
-from flask import Blueprint, g, current_app, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 import os.path
 import time
 
@@ -9,11 +9,11 @@ from analyzer.correlation import correlate_activities
 import mpld3
 
 
-statistics = Blueprint('statistics', __name__,
-                       template_folder='templates')
+statistics_blueprint = Blueprint('statistics', __name__,
+                                 template_folder='templates')
 
 
-@statistics.route('/get_statistics/<path:videoname>/<runname>')
+@statistics_blueprint.route('/get_statistics/<path:videoname>/<runname>')
 def get_statistics(videoname, runname):
     try:
         with Run(videoname, runname) as run:
@@ -85,7 +85,7 @@ def get_statistics(videoname, runname):
         return jsonify(fail=str(e))
 
 
-@statistics.route(
+@statistics_blueprint.route(
     '/get_statistics_rasterplot/<path:videoname>/<runname>',
     methods=['POST'])
 def get_statistics_rasterplot(videoname, runname):
@@ -99,7 +99,8 @@ def get_statistics_rasterplot(videoname, runname):
     return jsonify(rasterplot=rasterplot)
 
 
-@statistics.route('/save_plots/<path:videoname>/<runname>', methods=['POST'])
+@statistics_blueprint.route(
+    '/save_plots/<path:videoname>/<runname>', methods=['POST'])
 def save_plots(videoname, runname):
     analysis_folder = os.path.join(current_app.config['VIDEO_FOLDER'],
                                    "%s-analysis" % videoname)
