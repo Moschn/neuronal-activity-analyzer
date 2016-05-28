@@ -11,7 +11,7 @@ def analyze_file(filename, directory, config):
     analysis_folder = os.path.join(directory, filename + "-analysis")
 
     print("analyzing file {}/{}".format(directory, filename))
-    loader = analyzer.loader.open(videoname)
+    loader = analyzer.open_video(videoname)
     time_frame = loader.exposure_time
     pixel_per_um = loader.pixel_per_um
 

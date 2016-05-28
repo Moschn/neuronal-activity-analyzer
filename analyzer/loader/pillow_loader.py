@@ -1,6 +1,6 @@
 """ Loader class using pillow """
 
-from analyzer.loader import Loader
+from analyzer.loader.loader import Loader
 from PIL import Image
 import numpy
 # import exifread

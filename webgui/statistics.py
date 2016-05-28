@@ -27,7 +27,7 @@ def get_statistics(videoname, runname):
             exposure_time = run['exposure_time']
 
         # Load the file
-        loader = analyzer.loader.open(
+        loader = analyzer.open_video(
             os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
 
         # Calculate the activities

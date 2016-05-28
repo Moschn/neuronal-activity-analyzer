@@ -1,6 +1,5 @@
-from analyzer.loader import register_loader_class
-import analyzer.pillow_loader
-import analyzer.bioformat_loader
+import analyzer.loader.loader
+from analyzer.loader.loader import Loader
 import analyzer.plot
 import analyzer.util
 import analyzer.spike_detection
@@ -15,11 +14,11 @@ import os
 import csv
 import numpy
 
-register_loader_class(analyzer.pillow_loader.PILLoader)
-register_loader_class(analyzer.bioformat_loader.BioFormatLoader)
-
 thresholding_algorithms = analyzer.util.list_implementations(
     analyzer.thresholds, analyzer.thresholds.threshold.Threshold)
+
+
+Loader.find_loader_class()  # all sublasses of loader get registered in loader
 
 
 def get_thresholds(image):
@@ -30,6 +29,10 @@ def get_thresholds(image):
         thresholder = v()
         result[k.lower()] = thresholder.get_threshold(image)
     return result
+
+
+def open_video(videoname):
+    return analyzer.loader.loader.open(videoname)
 
 
 def segment(loader, config):

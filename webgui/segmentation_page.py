@@ -95,7 +95,7 @@ def generate_segmentation(run):
     data
     """
     with segmentation_lock:
-        loader = analyzer.loader.open(
+        loader = analyzer.open_video(
             os.path.join(current_app.config['VIDEO_FOLDER'], run.videoname))
         segmented = analyzer.segment(loader, run['config'])
 
@@ -189,7 +189,7 @@ def delete_run(videoname, runname):
 @segmentation_page.route('/convert/<path:videoname>', methods=['POST'])
 def convert(videoname):
     # We convert by opening the file
-    analyzer.loader.open(
+    analyzer.open_video(
         os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
 
     return jsonify({'success': True})

@@ -57,7 +57,7 @@ def save_roi(roi, frame, pixel_per_um, filename, analysis_folder):
         fn = os.path.join(directory, f)
         try:
             if f.endswith(".tif") and os.stat(fn).st_size < 100000000:
-                loader2 = analyzer.loader.open(fn)
+                loader2 = analyzer.open_video(fn)
                 fg_frame = loader2.get_frame(0)
                 bg_frame = loader2.get_frame(1)
 

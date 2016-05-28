@@ -1,6 +1,6 @@
 """ Loader for bioformat files """
 
-from analyzer.pillow_loader import PILLoader
+from analyzer.loader.pillow_loader import PILLoader
 from subprocess import check_call
 import os.path
 

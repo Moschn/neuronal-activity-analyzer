@@ -1,6 +1,7 @@
 """ Base class for a Loader, which produces frames """
 
 import numpy
+import analyzer.util
 
 # Number of frames used to calculate average frame and pixel's variance
 statistics_frame_count = 100
@@ -14,8 +15,6 @@ class Loader(object):
         """Constructor, which opens the specified path in
         implementations and sets the exposure_time and the
         pixels_per_um"""
-        self.exposure_time = 0.031347962382445145  # 1 / 31.9 fps
-        self.pixel_per_um = 0.6466
         raise NotImplemented
 
     @classmethod
@@ -91,12 +90,16 @@ class Loader(object):
         self.mean = numpy.mean(frames, axis=0)
         self.variance = numpy.var(frames, axis=0)
 
+    @classmethod
+    def find_loader_class(cls):
+        """ Register all loader class to automatically use for correct filetypes
+        """
+        load_classes = analyzer.util.list_implementations(analyzer.loader, cls)
+        for k, v in load_classes:
+            loader_types.append(v)
+
 loader_types = []
 
-
-def register_loader_class(cls):
-    """ Register a loader class to automatically use for correct filetypes"""
-    loader_types.append(cls)
 
 
 def open(path, typ=None):
