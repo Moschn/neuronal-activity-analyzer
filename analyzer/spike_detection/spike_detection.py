@@ -1,14 +1,15 @@
 """ Base class for a spike detection algorithm """
 
-from .settings import THREAD_COUNT
+from analyzer.settings import THREAD_COUNT
+
 
 class Spike_detection(object):
     """ Base class for a spike detection algorithm. Implementations must
     overwrite all methods """
 
-    def __init__(self):
+    def __init__(self, config, exposure_time):
         """ Constructor """
-        raise NotImplemented
+        pass
 
     def detect_spikes(self, dataset):
         """ Overwritten in implementation

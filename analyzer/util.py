@@ -1,6 +1,7 @@
 import numpy
 from types import ModuleType
 from analyzer.defaults import default_config
+import pkgutil
 
 #
 # Create labeled image from roi matrix
@@ -139,3 +140,36 @@ def get_default_config():
     config = {}
     apply_defaults(config, default_config)
     return config
+
+
+def find_impl(package, name):
+    """ Search in the package a module called <name> and find a class
+    with the name <name> in that module, ignoring case in the name
+
+    Example:
+        find_impl(analyzer.spike_detection, "wdm")
+        this will return analyzer.spike_detection.wdm.WDM
+    """
+    module = None
+
+    searched_name = name.lower()
+    searchpath = package.__path__._path
+
+    for _, mod_name, _ in pkgutil.iter_modules(searchpath):
+        if mod_name.lower() == searched_name:
+            module = getattr(
+                __import__(package.__name__, globals(), locals(), [mod_name]),
+                mod_name)
+            break
+
+    if module is None:
+        raise Exception("Implementation %s in %s not found! The file "
+                        " should be named: %s.py"
+                        % (name, package.__name__, name.lower()))
+
+    for attr in dir(module):
+        if attr.lower() == name.lower():
+            return getattr(module, attr)
+
+    raise Exception("module %s does not contain any class named %s" %
+                    (module.__name__, name))

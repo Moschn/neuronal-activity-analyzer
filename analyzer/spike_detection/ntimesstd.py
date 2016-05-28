@@ -1,11 +1,19 @@
+
 """ N times standard deviation spike detection method """
-from analyzer.spike_detection import Spike_detection
+from .spike_detection import Spike_detection
 import numpy
 
 
-class SD_spike_detection(Spike_detection):
+class NTimesSTD(Spike_detection):
 
-    def __init__(self, n):
+    def __init__(self, config, exposure_time):
+        if 'nSD_n' in config:
+            n = config['nSD_n']
+        else:
+            print("""If the n*SD spike detection method is
+            selected an additional 'nSD_n' parameter is required""")
+            print("A n value of 1 is assumed")
+            n = 1
         self.n = float(n)
 
     def detect_spikes(self, dataset):

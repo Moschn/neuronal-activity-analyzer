@@ -1,21 +1,22 @@
 """ Wavelet Detection Method (WDM) from
 "Spike Detection Using the Continuous Wavelet Transform"
 Authors: Nenadic, Zoran and Burdick, Joel W"""
-from analyzer.spike_detection import Spike_detection
+from .spike_detection import Spike_detection
 from math import log, sqrt
 import numpy
 from scipy.signal import ricker
+from analyzer.settings import MIN_SPIKE_WIDTH, MAX_SPIKE_WIDTH
 
 
 class WDM(Spike_detection):
 
-    def __init__(self, min_spike_width, max_spike_width):
+    def __init__(self, config, exposure_time):
         """ Constructor
         @min_spike_width minimum spike width in data points
         @max_spike_width maximum spike width in data points"""
-        self.min_spike_width = min_spike_width
-        self.max_spike_width = max_spike_width
-        self.step_size = (max_spike_width - min_spike_width) // 100
+        self.min_spike_width = int(5*MIN_SPIKE_WIDTH/exposure_time)
+        self.max_spike_width = int(5*MAX_SPIKE_WIDTH/exposure_time)
+        self.step_size = (self.max_spike_width - self.min_spike_width) // 100
         self.steps = 100
 
     def detect_spikes(self, dataset):
@@ -60,7 +61,6 @@ class WDM(Spike_detection):
 
     def _find_spikes(self, wavelet_transform, dataset, noise_probability):
         maxima = numpy.zeros(len(dataset))
-        from matplotlib import pyplot
         for i in range(0, len(wavelet_transform)):
             wavelet_row = wavelet_transform[i]
             mean = numpy.mean(numpy.fabs(wavelet_row))

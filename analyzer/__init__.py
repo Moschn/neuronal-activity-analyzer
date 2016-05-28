@@ -1,21 +1,16 @@
 from analyzer.loader import register_loader_class
 import analyzer.pillow_loader
 import analyzer.bioformat_loader
-from analyzer.wdm import WDM
-from analyzer.nsd_spike import SD_spike_detection
-import analyzer.segmentation
 import analyzer.plot
 import analyzer.util
+import analyzer.spike_detection
+import analyzer
 import os
 import csv
 import numpy
 
 register_loader_class(analyzer.pillow_loader.PILLoader)
 register_loader_class(analyzer.bioformat_loader.BioFormatLoader)
-
-# Min spike width in seconds
-MIN_SPIKE_WIDTH = 0.3
-MAX_SPIKE_WIDTH = 4
 
 def get_thresholds(image):
     """ Returns a dictionary of the li, otsu and yen thresholds for an image
@@ -89,27 +84,12 @@ def segment(loader, config):
 
 
 def detect_spikes(activity, config, exposure_time):
-    if config['spike_detection_algorithm'] == 'wavelet':
-        algo = WDM(int(5*MIN_SPIKE_WIDTH/exposure_time),
-                   int(5*MAX_SPIKE_WIDTH/exposure_time))
-        spikes = algo.detect_spikes_parallel(activity)
-    elif config['spike_detection_algorithm'] == 'nSD':
-        if 'nSD_n' in config:
-            n = config['nSD_n']
-        else:
-            print("""If the n*SD spike detection method is
-            selected an additional 'nSD_n' parameter is required""")
-            print("A n value of 1 is assumed")
-            n = 1
-        algo = SD_spike_detection(n)
-        spikes = algo.detect_spikes_parallel(activity)
-    else:
-        print("Config error, unknown spike detection alogrithm selected")
-        print("Falling back to the wavelet detection method")
-        algo = WDM(50, 700)  # TODO: adaptive min/max spike width
-        spikes = algo.detect_spikes_parallel(activity)
+    sd_class = analyzer.util.find_impl(analyzer.spike_detection,
+                                       config['spike_detection_algorithm'])
 
-    return spikes
+    spike_detector = sd_class(config, exposure_time)
+
+    return spike_detector.detect_spikes_parallel(activity)
 
 
 def save_results(roi, frame, pixel_per_um, exposure_time, activities, spikes,
