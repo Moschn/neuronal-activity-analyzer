@@ -1,6 +1,6 @@
 import numpy
 from types import ModuleType
-from analyzer.defaults import default_config
+from .settings import default_config
 import pkgutil
 
 #
