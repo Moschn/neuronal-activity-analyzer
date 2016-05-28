@@ -2,10 +2,11 @@ import analyzer.loader.loader
 from analyzer.loader.loader import Loader
 import analyzer.plot
 import analyzer.util
-import analyzer.spike_detection
 import analyzer.segmentation
+import analyzer.segmentation.segmentation
 import analyzer.thresholds
 import analyzer.thresholds.threshold
+import analyzer.spike_detection
 import analyzer.spike_detection.spike_detection
 import analyzer.integrater
 import analyzer.integrater.integrater
@@ -71,7 +72,8 @@ def segment(loader, config):
 
     # Apply segmentation algorithm
     segmentation_class = analyzer.util.find_impl(
-        analyzer.segmentation, config['segmentation_algorithm'])
+        analyzer.segmentation, analyzer.segmentation.segmentation.Segmentation,
+        config['segmentation_algorithm'])
     segmentor = segmentation_class()
     segmented = segmentor.get_segmentation(thresholded)
 
