@@ -1,5 +1,4 @@
 import analyzer
-import analyzer.filters
 import analyzer.segmentation
 import analyzer.util
 import analyzer.plot

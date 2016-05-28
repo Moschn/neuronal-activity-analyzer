@@ -171,7 +171,7 @@ def find_impl(package, name):
         if attr.lower() == name.lower():
             return getattr(module, attr)
 
-    raise Exception("module %s does not contain any class named %s" %
+    raise Exception("module %s does notimport analyzer.thresholds.threshold contain any class named %s" %
                     (module.__name__, name))
 
 
@@ -192,6 +192,6 @@ def list_implementations(package, base_class):
             if(issubclass(attr, base_class) and
                attr != base_class and
                attr_name not in impls):
-                impls.append(attr_name)
+                impls.append((attr_name, attr))
 
     return impls

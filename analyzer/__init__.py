@@ -4,6 +4,9 @@ import analyzer.bioformat_loader
 import analyzer.plot
 import analyzer.util
 import analyzer.spike_detection
+import analyzer.segmentation
+import analyzer.thresholds
+import analyzer.thresholds.threshold
 import analyzer
 import os
 import csv
@@ -12,14 +15,18 @@ import numpy
 register_loader_class(analyzer.pillow_loader.PILLoader)
 register_loader_class(analyzer.bioformat_loader.BioFormatLoader)
 
+thresholding_algorithms = analyzer.util.list_implementations(
+    analyzer.thresholds, analyzer.thresholds.threshold.Threshold)
+
+
 def get_thresholds(image):
     """ Returns a dictionary of the li, otsu and yen thresholds for an image
     """
-    return {
-        'li':   analyzer.segmentation.li_thresh_relative(image),
-        'otsu': analyzer.segmentation.otsu_thresh_relative(image),
-        'yen':  analyzer.segmentation.yen_thresh_relative(image)
-    }
+    result = {}
+    for k, v in thresholding_algorithms:
+        thresholder = v()
+        result[k.lower()] = thresholder.get_threshold(image)
+    return result
 
 
 def segment(loader, config):
@@ -44,8 +51,8 @@ def segment(loader, config):
         source = loader.get_mean()
 
     # Apply gaussian filter
-    filtered = analyzer.segmentation.\
-        gaussian_filter(source, config['gauss_radius'])
+    filtered = analyzer.thresholds.threshold.Threshold.gaussian_filter(
+        source, config['gauss_radius'])
 
     # Parse threshold parameter
     if config['threshold'] in ['li', 'otsu', 'yen']:
@@ -53,26 +60,17 @@ def segment(loader, config):
     config['threshold'] = float(config['threshold'])
 
     # Apply threshold
-    thresholded = analyzer.segmentation.\
-        threshold(filtered, config['threshold'])
+    thresholded = analyzer.thresholds.threshold.Threshold.threshold(
+        filtered, config['threshold'])
 
     # Apply segmentation algorithm
-    if config['segmentation_algorithm'] == 'watershed':
-        segmented = analyzer.segmentation.watershed(thresholded)
-    elif config['segmentation_algorithm'] == 'randomwalk':
-        segmented = analyzer.segmentation.\
-                         random_walker(thresholded)
-    elif config['segmentation_algorithm'] == 'kmeans':
-        segmented = analyzer.segmentation.k_means(thresholded)
-    elif config['segmentation_algorithm'] == 'fill':
-        segmented = analyzer.segmentation.label(thresholded)
-    else:
-        print("Config error, unknown segmentation alogrithm selected")
-        print("Falling back to the watershed algorithm")
-        segmented = analyzer.segmentation.watershed(thresholded)
+    segmentation_class = analyzer.util.find_impl(
+        analyzer.segmentation, config['segmentation_algorithm'])
+    segmentor = segmentation_class()
+    segmented = segmentor.get_segmentation(thresholded)
 
     # return borders as well
-    borders = analyzer.segmentation.get_borders(segmented)
+    borders = analyzer.thresholds.threshold.Threshold.get_borders(segmented)
 
     return {
         'source': source,
