@@ -82,8 +82,10 @@ def segment(loader, config):
 
 
 def detect_spikes(activity, config, exposure_time):
-    sd_class = analyzer.util.find_impl(analyzer.spike_detection,
-                                       config['spike_detection_algorithm'])
+    sd_class = analyzer.util.find_impl(
+        analyzer.spike_detection,
+        analyzer.spike_detection.spike_detection.Spike_detection,
+        config['spike_detection_algorithm'])
 
     spike_detector = sd_class(config, exposure_time)
 

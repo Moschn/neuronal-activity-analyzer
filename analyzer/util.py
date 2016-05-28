@@ -142,7 +142,7 @@ def get_default_config():
     return config
 
 
-def find_impl(package, name):
+def find_impl(package, base_class, name):
     """ Search in the package a module called <name> and find a class
     with the name <name> in that module, ignoring case in the name
 
@@ -167,9 +167,12 @@ def find_impl(package, name):
                         " should be named: %s.py"
                         % (name, package.__name__, name.lower()))
 
-    for attr in dir(module):
-        if attr.lower() == name.lower():
-            return getattr(module, attr)
+    for attr_name, attr in module.__dict__.items():
+        if attr_name.lower() == name.lower():
+            if not issubclass(attr, base_class):
+                raise Exception("Class %s does not implement the interface %s"
+                                % (attr.__name__, base_class.__name__))
+            return attr
 
     raise Exception("module %s does notimport analyzer.thresholds.threshold contain any class named %s" %
                     (module.__name__, name))
