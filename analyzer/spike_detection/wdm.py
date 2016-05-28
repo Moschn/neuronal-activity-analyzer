@@ -60,6 +60,9 @@ class WDM(Spike_detection):
         return numpy.array(maxima_time)
 
     def _find_spikes(self, wavelet_transform, dataset, noise_probability):
+        """ This function implements the statistical methods described in the 
+        paper to determine if a correlation with the wavelet is really a spike
+        or just noise"""
         maxima = numpy.zeros(len(dataset))
         for i in range(0, len(wavelet_transform)):
             wavelet_row = wavelet_transform[i]
@@ -69,35 +72,20 @@ class WDM(Spike_detection):
             l_m = 36.7368
             gamma = noise_probability[i]
 
+            # catch a few possible Math domain errors
             if mean != 0 and gamma != 0:
                 threshold = mean/2 + var**2 / mean * (l * l_m + log(gamma))
             else:
                 threshold = 100000000
 
+            # all correlations above the threshold are spikes
             highindices = (wavelet_transform[i]) > threshold
-            # highindices[0:(self.min_spike_width+i)//2] = False
-            # highindices[len(wavelet_transform[i])-(self.min_spike_width+i)//2:
-            #             len(highindices)] = False
-            pad_width = (len(maxima)-len(highindices)-1)//2
-            if pad_width < 0:
-                pad_width = 0
-            # highindices = numpy.lib.pad(highindices, (pad_width, 0),
-            #                            'constant', constant_values=False)
-
-            # pyplot.figure()
-            # pyplot.subplot(211)
-            # pyplot.plot(wavelet_transform[i])
-            # print(i)
-            # print("mean: {}".format(mean))
-            # print("var: {}".format(var))
-            # print("(noise/signal): {}".format(gamma))
-            # print("treshold: {}".format(threshold))
-            # pyplot.subplot(212)
-            # pyplot.plot(highindices)
-            # pyplot.show()
 
             maxima[highindices] = 1
 
+        # now there are regions were spikes are
+        # In order to get only one exact time for each spike the maximum of
+        # the signal in the possible range is taken
         peaks_time = []
         i = 0
         while i < len(dataset):
@@ -140,10 +128,7 @@ class WDM(Spike_detection):
                 probability = (nr_noise / (len(wavelet_row) - nr_noise))
             else:
                 probability = 99999999
-            # print("{}: {}/{}, percent: {}".format(threshold,
-            #                                       nr_noise,
-            #                                       len(wavelet_row),
-            #                                       probability))
+
             noise_probability.append(probability)
 
         return wavelet_transform_threshold, noise_probability
@@ -153,13 +138,13 @@ class WDM(Spike_detection):
         for j in range(0, self.steps):
             width = self.min_spike_width + j*self.step_size
             wavelet = gen_wavelet(width)
+            # convolution is used because the ricker wavelet is symmetric
+            # this means inner product = convolution
+            # if the wavelet is not symmetric numpy.correlate can be used
             conv = numpy.convolve(dataset, wavelet, 'same')
             wt[j] = conv
         return wt
 
     def wavelet_ricker(self, number_of_points):
         a = self.min_spike_width/2 * number_of_points/self.max_spike_width
-        wavelet = ricker(number_of_points, a)
-        if numpy.sum(wavelet) > 1:
-            print("dafuq: energy: {}".format(sum(wavelet)))
-        return wavelet
+        return ricker(number_of_points, a)
