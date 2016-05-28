@@ -21,7 +21,7 @@ def analyze_file(filename, directory, config):
     frame = segmented['source']
 
     print("\tanalyzing all frames...")
-    activities = analyzer.extract_activities(loader, roi, config)
+    activities = analyzer.calculate_activities(loader, roi, config)
     activities = normalize(activities)
 
     print("\tdetecting spikes...")

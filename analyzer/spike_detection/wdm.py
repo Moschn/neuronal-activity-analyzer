@@ -14,8 +14,8 @@ class WDM(Spike_detection):
         """ Constructor
         @min_spike_width minimum spike width in data points
         @max_spike_width maximum spike width in data points"""
-        self.min_spike_width = int(5*MIN_SPIKE_WIDTH/exposure_time)
-        self.max_spike_width = int(5*MAX_SPIKE_WIDTH/exposure_time)
+        self.min_spike_width = int(5*config['min_spike_width']/exposure_time)
+        self.max_spike_width = int(5*config['max_spike_width']/exposure_time)
         self.step_size = (self.max_spike_width - self.min_spike_width) // 100
         self.steps = 100
 
@@ -140,7 +140,7 @@ class WDM(Spike_detection):
             wavelet = gen_wavelet(width)
             # convolution is used because the ricker wavelet is symmetric
             # this means inner product = convolution
-            # if the wavelet is not symmetric numpy.correlate can be used
+            # if the wavelet is not symmetric numpy.correlate should be used
             conv = numpy.convolve(dataset, wavelet, 'same')
             wt[j] = conv
         return wt

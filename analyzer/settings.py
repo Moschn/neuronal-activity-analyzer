@@ -14,4 +14,6 @@ default_config = {
     'spike_detection_algorithm': 'wdm',
     'nSD_n': 3,
     'integrater': 'mean',
+    'min_spike_width': 0.3,
+    'max_spike_width': 4
 }
