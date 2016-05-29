@@ -138,10 +138,7 @@ class WDM(Spike_detection):
         for j in range(0, self.steps):
             width = self.min_spike_width + j*self.step_size
             wavelet = gen_wavelet(width)
-            # convolution is used because the ricker wavelet is symmetric
-            # this means inner product = convolution
-            # if the wavelet is not symmetric numpy.correlate should be used
-            conv = numpy.convolve(dataset, wavelet, 'same')
+            conv = numpy.correlate(dataset, wavelet, 'same')
             wt[j] = conv
         return wt
 
