@@ -13,7 +13,7 @@ class Integrater(object):
         """ Contructor. An array representing the various ROIs is needed.
         The array contains a number at every ROI. The number represents the
         unique nmumber of the respective ROI """
-        raise NotImplemented
+        self.roi = roi
 
     def process_frame(self, frame):
         """ Process new frame
@@ -27,7 +27,7 @@ class Integrater(object):
         try:  # python 3.5
             from concurrent.futures import ThreadPoolExecutor
             frame_count = loader.frame_count()
-            activities = numpy.zeros((frame_count, numpy.max(self.roi)))
+            activities = numpy.zeros((frame_count, numpy.amax(self.roi)))
             loader.lock = Lock()
             with ThreadPoolExecutor(max_workers=THREAD_COUNT) as executor:
                 futures = [executor.submit(self._load_process_frame, loader, i)

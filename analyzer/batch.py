@@ -1,7 +1,4 @@
 import analyzer
-import analyzer.segmentation
-import analyzer.util
-import analyzer.plot
 import os
 from analyzer.normalize import normalize
 
