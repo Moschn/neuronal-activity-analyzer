@@ -1,6 +1,7 @@
 from flask import Blueprint, current_app, jsonify, request
 import os.path
 import time
+import traceback
 
 from .runs import Run
 import analyzer
@@ -81,8 +82,8 @@ def get_statistics(videoname, runname):
             run['time_per_bin'] = 1
 
         return jsonify(**response)
-    except Exception as e:
-        return jsonify(fail=str(e))
+    except Exception:
+        return jsonify(fail=traceback.format_exc())
 
 
 @statistics_blueprint.route(
