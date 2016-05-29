@@ -16,4 +16,7 @@ class Randomwalker(Segmentation):
                                     labels=image)
         markers = skimage.morphology.label(local_maxi)
         markers[~image] = -1
-        return skimage.segmentation.random_walker(image, markers)
+        segmented = skimage.segmentation.random_walker(distance, markers,
+                                                       beta=10, copy=False)
+        segmented[segmented == -1] = 0
+        return segmented
