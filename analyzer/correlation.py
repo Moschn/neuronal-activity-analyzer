@@ -1,11 +1,10 @@
 import numpy
-import time
 from concurrent.futures import ThreadPoolExecutor
 
-from .settings import THREAD_COUNT, CORRELATION_MAX_SHIFT
+from .settings import THREAD_COUNT
 
 
-def correlate_activities(activities, exposure_time):
+def correlate_activities(activities, config, exposure_time):
     """ Given activities of neurons, this function calculates the corellation of
     their activities with each other
 
@@ -22,7 +21,7 @@ def correlate_activities(activities, exposure_time):
 
     n_neurons = activities.shape[0]
     n_frames = activities.shape[1]
-    n_shifts = round(CORRELATION_MAX_SHIFT / exposure_time)
+    n_shifts = round(config['correlation_max_shift'] / exposure_time)
 
     correlations = numpy.ndarray((n_neurons, n_neurons, 2 * n_shifts + 1),
                                  dtype='float')

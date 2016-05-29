@@ -45,7 +45,7 @@ def get_statistics(videoname, runname):
 
         # Calculate correlation functions
         correlations_start = time.time()
-        correlations = correlate_activities(activities, exposure_time)
+        correlations = correlate_activities(activities, config, exposure_time)
         correlation_time = time.time() - correlations_start
 
         # Generate the rasterplot of the spikes
