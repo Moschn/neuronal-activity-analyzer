@@ -2,6 +2,7 @@
 
 import numpy
 import analyzer.util
+import os
 
 # Number of frames used to calculate average frame and pixel's variance
 statistics_frame_count = 100
@@ -13,9 +14,27 @@ class Loader(object):
 
     def __init__(self, path):
         """Constructor, which opens the specified path in
-        implementations and sets the exposure_time and the
-        pixels_per_um"""
-        raise NotImplemented
+        implementations. If super().__init__(path) is called then
+        the default video specific configureation file is loaded"""
+        self.exposure_time = 0.031347962382445145  # 1 / 31.9 fps
+        self.pixel_per_um = 0.6466
+
+        conf_name = path + ".txt"
+        try:
+            if os.path.isfile(conf_name):
+                f = open(conf_name, 'r')
+                for line in f:
+                    parts = line.split("=")
+                    if "FrameRate" in parts[0]:
+                        frame_rate = float(parts[len(parts)-1].strip())
+                        self.exposure_time = 1/frame_rate
+                    if "PixelPerUM" in parts[0]:
+                        self.pixel_per_um = float(parts[len(parts)-1].strip())
+        except:
+            if os.stat(path).st_size > 100000000:
+                print("Could not open or convert the config file of " + path)
+                print("FrameRate is set to standard: 31.9 fps")
+                print("PixelPerUM is set to standard: 0.6466")
 
     @classmethod
     def can_open(cls, path):

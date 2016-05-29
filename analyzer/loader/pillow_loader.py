@@ -3,8 +3,6 @@
 from analyzer.loader.loader import Loader
 from PIL import Image
 import numpy
-# import exifread
-import os
 
 
 class PILLoader(Loader):
@@ -14,25 +12,8 @@ class PILLoader(Loader):
         self.current_frame = -1
         self.path = path
 
-        self.exposure_time = 0.031347962382445145  # 1 / 31.9 fps
-        self.pixel_per_um = 0.6466
-
-        conf_name = path + ".txt"
-        try:
-            if os.path.isfile(conf_name):
-                f = open(conf_name, 'r')
-                for line in f:
-                    parts = line.split("=")
-                    if "FrameRate" in parts[0]:
-                        frame_rate = float(parts[len(parts)-1].strip())
-                        self.exposure_time = 1/frame_rate
-                    if "PixelPerUM" in parts[0]:
-                        self.pixel_per_um = float(parts[len(parts)-1].strip())
-        except:
-            if os.stat(path).st_size > 100000000:
-                print("Could not open or convert the config file of " + path)
-                print("FrameRate is set to standard: 31.9 fps")
-                print("PixelPerUM is set to standard: 0.6466")
+        # use the 
+        super().__init__(path)
 
     @classmethod
     def can_open(cls, path):
