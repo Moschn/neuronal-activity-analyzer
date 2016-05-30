@@ -6,7 +6,7 @@ from threading import Lock
 
 import analyzer.settings
 
-SHELF_VERSION = 1
+RUN_VERSION = 1
 
 
 class Run():
@@ -36,9 +36,11 @@ class Run():
     def open(self):
         Run.lock.acquire()
         self.shelf = shelve.open(self.runpath, writeback=True)
-        if('version' not in self.shelf or
-           self.shelf['version'] != SHELF_VERSION):
-            Run._update(self.shelf)
+        if 'config' in self.shelf:
+            # The shelf already contains data
+            if('version' not in self.shelf or
+               self.shelf['version'] != RUN_VERSION):
+                Run._update(self.shelf)
 
     def close(self):
         self.shelf.sync()
@@ -112,3 +114,5 @@ class Run():
         for k, v in analyzer.settings.default_config.items():
             if k not in shelf['config']:
                 shelf['config'][k] = v
+
+        shelf['version'] = RUN_VERSION
