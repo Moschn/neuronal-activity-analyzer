@@ -7,8 +7,8 @@ default_config = {
     'segmentation_algorithm': 'watershed',  # name of implementation
     'integrater': 'mean',           # name of implementation
     'spike_detection_algorithm': 'wdm',  # name of implementation
-    'min_spike_width': 2,         # [s]
-    'max_spike_width': 6,           # [s]
+    'min_spike_width': 0.3,         # [s]
+    'max_spike_width': 4,           # [s]
     'correlation_max_shift': 5.,    # [s]
     'nSD_n': 3.,                    # float, threshold value in standard
                                     # deviations for ntimesstd implementation
