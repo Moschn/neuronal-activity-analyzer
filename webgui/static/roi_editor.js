@@ -41,14 +41,18 @@ function editor_save() {
 
 function draw_editor() {
     var layer0 = $('#editor_layer0')[0];
+    var layer1 = $('#editor_layer1')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
+
+    var canvas_size = fit_canvas_to_image(layer0, w, h, 0);
+    fit_canvas_to_image(layer1, w, h, 0);
     draw_image_rgb_scaled(layer0,
 			  greyscale16_to_normrgb(segmentation.source, w, h),
-			  w, h, layer0.width, layer0.height);
+			  w, h, canvas_size[0], canvas_size[1]);
     draw_image_rgba_scaled(layer0,
 			   color_roi(segmentation.editor, w, h), w, h,
-			   layer0.width, layer0.height);
+			   canvas_size[0], canvas_size[1]);
 }
 
 function redraw_editor_overlay() {

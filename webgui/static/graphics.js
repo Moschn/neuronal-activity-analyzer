@@ -82,7 +82,7 @@ function fit_canvas_to_image(canvas, img_w, img_h, bottom_padding) {
     // Resize canvas to correct aspect ratio
     var aspect_ratio = img_w / img_h;
     var c_w = (c_h - bottom_padding) * aspect_ratio;
-    canvas.width = c_w;
+    canvas.style.width = c_w;
     return [c_w, c_h];
 }
 
