@@ -111,7 +111,7 @@ def detect_spikes(activity, config, exposure_time):
 
 
 def save_results(roi, frame, pixel_per_um, exposure_time, activities, spikes,
-                 time_per_bin, videoname, analysis_folder):
+                 time_per_bin, correlation,  videoname, analysis_folder):
     if not os.path.exists(analysis_folder):
         os.makedirs(analysis_folder)
 
@@ -156,6 +156,11 @@ def save_results(roi, frame, pixel_per_um, exposure_time, activities, spikes,
             summary_peaks.append("Neuron {}: \t{} peaks/s".format(idx,
                                                                   peaks_time))
             idx += 1
+
+    # plot correlations
+    fig_correlation = analyzer.plot.plot_correlation_heatmap(correlation)
+    analyzer.plot.save(fig_correlation, os.path.join(analysis_folder,
+                                                     'correlations.svg'))
 
     with open(os.path.join(analysis_folder, 'summary.txt'), 'w') as summary:
         summary.write("Summary of analysis of {}\n".format(videoname))

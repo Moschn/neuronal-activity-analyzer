@@ -114,6 +114,7 @@ def save_plots(videoname, runname):
         activities = run['statistics']['activities']
         spikes = run['statistics']['spikes']
         time_per_bin = run['time_per_bin']
+        correlations = run['statistics']['correlations']
 
     analyzer.save_results(segmentation_editor,
                           segmentation_source,
@@ -122,6 +123,7 @@ def save_plots(videoname, runname):
                           activities,
                           spikes,
                           time_per_bin,
+                          correlations,
                           os.path.basename(videoname),
                           analysis_folder)
 

@@ -1,6 +1,7 @@
 import analyzer
 import os
 from analyzer.normalize import normalize
+from analyzer.correlation import correlate_activities
 
 
 def analyze_file(filename, directory, config):
@@ -24,9 +25,13 @@ def analyze_file(filename, directory, config):
     print("\tdetecting spikes...")
     spikes = analyzer.detect_spikes(activities, config, time_frame)
 
+    print("\tcalculate correlation")
+    correlation = correlate_activities(activities, config, time_frame)
+
     print("\tplotting results...")
     analyzer.save_results(roi, frame, pixel_per_um, time_frame,
-                          activities, spikes, 1, videoname, analysis_folder)
+                          activities, spikes, 1, correlation,
+                          videoname, analysis_folder)
 
 
 def analyze_all_in_folder(path, config):

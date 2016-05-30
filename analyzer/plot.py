@@ -86,6 +86,9 @@ def plot_spikes(activity, spikes):
     pyplot.plot(activity)
     for time in spikes:
         pyplot.axvline(time, color='r')
+
+    pyplot.xlabel('time [frames]')
+    pyplot.ylabel('brightness [in std deviations]')
     return fig
 
 
@@ -127,6 +130,40 @@ def plot_rasterplot(spikes, exposure_time, time_per_bin):
 
     pyplot.tight_layout()
     # fig.subplots_adjust(hspace=0)
+    return fig
+
+
+def plot_correlation_heatmap(correlation):
+    correlation = numpy.array(correlation)
+    fig = pyplot.figure()
+
+    # calculate maximal correlation
+    corr_maxima = numpy.zeros((correlation.shape[0], correlation.shape[1]))
+    for neuron1 in range(0, correlation.shape[0]):
+        for neuron2 in range(0, correlation.shape[1]):
+            max_val = numpy.amax(correlation[neuron1, neuron2, :])
+            min_val = numpy.amin(correlation[neuron1, neuron2, :])
+            if numpy.abs(max_val) > numpy.abs(min_val):
+                corr_maxima[neuron1][neuron2] = max_val
+            else:
+                corr_maxima[neuron1][neuron2] = min_val
+
+    im = pyplot.pcolormesh(corr_maxima)
+    fig.colorbar(im)
+    pyplot.ylim([0, corr_maxima.shape[0]])
+    pyplot.xlim([0, corr_maxima.shape[1]])
+    pyplot.title("Correlation Heatmap")
+    pyplot.xlabel("First Neuron")
+    pyplot.ylabel("Second Neuron")
+    return fig
+
+
+def plot_correlation_details(correlation):
+    pyplot.style.use('seaborn-deep')
+    fig = pyplot.figure()
+    pyplot.plot(correlation)
+    pyplot.xlabel('Time delay')
+    pyplot.ylabel('Correlation')
     return fig
 
 
