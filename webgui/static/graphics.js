@@ -71,9 +71,7 @@ function draw_image_rgb_scaled(canvas, img, w, h, c_w, c_h, alpha) {
     }
     var scale_factor_w = c_w / w;
     var scale_factor_h = c_h / h;
-    console.log("scale w:" + scale_factor_w + " | scale h:" + scale_factor_h);
     var scale_factor = Math.min(scale_factor_w, scale_factor_h);
-    console.log(scale_factor);
     ctx.scale(scale_factor, scale_factor);
     if (scale_factor_w > scale_factor_h) {
 	ctx.drawImage(temp_canvas, c_w/scale_factor/2-w/2, 0);
@@ -162,9 +160,7 @@ function draw_image_rgba_scaled(canvas, img, w, h, c_w, c_h) {
     }
     var scale_factor_w = c_w / w;
     var scale_factor_h = c_h / h;
-    console.log("scale w:" + scale_factor_w + " | scale h:" + scale_factor_h);
     var scale_factor = Math.min(scale_factor_w, scale_factor_h);
-    console.log(scale_factor);
     ctx.scale(scale_factor, scale_factor);
     if (scale_factor_w > scale_factor_h) {
 	ctx.drawImage(temp_canvas, c_w/scale_factor/2-w/2, 0);

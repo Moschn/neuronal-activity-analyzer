@@ -420,6 +420,7 @@ function draw_correlation_heatmap() {
         series: [{
             name: 'Maximum of correlation function',
             borderWidth: 1,
+	    turboThreshold: 0,
             data: data,
 	    events: {
 		click: heatmap_clicked
