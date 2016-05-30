@@ -14,33 +14,36 @@ function receive_segmentations(data) {
     var w = segmentation['width'];
     var h = segmentation['height'];
 
-    var c_w = $('#source_image')[0].width;
-    var c_h = $('#source_image')[0].height;
+    // Draw source image
+    var canvas_size = fit_canvas_to_image($('#source_image')[0], w, h, 50);
+    draw_image_rgb_scaled($('#source_image')[0],
+			  greyscale16_to_normrgb(segmentation.source, w, h),
+			  w, h, canvas_size[0], canvas_size[1]-50);
+    draw_scale_bar($('#source_image')[0], w, segmentation.pixel_per_um);
 
-    x_corr = draw_image_rgb_scaled($('#source_image')[0],
-				   greyscale16_to_normrgb(segmentation.source, w, h),
-				   w, h, c_w, c_h-70);
-    draw_image_pixel_per_um($('#source_image')[0], x_corr, h-100, w,
-			    segmentation.pixel_per_um);
-    x_corr = draw_image_rgb_scaled($('#filtered_image')[0],
-				   greyscale16_to_normrgb(segmentation.filtered, w, h),
-				   w, h, c_w, c_h-70);
-    draw_image_pixel_per_um($('#filtered_image')[0], x_corr, h-100, w,
-			    segmentation.pixel_per_um);
-    x_corr = draw_image_rgb_scaled($('#thresholded_image')[0],
-				   greyscale16_to_normrgb(segmentation.thresholded, w, h),
-				   w, h, c_w, c_h-70);
-    draw_image_pixel_per_um($('#thresholded_image')[0], x_corr, h-100, w,
-			    segmentation.pixel_per_um);
-    x_corr = draw_image_rgb_scaled($('#segmented_image')[0],
-				   greyscale16_to_normrgb(segmentation.source, w, h),
-				   w, h, c_w, c_h-70);
-    draw_image_pixel_per_um($('#segmented_image')[0], x_corr, h-100, w,
-			    segmentation.pixel_per_um);
-    x_corr = draw_image_rgba_scaled($('#segmented_image')[0],
-				    color_roi_borders(segmentation.segmented,
-						      segmentation.borders, w, h),
-				    w, h, c_w, c_h-70);
+    // Draw filtered image
+    canvas_size = fit_canvas_to_image($('#filtered_image')[0], w, h, 50);
+    draw_image_rgb_scaled($('#filtered_image')[0],
+			  greyscale16_to_normrgb(segmentation.filtered, w, h),
+			  w, h, canvas_size[0], canvas_size[1]-50);
+    draw_scale_bar($('#filtered_image')[0], w, segmentation.pixel_per_um);
+
+    // Draw thresholded image
+    canvas_size = fit_canvas_to_image($('#thresholded_image')[0], w, h, 50);
+    draw_image_rgb_scaled($('#thresholded_image')[0],
+			  greyscale16_to_normrgb(segmentation.thresholded, w, h),
+			  w, h, canvas_size[0], canvas_size[1]-50);
+    draw_scale_bar($('#thresholded_image')[0], w, segmentation.pixel_per_um);
+
+    // Draw segmented image by drawing source and the borders above
+    canvas_size = fit_canvas_to_image($('#segmented_image')[0], w, h, 50);
+    draw_image_rgb_scaled($('#segmented_image')[0],
+			  greyscale16_to_normrgb(segmentation.source, w, h),
+			  w, h, canvas_size[0], canvas_size[1]-50);
+    draw_scale_bar($('#segmented_image')[0], w, segmentation.pixel_per_um);
+    draw_image_rgba_scaled($('#segmented_image')[0],
+			   borders_overlay(segmentation.borders, w, h),
+			   w, h, canvas_size[0], canvas_size[1]-50);
     
     // set the webgui to the current config of the run
     $("input[id='seg_source_" + config['segmentation_source'] +
@@ -58,7 +61,7 @@ function receive_segmentations(data) {
     //          function(data) { thresholds = data; });
 
     draw_editor();
-    redraw_editor();
+    redraw_editor_overlay();
 }
 
 function apply_li() {

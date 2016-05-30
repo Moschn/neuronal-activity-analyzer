@@ -42,25 +42,24 @@ function statistics_draw_overview() {
     var layer0 = $('#statistics_layer0')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
-    var c_w = layer0.width;
-    var c_h = layer0.height - 70;
+
+    var canvas_size = fit_canvas_to_image(layer0, w, h, 50);
     draw_image_rgb_scaled(layer0,
 			  greyscale16_to_normrgb(segmentation.source, w, h),
-			  w, h, c_w, c_h);
+			  w, h, canvas_size[0], canvas_size[1] - 50);
     draw_image_rgba_scaled(layer0,
-			   color_roi_borders(segmentation.editor,
-					     segmentation.borders, w, h),
-			   w, h, c_w, c_h);
-    draw_image_pixel_per_um(layer0, 0, c_h+15, w, segmentation['pixel_per_um']);
-    draw_image_neurons_number(layer0, segmentation.editor, w, h, c_w, c_h);
+			   borders_overlay(segmentation.borders, w, h),
+			   w, h, canvas_size[0], canvas_size[1] - 50);
+    draw_scale_bar(layer0, w, segmentation.pixel_per_um);
+    draw_image_neurons_number(layer0, segmentation.editor, w, h,
+			      canvas_size[0], canvas_size[1] - 50);
 }
 
 function statistics_redraw_overview_overlays() {
     var layer1 = $('#statistics_layer1')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
-    var c_w = layer1.width;
-    var c_h = layer1.height - 70;
+    var canvas_size = fit_canvas_to_image(layer1, w, h, 0);
     
     var layer1_ctx = layer1.getContext('2d');
     layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
@@ -68,27 +67,35 @@ function statistics_redraw_overview_overlays() {
 	statistics_overlay = roi_highlight_overlay(statistics_overlay,
 						   segmentation.editor, w, h,
 						   statistics_hovered_neuron,
-						   255, 255, 255, 80);
-	draw_image_rgba_scaled(layer1, statistics_overlay, w, h, c_w, c_h);
+						   255, 255, 255, 120);
+	draw_image_rgba_scaled(layer1, statistics_overlay, w, h,
+			       canvas_size[0], canvas_size[1]);
     }
     statistics_active_neurons.forEach(function (neuron) {
 	statistics_overlay = roi_highlight_overlay(statistics_overlay,
 						   segmentation.editor, w, h,
 						   neuron,
-						   255, 255, 255, 50);
-	draw_image_rgba_scaled(layer1, statistics_overlay, w, h, c_w, c_h);
+						   255, 255, 255, 80);
+	draw_image_rgba_scaled(layer1, statistics_overlay, w, h,
+			       canvas_size[0], canvas_size[1]);
     })
 }
 
-function statistics_overview_clicked(e) {
-    var offset = $(this).offset();
+function overview_get_neuron_at(event) {
+    var canvas = $('#statistics_layer1');
+    var offset = canvas.offset();
     // Get coordinates on whole image
-    var x = e.pageX - offset.left;
-    var y = e.pageY - offset.top;
-    var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
-    var seg_y = Math.floor(y * segmentation['height'] / ($(this)[0].offsetHeight-70));
-    neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
-    if (neuron == 0) return;
+    var x = event.pageX - offset.left;
+    var y = event.pageY - offset.top;
+    var seg_x = Math.floor(x * segmentation['width'] / canvas[0].offsetWidth);
+    var seg_y = Math.floor(y * segmentation['height'] / canvas[0].offsetHeight);
+    return segmentation['editor'][seg_y*segmentation['width'] + seg_x];
+}
+
+function statistics_overview_clicked(e) {
+    var neuron = overview_get_neuron_at(e);
+    if (neuron == 0)
+	return;
 
     var index = statistics_active_neurons.indexOf(neuron);
     if(index != -1) {
@@ -107,13 +114,7 @@ $(document).ready(function() {
 });
 
 function statistics_overview_hovered(e) {
-    var offset = $(this).offset();
-    // Get coordinates on whole image
-    var x = e.pageX - offset.left;
-    var y = e.pageY - offset.top;
-    var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
-    var seg_y = Math.floor(y * segmentation['height'] / ($(this)[0].offsetHeight-70));
-    statistics_hovered_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
+    statistics_hovered_neuron = overview_get_neuron_at(e);
 
     if(statistics_hovered_neuron !== 0
        && statistics_hovered_neuron !== statistics_last_hovered_neuron) {

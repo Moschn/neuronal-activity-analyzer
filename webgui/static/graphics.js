@@ -3,47 +3,20 @@
  * on canvases and all other functions to create images
  */
 
-var label_colors = [
-    [0xff, 0x00, 0x00],
-    [0x00, 0xff, 0x00],
-    [0x00, 0x00, 0xff],
-    [0x00, 0xff, 0xff],
-    [0xff, 0x00, 0xff],
-    [0xff, 0xff, 0x00],
-    [0xff, 0x40, 0x00],
-    [0x00, 0x40, 0xff],
-    [0x40, 0x00, 0xff],
-    [0x40, 0xff, 0x00],
-    [0xff, 0x00, 0x40],
-    [0x00, 0xff, 0x40],
-    [0xff, 0x40, 0x40],
-    [0x40, 0xff, 0x40],
-    [0x40, 0x40, 0xff],
-    [0xff, 0x80, 0x00],
-    [0x00, 0x80, 0xff],
-    [0x80, 0xff, 0x00],
-    [0x80, 0x00, 0xff],
-    [0x00, 0xff, 0x80],
-    [0xff, 0x00, 0x80],
-    [0x80, 0x80, 0xff],
-    [0x80, 0xff, 0x80],
-    [0xff, 0x80, 0x80]
-]
-
 /*
  * drawing arrays onto canvases
  */
 
-function draw_image_rgb_scaled(canvas, img, w, h, c_w, c_h, alpha) {
+function draw_image_rgb_scaled(canvas, img, w, h, target_w, target_h, alpha) {
     /* Takes a w*h*3 long array of 24 bit RGB pixel data and draws
-       it on the canvas with an alpha value. The image is scaled to the size of
-       the canvas.
+       it on the canvas with an alpha value. The image is resized to fit in the
+       rect (0, 0, target_w, target_h) of the canvas.
 
        Args:
          canvas: A canvas object as returned by getDocumentById or $('#id')[0]
-         img(w*h*3 Array): An array of length W*H*3 with values from 0-255
+         img(w*h*3 Array): An array of length w*h*3 with values from 0-255
 	 w, h: Size of the source image
-         c_w, c_h: Size of the drawing space inside of the canvas
+         target_w, target_h: Size of the drawing space inside of the canvas
 	 alpha: transparency to use while drawing, defaults to 255 (opaque)
     */
     if (typeof(alpha) === 'undefined')
@@ -64,58 +37,95 @@ function draw_image_rgb_scaled(canvas, img, w, h, c_w, c_h, alpha) {
     temp_ctx.putImageData(imgData, 0, 0);
     
     var ctx = canvas.getContext('2d');
-    if (typeof c_w == 'undefined')
-    {
-	c_w = canvas.width;
-	c_h = canvas.height;
-    }
-    var scale_factor_w = c_w / w;
-    var scale_factor_h = c_h / h;
-    var scale_factor = Math.min(scale_factor_w, scale_factor_h);
-    ctx.scale(scale_factor, scale_factor);
-    if (scale_factor_w > scale_factor_h) {
-	ctx.drawImage(temp_canvas, c_w/scale_factor/2-w/2, 0);
-	ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
-	return c_w/2-w/2*scale_factor;
-    }
-    else {
-	ctx.drawImage(temp_canvas, 0, 0);
-	ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
-	return 0;
-    }
-   
-    
-    
+    ctx.drawImage(temp_canvas, 0, 0, target_w, target_h);
+    return 0;
 }
 
-function draw_image_pixel_per_um(canvas, x, y, img_width, pixel_per_um) {
-    var ctx = canvas.getContext('2d');
+function draw_image_rgba_scaled(canvas, img, w, h, target_w, target_h) {
+    /* Takes a w*h*4 long array of 32 bit RGBA pixel data and draws
+       it on the canvas with an alpha value. The image is resized to fit in the
+       rect (0, 0, target_w, target_h) of the canvas.
+
+       Args:
+         canvas: A canvas object as returned by getDocumentById or $('#id')[0]
+         img(w*h*4 Array): An array of length w*h*4 with values from 0-255
+	 w, h: Size of the source image
+         target_w, target_h: Size of the drawing space inside of the canvas
+    */
+    var temp_canvas = $('<canvas>')
+	.attr('width', w).attr('height', h)[0];
+    var temp_ctx = temp_canvas.getContext('2d');
+    var imgData = temp_ctx.createImageData(w, h)
     
-    var msd = Math.pow(10, Math.floor(Math.log10(img_width/pixel_per_um)));
-    if ((img_width/pixel_per_um)/msd < 2)
-    {
-	msd = msd/10;
+    for (var i = 0; i < w*h*4; ++i) {
+	    imgData.data[i] = img[i];
     }
-    pixel_length = img_width * msd/(img_width/pixel_per_um);
-    ctx.clearRect(0, y-5, img_width, 100);
+
+    temp_ctx.putImageData(imgData, 0, 0);
+    
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(temp_canvas, 0, 0, target_w, target_h);
+    return 0;
+}
+
+function fit_canvas_to_image(canvas, img_w, img_h, bottom_padding) {
+    /* Fit an image into a canvas by modifying the width of the canvas
+       First the bottom padding is reserved, then in the remaining space the
+       image is plotted. The width of the canvas is modified to be filled
+       while the height is kept.
+
+       Returns:
+           Size of the canvas after fitting: [w, h]
+     */
+    var c_h = canvas.height;
+
+    // Resize canvas to correct aspect ratio
+    var aspect_ratio = img_w / img_h;
+    var c_w = (c_h - bottom_padding) * aspect_ratio;
+    canvas.width = c_w;
+    return [c_w, c_h];
+}
+
+function draw_scale_bar(canvas, img_width, pixel_per_um) {
+    /*
+       Draws a scale bar in in the canvas. This will use the lowest 50 pixels
+       over the whole width of the canvas. It is assumed the canvas was resized,
+       so the image fills the whole width and leaves a border of 50 pixel at the
+       bottom.
+    */
+    var ctx = canvas.getContext('2d');
+
+    var img_w_um = img_width / pixel_per_um;
+    // Get the order of the width of the image in um
+    var bar_width_um = Math.pow(10, Math.floor(Math.log10(img_w_um)));
+    // If bar_width is bigger than half the image width, make it one order
+    // smaller
+    if (img_w_um < bar_width_um * 2)
+    {
+	bar_width_um = bar_width_um / 10;
+    }
+    var bar_width = bar_width_um * pixel_per_um;
+    var bar_width_canvas = bar_width * canvas.width / img_width;
+    
+    ctx.clearRect(0, canvas.height - 50, canvas.width, canvas.height);
 		  
     ctx.beginPath();
-    ctx.moveTo(x,y);
-    ctx.lineTo(x+pixel_length,y);
+    ctx.moveTo(0, canvas.height - 40);
+    ctx.lineTo(bar_width_canvas, canvas.height - 40);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(x,y+5);
-    ctx.lineTo(x,y-5);
+    ctx.moveTo(0, canvas.height - 45);
+    ctx.lineTo(0, canvas.height - 35);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(x+pixel_length,y+5);
-    ctx.lineTo(x+pixel_length,y-5);
+    ctx.moveTo(bar_width_canvas, canvas.height - 45);
+    ctx.lineTo(bar_width_canvas, canvas.height - 35);
     ctx.stroke();
 
     ctx.font = '16px Arial';
-    ctx.fillText(msd + 'um', x, y + 20);
+    ctx.fillText(bar_width_um + 'um', 0, canvas.height - 20);
 }
 
 function draw_image_neurons_number(canvas, roi, width, height, c_w, c_h) {
@@ -130,49 +140,6 @@ function draw_image_neurons_number(canvas, roi, width, height, c_w, c_h) {
 	ctx.fillText(i, x, y);
     }
     ctx.restore();
-}
-
-function draw_image_rgba_scaled(canvas, img, w, h, c_w, c_h) {
-    /* Takes a w*h*4 long array of 32 bit RGBA pixel data and draws
-       it on the canvas. The image is scaled to the size of the canvas.
-
-       Args:
-         canvas: A canvas object as returned by getDocumentById or $('#id')[0]
-         img(w*h*4 Array): An array of length W*H*4 with values from 0-255
-	 w, h: Size of the source image
-    */
-    var temp_canvas = $('<canvas>')
-	.attr('width', w).attr('height', h)[0];
-    var temp_ctx = temp_canvas.getContext('2d');
-    var imgData = temp_ctx.createImageData(w, h)
-    
-    for (var i = 0; i < w*h*4; ++i) {
-	imgData.data[i] = img[i];
-    }
-
-    temp_ctx.putImageData(imgData, 0, 0);
-
-    var ctx = canvas.getContext('2d');
-    if (typeof c_w == 'undefined')
-    {
-	c_w = canvas.width;
-	c_h = canvas.height;
-    }
-    var scale_factor_w = c_w / w;
-    var scale_factor_h = c_h / h;
-    var scale_factor = Math.min(scale_factor_w, scale_factor_h);
-    ctx.scale(scale_factor, scale_factor);
-    if (scale_factor_w > scale_factor_h) {
-	ctx.drawImage(temp_canvas, c_w/scale_factor/2-w/2, 0);
-	ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
-	return c_w/2-w/2*scale_factor;
-    }
-    else {
-	ctx.drawImage(temp_canvas, 0, 0);
-	ctx.setTransform(1, 0, 0, 1, 0, 0); // reset scaling
-	return 0;
-    }
-    
 }
 
 /*
@@ -213,6 +180,33 @@ function greyscale16_to_normrgb(img, w, h) {
  * generating a color overlay from segmentation results
  */
 
+var label_colors = [
+    [0xff, 0x00, 0x00],
+    [0x00, 0xff, 0x00],
+    [0x00, 0x00, 0xff],
+    [0x00, 0xff, 0xff],
+    [0xff, 0x00, 0xff],
+    [0xff, 0xff, 0x00],
+    [0xff, 0x40, 0x00],
+    [0x00, 0x40, 0xff],
+    [0x40, 0x00, 0xff],
+    [0x40, 0xff, 0x00],
+    [0xff, 0x00, 0x40],
+    [0x00, 0xff, 0x40],
+    [0xff, 0x40, 0x40],
+    [0x40, 0xff, 0x40],
+    [0x40, 0x40, 0xff],
+    [0xff, 0x80, 0x00],
+    [0x00, 0x80, 0xff],
+    [0x80, 0xff, 0x00],
+    [0x80, 0x00, 0xff],
+    [0x00, 0xff, 0x80],
+    [0xff, 0x00, 0x80],
+    [0x80, 0x80, 0xff],
+    [0x80, 0xff, 0x80],
+    [0xff, 0x80, 0x80]
+]
+
 function color_roi(roi, w, h) {
     /* Take an roi map of width w, and height h and create an rgba image, which
        has each roi in a different color. The background is transparent.
@@ -245,8 +239,9 @@ function color_roi(roi, w, h) {
     return img;
 }
 
-function color_roi_borders(roi, borders, w, h) {
-    var img = color_roi(roi, w, h);
+function borders_overlay(borders, w, h) {
+    var img = new Uint8Array(w*h*4);
+    img.fill(0);
     for(var i = 0; i < w*h; i++)
     {
 	if(borders[i] == true)

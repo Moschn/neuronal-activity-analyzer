@@ -37,28 +37,21 @@ function editor_save() {
               function(data) { segmentation.borders = data; });
     var w = segmentation['width'];
     var h = segmentation['height'];
-    draw_image_rgba_scaled($('#segmented_image')[0],
-			   color_roi_borders(segmentation.segmented,
-					     segmentation.borders, w, h),
-			   w, h, $('#segmented_image')[0].width,
-			   $('#segmented_image')[0].height-70);
-
 }
 
 function draw_editor() {
     var layer0 = $('#editor_layer0')[0];
-    var layer1 = $('#editor_layer1')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
     draw_image_rgb_scaled(layer0,
 			  greyscale16_to_normrgb(segmentation.source, w, h),
-			  w, h);
+			  w, h, layer0.width, layer0.height);
     draw_image_rgba_scaled(layer0,
-			   color_roi(segmentation.editor, w, h),w, h);
+			   color_roi(segmentation.editor, w, h), w, h,
+			   layer0.width, layer0.height);
 }
 
-function redraw_editor() {
-    var layer0 = $('#editor_layer0')[0];
+function redraw_editor_overlay() {
     var layer1 = $('#editor_layer1')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
@@ -70,14 +63,16 @@ function redraw_editor() {
 					       segmentation.editor, w, h,
 					       editor_active_neuron,
 					       255, 255, 255, 80);
-	draw_image_rgba_scaled(layer1, editor_overlay, w, h);
+	draw_image_rgba_scaled(layer1, editor_overlay, w, h,
+			       layer1.width, layer1.height);
     }
     if(editor_hovered_neuron > 0) {
 	editor_overlay = roi_highlight_overlay(editor_overlay,
 					       segmentation.editor, w, h,
 					       editor_hovered_neuron,
 					       255, 255, 255, 50);
-	draw_image_rgba_scaled(layer1, editor_overlay, w, h);
+	draw_image_rgba_scaled(layer1, editor_overlay, w, h,
+			       layer1.width, layer1.height);
     }
 }
 
@@ -90,7 +85,7 @@ function editor_clicked(e) {
     var seg_y = Math.floor(y * segmentation['height'] / $(this)[0].offsetHeight);
     editor_active_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
 
-    redraw_editor();
+    redraw_editor_overlay();
 }
 $(document).ready(function() {
     $('#editor_view').click(editor_clicked);
@@ -108,7 +103,7 @@ function editor_hovered(e) {
     var seg_x = Math.floor(x * segmentation['width'] / $(this)[0].offsetWidth);
     var seg_y = Math.floor(y * segmentation['height'] / $(this)[0].offsetHeight);
     editor_hovered_neuron = (segmentation['editor'][seg_y*segmentation['width'] + seg_x]);
-    redraw_editor();
+    redraw_editor_overlay();
 }
 $(document).ready(function() {
     $('#editor_view').mousemove(editor_hovered);
@@ -130,7 +125,7 @@ function editor_keypress(e) {
 	    }
 	    editor_not_saved();
 	    draw_editor();
-	    redraw_editor();
+	    redraw_editor_overlay();
 	}
     } else if(key == 'd') {
 	if(editor_active_neuron > 0) {
@@ -143,14 +138,14 @@ function editor_keypress(e) {
 	    }
 	    editor_not_saved();
 	    draw_editor();
-	    redraw_editor();
+	    redraw_editor_overlay();
 	}
     } else if(key == 'u') {
 	if(editor_undo_stack.length > 0) {
 	    segmentation.editor = editor_undo_stack.pop();
 	    editor_not_saved();
 	    draw_editor();
-	    redraw_editor();
+	    redraw_editor_overlay();
 	}
     }
 }
