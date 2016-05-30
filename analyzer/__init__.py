@@ -84,8 +84,8 @@ def segment(loader, config):
         'source': source,
         'filtered': filtered,
         'thresholded': thresholded,
-        'borders': borders,
         'segmented': segmented,
+        'borders': borders,
     }
 
 

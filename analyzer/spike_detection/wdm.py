@@ -5,7 +5,6 @@ from .spike_detection import Spike_detection
 from math import log, sqrt
 import numpy
 from scipy.signal import ricker
-from analyzer.settings import MIN_SPIKE_WIDTH, MAX_SPIKE_WIDTH
 
 
 class WDM(Spike_detection):
