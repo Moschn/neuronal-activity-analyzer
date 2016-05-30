@@ -4,6 +4,10 @@ from os import path, listdir, makedirs
 from flask import current_app
 from threading import Lock
 
+import analyzer.settings
+
+SHELF_VERSION = 1
+
 
 class Run():
     """ This is a version of shelf, which automatically generates the path from
@@ -32,6 +36,9 @@ class Run():
     def open(self):
         Run.lock.acquire()
         self.shelf = shelve.open(self.runpath, writeback=True)
+        if('version' not in self.shelf or
+           self.shelf['version'] != SHELF_VERSION):
+            Run._update(self.shelf)
 
     def close(self):
         self.shelf.sync()
@@ -83,3 +90,25 @@ class Run():
     def _path(videoname, runname):
         return path.join(current_app.config['DATA_FOLDER'],
                          videoname + "." + runname + ".run")
+
+    @classmethod
+    def _update(cls, shelf):
+        if 'version' not in shelf:
+            old_version = 0
+        else:
+            old_version = shelf['version']
+
+        if old_version == 0:
+            if shelf['config']['spike_detection_algorithm'] == 'wavelet':
+                shelf['config']['spike_detection_algorithm'] = 'wdm'
+            if shelf['config']['spike_detection_algorithm'] == 'nSD':
+                shelf['config']['spike_detection_algorithm'] = 'ntimesstd'
+
+            if shelf['config']['segmentation_algorithm'] == 'fill':
+                shelf['config']['segmentation_algorithm'] = 'label'
+            if shelf['config']['segmentation_algorithm'] == 'randomwalk':
+                shelf['config']['segmentation_algorithm'] = 'randomwalker'
+
+        for k, v in analyzer.settings.default_config.items():
+            if k not in shelf['config']:
+                shelf['config'][k] = v
