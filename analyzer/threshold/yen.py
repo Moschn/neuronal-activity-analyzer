@@ -1,5 +1,5 @@
 from skimage.filters import threshold_yen
-from analyzer.thresholds.threshold import Threshold
+from analyzer.threshold.threshold import Threshold
 
 
 class Yen(Threshold):

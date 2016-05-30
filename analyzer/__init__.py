@@ -4,8 +4,8 @@ import analyzer.plot
 import analyzer.util
 import analyzer.segmentation
 import analyzer.segmentation.segmentation
-import analyzer.thresholds
-import analyzer.thresholds.threshold
+import analyzer.threshold
+import analyzer.threshold.threshold
 import analyzer.spike_detection
 import analyzer.spike_detection.spike_detection
 import analyzer.integrater
@@ -16,7 +16,7 @@ import csv
 import numpy
 
 thresholding_algorithms = analyzer.util.list_implementations(
-    analyzer.thresholds, analyzer.thresholds.threshold.Threshold)
+    analyzer.threshold, analyzer.threshold.threshold.Threshold)
 
 
 Loader.find_loader_class()  # all sublasses of loader get registered in loader
@@ -58,7 +58,7 @@ def segment(loader, config):
         source = loader.get_mean()
 
     # Apply gaussian filter
-    filtered = analyzer.thresholds.threshold.Threshold.gaussian_filter(
+    filtered = analyzer.threshold.threshold.Threshold.gaussian_filter(
         source, config['gauss_radius'])
 
     # Parse threshold parameter
@@ -67,7 +67,7 @@ def segment(loader, config):
     config['threshold'] = float(config['threshold'])
 
     # Apply threshold
-    thresholded = analyzer.thresholds.threshold.Threshold.threshold(
+    thresholded = analyzer.threshold.threshold.Threshold.threshold(
         filtered, config['threshold'])
 
     # Apply segmentation algorithm
@@ -78,7 +78,7 @@ def segment(loader, config):
     segmented = segmentor.get_segmentation(thresholded)
 
     # return borders as well
-    borders = analyzer.thresholds.threshold.Threshold.get_borders(segmented)
+    borders = analyzer.threshold.threshold.Threshold.get_borders(segmented)
 
     return {
         'source': source,
@@ -102,7 +102,7 @@ def calculate_activities(loader, segmented, config):
 def detect_spikes(activity, config, exposure_time):
     sd_class = analyzer.util.find_impl(
         analyzer.spike_detection,
-        analyzer.spike_detection.spike_detection.Spike_detection,
+        analyzer.spike_detection.spike_detection.SpikeDetection,
         config['spike_detection_algorithm'])
 
     spike_detector = sd_class(config, exposure_time)

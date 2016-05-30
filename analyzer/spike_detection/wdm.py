@@ -1,13 +1,13 @@
 """ Wavelet Detection Method (WDM) from
 "Spike Detection Using the Continuous Wavelet Transform"
 Authors: Nenadic, Zoran and Burdick, Joel W"""
-from .spike_detection import Spike_detection
+from .spike_detection import SpikeDetection
 from math import log, sqrt
 import numpy
 from scipy.signal import ricker
 
 
-class WDM(Spike_detection):
+class WDM(SpikeDetection):
 
     def __init__(self, config, exposure_time):
         """ Constructor

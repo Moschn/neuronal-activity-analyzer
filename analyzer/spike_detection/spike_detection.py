@@ -3,7 +3,7 @@
 from analyzer.settings import THREAD_COUNT
 
 
-class Spike_detection(object):
+class SpikeDetection(object):
     """ Base class for a spike detection algorithm. Implementations must
     overwrite all methods """
 

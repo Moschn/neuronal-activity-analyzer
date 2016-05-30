@@ -1,5 +1,5 @@
 from skimage.filters import threshold_li
-from analyzer.thresholds.threshold import Threshold
+from analyzer.threshold.threshold import Threshold
 
 
 class Li(Threshold):

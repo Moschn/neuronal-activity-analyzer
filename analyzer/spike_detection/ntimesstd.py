@@ -1,10 +1,10 @@
 
 """ N times standard deviation spike detection method """
-from .spike_detection import Spike_detection
+from .spike_detection import SpikeDetection
 import numpy
 
 
-class NTimesSTD(Spike_detection):
+class NTimesSTD(SpikeDetection):
 
     def __init__(self, config, exposure_time):
         if 'nSD_n' in config:

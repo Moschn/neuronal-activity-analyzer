@@ -174,7 +174,7 @@ def find_impl(package, base_class, name):
                                 % (attr.__name__, base_class.__name__))
             return attr
 
-    raise Exception("module %s does notimport analyzer.thresholds.threshold contain any class named %s" %
+    raise Exception("module %s does not contain any class named %s" %
                     (module.__name__, name))
 
 
