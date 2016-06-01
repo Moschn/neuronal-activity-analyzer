@@ -9,7 +9,7 @@ def normalize(activities):
         # correct the bleaching
         # Fit a linear function through the activity data
         x = numpy.arange(0, n_frames)
-        coeffs = numpy.polyfit(x, activities[i], 2)
+        coeffs = numpy.polyfit(x, activities[i], 8)
         fn = numpy.poly1d(coeffs)
         activities[i] = activities[i] - fn(x)
 

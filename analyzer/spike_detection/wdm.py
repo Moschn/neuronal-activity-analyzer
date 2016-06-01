@@ -56,6 +56,9 @@ class WDM(SpikeDetection):
             maxima_time.append(selected_max)
             i = j
 
+        while len(maxima_time) > 0 and maxima_time[0] < self.min_spike_width:
+            del maxima_time[0]
+
         return numpy.array(maxima_time)
 
     def _find_spikes(self, wavelet_transform, dataset, noise_probability):
