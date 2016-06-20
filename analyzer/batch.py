@@ -37,5 +37,7 @@ def analyze_file(filename, directory, config):
 def analyze_all_in_folder(path, config):
     for root, dirs, files in os.walk(path):
         for name in files:
-            if os.stat('{}/{}'.format(root, name)).st_size > 100000000:
+            # HACK: Prevent using config files and converted files
+            if (os.stat('{}/{}'.format(root, name)).st_size > 100000000 and
+                    not name.endswith(".cxd.tif")):
                 analyze_file(name, root, config)
