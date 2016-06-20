@@ -36,11 +36,12 @@ function receive_runs(data) {
 	disable('#runselect-container *');
 	enable('#convert-button');
     } else {
-	show_popup("Error while getting runs!", data.error);
+	show_popup("Error!", data.error);
     }
 
     // Reset button text
     $('#create-run-button').html('Create run');
+    enable($('#create-run-button'));
 }
 
 function convert_clicked() {

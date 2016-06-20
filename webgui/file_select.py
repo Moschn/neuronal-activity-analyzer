@@ -26,13 +26,16 @@ def get_runs(videoname):
 @file_select_blueprint.route('/create_run/<path:videoname>/<runname>',
                              methods=['POST'])
 def create_run(videoname, runname):
+    if runname in Run.ls(videoname):
+        return jsonify(error="A run with that name already exists!")
+
     with Run(videoname, runname) as run:
         config = analyzer.util.get_default_config()
 
         run['config'] = config
         generate_segmentation(run)
 
-    return jsonify({'runs': Run.ls(videoname)})
+    return jsonify(success=True, runs=Run.ls(videoname))
 
 
 @file_select_blueprint.route('/delete_run/<path:videoname>/<runname>',
