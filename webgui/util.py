@@ -19,7 +19,7 @@ def make_tree(path_arg):
     try:
         lst = os.scandir(path_arg)
     except OSError:
-        print("dafuq")
+        print("Warning: Failed to list directory: %s" % path_arg)
         pass  # ignore errors
     else:
         for entry in lst:
