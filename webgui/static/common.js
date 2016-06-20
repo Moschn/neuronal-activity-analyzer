@@ -15,6 +15,8 @@ var correlations = undefined;  // correlation functions for each neuron pair
 var correlation_maximas = undefined;  // maximums of those functions
 
 
+var treeData = undefined;
+
 /*
  * functions to update the trees
  */
@@ -26,6 +28,7 @@ $(document).ready(update_tree);
 
 function receive_tree(data) {
     treeData = data.nodes;
+    sort_tree(treeData);
     $('#tree').treeview({data: treeData});
     $('#tree').treeview('collapseAll', { silent: true });
     $('#tree').on('nodeSelected', node_selected);
@@ -34,6 +37,22 @@ function receive_tree(data) {
     $('#batchTree').treeview({data: treeData});
     $('#batchTree').treeview('collapseAll', { silent: true });
 }
+
+function sort_tree(treeData) {
+    if (treeData.length != 0) {
+	
+	for (var i = 0; i < treeData.length; i++) {
+	    if ('nodes' in treeData[i]) {
+		sort_tree(treeData[i].nodes);
+	    }
+	}
+	treeData.sort(function (node1, node2) {
+	    return node1.text.localeCompare(node2.text);
+	});
+    }
+}
+
+
 
 $(document).ready(function () {
     show_up_to('file_select');
