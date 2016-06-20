@@ -245,6 +245,9 @@ function plot_active_neurons() {
 		animation: false
 	    }
 	},
+	chart: {
+	    zoomType: 'x',
+	},
         series: data
     });
 
@@ -302,6 +305,9 @@ function redraw_single_activity_plot() {
             verticalAlign: 'middle',
             borderWidth: 0
         },
+	chart: {
+	    zoomType: 'x',
+	},
         series: [{
             name: 'Neuron ' + neuron,
             data: points
@@ -418,7 +424,7 @@ function draw_correlation_heatmap() {
             }
         },
 
-        series: [{
+	series: [{
             name: 'Maximum of correlation function',
             borderWidth: 1,
 	    turboThreshold: 0,
@@ -472,6 +478,9 @@ function draw_correlation_function(neuron1, neuron2) {
                 return ('delay [s]: ' + this.point.x + '<br>corr: ' + this.point.y);
             }
         },
+	chart: {
+	    zoomType: 'x',
+	},
         series: [{
 	    name: ('Correlation function (neuron ' + neuron1 +
 		   ' and ' + neuron2 + ')'),
