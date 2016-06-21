@@ -7,3 +7,4 @@ scipy
 flask
 flask-compress
 mpld3
+gevent
