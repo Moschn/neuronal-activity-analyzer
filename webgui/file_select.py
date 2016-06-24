@@ -1,5 +1,10 @@
-from flask import Blueprint, jsonify, current_app
-from os import path
+from flask import Blueprint, jsonify, current_app, send_file
+from os import walk
+import os.path
+from io import BytesIO
+import zipfile
+import zlib
+from werkzeug.security import safe_join
 
 import analyzer
 from .runs import Run
@@ -52,7 +57,7 @@ def delete_run(videoname, runname):
 def convert(videoname):
     # We convert by opening the file
     analyzer.open_video(
-        path.join(current_app.config['VIDEO_FOLDER'], videoname))
+        os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
 
     return jsonify({'success': True})
 
@@ -67,3 +72,26 @@ def get_config(videoname, runname):
     with Run(videoname, runname) as run:
         config = run['config']
     return jsonify(config)
+
+
+@file_select_blueprint.route('/download/<path:filename>', methods=['GET'])
+def download(filename):
+    path = safe_join(current_app.config['VIDEO_FOLDER'], filename)
+    print(path)
+    if not os.path.isfile(path):
+        # zip the folder
+        zip_in_memory = BytesIO()
+        with zipfile.ZipFile(zip_in_memory, 'w',
+                             compression=zipfile.ZIP_DEFLATED, ) as zf:
+            for dirpath, dirs, files in walk(path):
+                for f in files:
+                    fn = os.path.join(dirpath, f)
+                    zf.write(fn, os.path.relpath(fn, path))
+
+        zip_in_memory.seek(0)
+        zipname = os.path.basename(path) + '.zip'
+        return send_file(zip_in_memory, attachment_filename=zipname,
+                         as_attachment=True)
+    else:
+        return send_file(path, attachment_filename=os.path.basename(path),
+                         as_attachment=True)

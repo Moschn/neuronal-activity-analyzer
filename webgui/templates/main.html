@@ -1,407 +1,388 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Neuronal activity analyzer</title>
-    <script src="{{ url_for('static', filename='jquery-2.2.3.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='d3.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='mpld3.v0.2.js') }}"></script>
-    <script src="{{ url_for('static', filename='bootstrap-treeview.js') }}"></script>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
-    <script src="http://code.highcharts.com/modules/exporting.js"></script>
-    <script src="http://code.highcharts.com/modules/offline-exporting.js"></script>
-    
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <head>
+	<title>Neuronal activity analyzer</title>
+	<script src="{{ url_for('static', filename='jquery-2.2.3.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='d3.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='mpld3.v0.2.js') }}"></script>
+	<script src="{{ url_for('static', filename='bootstrap-treeview.js') }}"></script>
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/modules/heatmap.js"></script>
+	<script src="http://code.highcharts.com/modules/exporting.js"></script>
+	<script src="http://code.highcharts.com/modules/offline-exporting.js"></script>
 
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
 
-    <script src="{{ url_for('static', filename='functions.js') }}"></script>
-    <script src="{{ url_for('static', filename='graphics.js') }}"></script>
-    <script src="{{ url_for('static', filename='common.js') }}"></script>
-    <script src="{{ url_for('static', filename='batch.js') }}"></script>        
-    <script src="{{ url_for('static', filename='runselect.js') }}"></script>    
-    <script src="{{ url_for('static', filename='segmentation.js') }}"></script>
-    <script src="{{ url_for('static', filename='roi_editor.js') }}"></script>
-    <script src="{{ url_for('static', filename='statistics.js') }}"></script>
-    <script src="{{ url_for('static', filename='infoline.js') }}"></script>
-  </head>
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
-  <body>
-      <div class="container" >
-	  <div class="page-header">
-	      <h1 id="title" style="text-align: center;">Neuronal activity analyzer</h1>
-	  </div>
-	  
-	  {% with messages = get_flashed_messages() %}
-          {% if messages %}
-          <ul style="border: 2px; background-color: #EE4444;">
-	      {% for message in messages %}
-              <li>{{ message }}</li>
-	      {% endfor %}
-	  </ul>
-	  {% endif %}
-	  {% endwith %}
+	<script src="{{ url_for('static', filename='functions.js') }}"></script>
+	<script src="{{ url_for('static', filename='graphics.js') }}"></script>
+	<script src="{{ url_for('static', filename='common.js') }}"></script>
+	<script src="{{ url_for('static', filename='batch.js') }}"></script>
+	<script src="{{ url_for('static', filename='runselect.js') }}"></script>
+	<script src="{{ url_for('static', filename='segmentation.js') }}"></script>
+	<script src="{{ url_for('static', filename='roi_editor.js') }}"></script>
+	<script src="{{ url_for('static', filename='statistics.js') }}"></script>
+	<script src="{{ url_for('static', filename='infoline.js') }}"></script>
+    </head>
 
-	  <div class="modal fade" id="popup" role="dialog">
-	      <div class="modal-dialog">
-		  <div class="modal-content">
-		      <div class="modal-header">
-			  <button type="button" class="close" data-dismiss="modal">&times;</button>
-			  <h4 id="popup-title" class="modal-title"></h4>
-		      </div>
-		      <div class="modal-body">
-			  <p id="popup-content"></p>
-		      </div>
-		      <div class="modal-footer">
-			  <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
-		      </div>
-		  </div>
-	      </div>
-	  </div>
+    <body>
+	<div class="container" >
+	    <div class="page-header">
+		<h1 id="title" style="text-align: center;">Neuronal activity analyzer</h1>
+	    </div>
+	    {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul style="border: 2px; background-color: #EE4444;">
+		{% for message in messages %}
+		<li>{{ message }}</li>
+		{% endfor %}
+	    </ul>
+	    {% endif %}
+	    {% endwith %}
 
-	  <!--------------------------------------------------------------------------
-	     --
-	     -- Batch status
-	     --
-	     -------------------------------------------------------------------------->
-	  <div id="batch-status" style="display: none;">
-	      <div class="row">
-	          <div class="col-md-2" style="text-align: right;">
-		    Batch status:
-		  </div>
-		  <div class="col-md-8">
-                      <div class="progress">
-			  <div id="batch-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="70"
-			       aria-valuemin="0" aria-valuemax="100" style="width:70%">
-			  </div>
-		      </div>
-		  </div>
-		  <div class="col-md-2" style="text-align: left;">
-		      <button id="batch-stop-button" class="btn btn-danger" onclick="stop_batch_clicked()">Stop batch</button>
-		  </div>
-	      </div>
-	      <div class="well" id="batch-errors">
-	      </div>
-	      <hr/>
-	  </div>
-	  
-	  <!--------------------------------------------------------------------------
-	     --
-	     -- Run creation
-	     --
-	     -------------------------------------------------------------------------->
-	  
-	  <div id='file_select'>
-	      
-	      <p>To analyze a file, choose it from the list or upload a new file.</p>
-	      
-	      <div class="row">
-		  <div class="col-md-6">
-		      <div class="form-group">
-		          <div class="form-inline">
-			      <button id="convert-button" class="btn btn-success" disabled="1" onclick="convert_clicked()">
-				  Convert to tif</button>
-			  </div>
-			  <br>
-			  <div id="tree"></div>
-		      </div>
-		  </div>
-		  <div id="runselect-container" class="col-md-6">
-		      <div class="form-inline">
-			  <input class="form-control" type="text" id="runname"
-				 name="runname" value="default" disabled>
-			  <button id="create-run-button" class="btn btn-primary"
-				  onclick="create_run_clicked()" disabled>
-			      Create run
-			  </button>
-			  <button id="delete-run-button" class="btn btn-danger"
-				  onclick="delete_run_clicked()" disabled>
-			      Delete run
-			  </button>
-		      </div>
-		      <select id="runselect" name="runselect" size="10"
-			      class="form-control" style="margin-top:10px" disabled>
-		      </select>
-		  </div>
-	      </div>
-	  </div>
-	  <hr>
-
-	  <!--------------------------------------------------------------------------
-	     --
-	     -- Segmentation
-	     --
-	     -------------------------------------------------------------------------->
-	  
-	  <div id="segmentation" style="display: none;">
-	      <h2 style="text-align: center">Segmentation</h2>
-	      <p>
-		  In this step we find the neurons in the video. We assume they do not
-		  move and one localisation will work for all of the movie.
-	      </p>
-	      
-	      <div class="row">
-		  <div class="col-md-6">
-		      <h3>Source image</h3>
-		      <p style="text-align: justify;">Choose what data to use for segmentation. Mean is bad if some neurons are rarely active, but filters noise very well. Variance should yield good results, but might also show noise.</p>
-		      
-		      <canvas id="source_image" width="400" height="450" class="col-md-8"></canvas>
-		      <div class="col-md-4">
-			  <form>
-			      <label for="seg_select">Source for segmentation: </label>
-			      <input type="radio" name="segmentation_source" value="first_frame" id="seg_source_first_frame" onclick="segmentation_parameters_changed()">First frame<br>
-			      <input type="radio" name="segmentation_source" value="mean" id="seg_source_mean" onclick="segmentation_parameters_changed()" checked>Mean of frames<br>
-			      <input type="radio" name="segmentation_source" value="variance" id="seg_source_variance" onclick="segmentation_parameters_changed()">Variance of pixels<br>
-			  </form>
-		      </div>
-		  </div>
-		  
-		  <div class="col-md-6">
-		      <h3>Gauss filtering</h3>
-		      <p style="text-align: justify;">Here we filter noise, so random light pixels do not appear as small neurons. Increase, if axons are recognised as neurons<br>
-			  Decrease, if small neurons disappear
-		      </p>
-		      <canvas id="filtered_image" width="400" height="450" class="col-md-8"></canvas>
-		      <div class="col-md-4">
-			  
-			  <label for="gauss_radius"> Sigma radius: </label>
-			  <div class="form-inline">
-			      <input type="text" class="form-control" id="gauss_radius" name="gauss_radius" value="2.0" style="width: 100%">
-			      <input type="submit" class="form-control" onclick="segmentation_parameters_changed()" value="go">
-			  </div>
-			  
-		      </div>
-		  </div>
-	      </div>
-	      <div class="row">
-		  <div class="col-md-6">
-		      <h3>Thresholding</h3>
-		      <p style="text-align: justify;">The image is divided into background and neurons by defining a threshold. Every pixel brighter than the threshold will belong to foreground and every pixel darker to the background. There are several algorithms to choose an appropriate threshold. Click the buttons to use a value provided by an algorithm or define one manually.
-		      </p>
-		      
-		  </div>
-		  <div class="col-md-6">
-		      <h3>Segmentation Result</h3>
-		      <p style="text-align: justify;">Last we apply an algorithm to seperate neurons, which are overlapping. To just use every continuous region as one neuron, select 'fill'.
-		      </p>
-		  </div>
-	      </div>
-	      <div class="row">
-		  <div class="col-md-6">
-		      <canvas id="thresholded_image" width="400" height="450" class="col-md-8"></canvas>
-		      <div class="col-md-4">
-			  
-			  <label for="threshold">Threshold(Percent of dynamic range):</label>
-			  <input type="text" class="form-control" id="threshold" name="threshold" value="li">
-			  <div class="form-group btn-group">
-			      <input class="btn btn-default" type="submit" onclick="apply_li()" value="Li">
-			      <input class="btn btn-default" type="submit" onclick="apply_otsu()" value="Otsu">
-			      <input class="btn btn-default" type="submit" onclick="apply_yen()" value="Yen">
-			  </div>
-			  <input type="submit" onclick="segmentation_parameters_changed()" value="go" class="btn btn-primary">
-			  
-		      </div>
-		  </div>
-		  <div class="col-md-6">
-		      <canvas id="segmented_image" width="400" height="450" class="col-md-8"></canvas>
-		      <div class="col-md-4">
-			  <form>
-			      <label for="seg_algo">Algorithm: </label>
-			      <div class="form-group" id="seg_algo">
-				  <input type="radio" name="segmentation_algorithm" value="watershed" id="seg_algo_watershed" onclick="segmentation_parameters_changed()" checked>Watershed<br>
-				  <input type="radio" name="segmentation_algorithm" value="randomwalker" id="seg_algo_randomwalk" onclick="segmentation_parameters_changed()">Random walk<br>
-				  <input type="radio" name="segmentation_algorithm" value="label" id="seg_algo_fill" onclick="segmentation_parameters_changed()">Fill<br>
-			      </div>
-			  </form>
-		      </div>
-		      
-		  </div>
-	      </div>
-	      <h2 style="text-align: center">Spike Detection</h2>
-	      <div class="row">
-		  <div class="col-md-8">
-		      <form>
-			  <label for="spike_algo" class="col-sm-offset-1 col-sm-11">Algorithm: </label>
-			  <div class="form-horizontal" id="spike_algo">
-			      <div class="form-group">
-				  <div class="col-sm-offset-1 col-sm-11">
-				      <input type="radio" name="spike_algorithm" id="spike_algo_wavelet" value="wdm" onclick="segmentation_parameters_changed()"> Wavelet spike detection<br>
-
-				      <input type="radio" name="spike_algorithm" id="spike_algo_nSD" value="ntimesstd" onclick="segmentation_parameters_changed()"> N times standard deviation
-				  </div>
-			      </div>
-			      <div class="form-group" >
-				  <label for="nSD_n" class="col-sm-1 control-label"> n:   </label>
-				  <div class="col-sm-11">
-				      <input type="text" class="form-control" id="nSD_n" value="1.0" onchange="segmentation_parameters_changed()">
-				  </div>
-			      </div>
-			      <br>
-			  </div>
-		      </form>
-		  </div>
-	      </div>
-	      <div class="row">
-		  <div class="col-md-4"></div>
-		  <div class="col-md-4" style="text-align: center;">
-		      <button class="btn-lg btn-primary" data-toggle="modal" data-target="#batchFolderChooser">
-			  Use settings for batch processing
-		      </button>
-		  </div>
-		  <div class="col-md-4"></div>
-	      </div>
-	      <hr>
-	  </div>
-
-	  <div class="modal fade" id="batchFolderChooser" role="dialog">
-	      <div class="modal-dialog">
-		  <div class="modal-content">
-		      <div class="modal-header">
-			  <button type="button" class="close" data-dismiss="modal">&times;</button>
-			  <h4 class="modal-title">Choose folder to run batch on</h4>
-		      </div>
-		      <div class="modal-body">
-			  <div id="batchTree"></div>
-		      </div>
-		      <div class="modal-footer">
-			  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-			  <button id="batch-start-button" type="button" class="btn btn-success"
-				  onclick="start_batch_clicked()">Run batch</button>
-		      </div>
-		  </div>
-	      </div>
-	  </div>
-
-	  <!--------------------------------------------------------------------------
-	    --
-	    -- ROI Editor
-	    --
-	    -------------------------------------------------------------------------->
-	  
-	  <div id="roi_editor" style="display: none">
-	    <h2 style="text-align: center">ROI editor</h2>
-	    <p>
-	      In this step the segmentation can be edited for better results.
-	    </p>
-	    <div class="row">
-	      <div class="col-md-9">
-		<div id="editor_view" style="position: relative; width:800px; height:800px"
-		     tabindex="1">
-		  <canvas id='editor_layer0' width="800" height="800"
-			  style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
-		  <canvas id='editor_layer1' width="800" height="800"
-			  style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+	    <div class="modal fade" id="popup" role="dialog">
+		<div class="modal-dialog">
+		    <div class="modal-content">
+			<div class="modal-header">
+			    <button type="button" class="close" data-dismiss="modal">&times;</button>
+			    <h4 id="popup-title" class="modal-title"></h4>
+			</div>
+			<div class="modal-body">
+			    <p id="popup-content"></p>
+			</div>
+			<div class="modal-footer">
+			    <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+			</div>
+		    </div>
 		</div>
-	      </div>
-	      <div class="col-md-3">
-		<div class="well well-lg" style="display:inline-block; height: 100%; vertical-align: top">
-		  Click on a neuron to choose it.<br>
-		  <table>
-		    <tr>
-		      <td style="vertical-align: top; padding: 3px;">
-			<strong>d</strong>
-		      </td>
-		      <td style="vertical-align: top; padding: 3px;">
-			Delete the chosen neuron.
-		      </td>
-		    </tr>
-		    <tr>
-		      <td style="vertical-align: top; padding: 3px;">
-			<strong>m</strong>
-		      </td>
-		      <td style="vertical-align: top; padding: 3px;">
-			Hover over a second neuron and press this key to merge the two neurons.
-		      </td>
-		    </tr>
-		    <tr>
-		      <td style="vertical-align: top; padding: 3px;">
-			<strong>u</strong>
-		      </td>
-		      <td style="vertical-align: top; padding: 3px;">
-			Undo the last operation.
-		      </td>
-		    </tr>
-		  </table>
-		  <button id="editor_save" class="btn btn-success" onclick="editor_save()"
-			  style="display: inline;">Changes saved</button>
+	    </div>
+
+	    <!--------------------------------------------------------------------------
+	       --
+	       -- Batch status
+	       --
+	       -------------------------------------------------------------------------->
+	    <div id="batch-status" style="display: none;">
+		<div class="row">
+	            <div class="col-md-2" style="text-align: right;">
+			Batch status:
+		    </div>
+		    <div class="col-md-8">
+			<div class="progress">
+			    <div id="batch-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="70"
+				 aria-valuemin="0" aria-valuemax="100" style="width:70%">
+			    </div>
+			</div>
+		    </div>
+		    <div class="col-md-2" style="text-align: left;">
+			<button id="batch-stop-button" class="btn btn-danger" onclick="stop_batch_clicked()">Stop batch</button>
+		    </div>
 		</div>
-	      </div>
+		<div class="well" id="batch-errors">
+		</div>
+		<hr/>
+	    </div>
+	    <!--------------------------------------------------------------------------
+	       --
+	       -- Run creation
+	       --
+	       -------------------------------------------------------------------------->
+	    <div id='file_select'>
+		<p>To analyze a file, choose it from the list or upload a new file.</p>
+		<div class="row">
+		    <div class="col-md-6">
+			<div class="form-group">
+		            <div class="form-inline">
+				<button id="convert-button" class="btn btn-success" disabled="1" onclick="convert_clicked()">
+				    Convert to tif</button>
+			    </div>
+			    <br>
+			    <div id="tree"></div>
+			</div>
+		    </div>
+		    <div id="runselect-container" class="col-md-6">
+			<div class="form-inline">
+			    <input class="form-control" type="text" id="runname"
+				   name="runname" value="default" disabled>
+			    <button id="create-run-button" class="btn btn-primary"
+				    onclick="create_run_clicked()" disabled>
+				Create run
+			    </button>
+			    <button id="delete-run-button" class="btn btn-danger"
+				    onclick="delete_run_clicked()" disabled>
+				Delete run
+			    </button>
+			</div>
+			<select id="runselect" name="runselect" size="10"
+				class="form-control" style="margin-top:10px" disabled>
+			</select>
+		    </div>
+		</div>
 	    </div>
 	    <hr>
-	  </div>
-	  
-	  <!--------------------------------------------------------------------------
-	     --
-	     -- Statistics
-	     --
-	     -------------------------------------------------------------------------->
-	  <div id="statistics-button-container" style="display: none;">
-	       <div class="row">
-		 <div class="col-md-12">
-		   <button id="statistics-button" class="btn btn-primary" style="text-align: center" onclick="calculate_statistics_clicked()">
-		     Calculate statistics
-		   </button>
-		 </div>
-	       </div>
-	       <hr>
-	  </div>
-	  
-	  <div id="statistics" style="display: none;">
-	      <h2 style="text-align: center">Statistics</h2>
-	      <div class="row">
-		  <div class="col-md-5">
-		      <div id="overview" style="position: relative; width:400px; height:450px">
-			  <canvas id='statistics_layer0' width="400px" height="450px"
-				  style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
-			  <canvas id='statistics_layer1' width="400px" height="400px"
-				  style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
-		      </div>
-		  </div>
-		  <div class="col-md-7">
-		      <div class="row">
-			  <div id="plot_hovered" class="col-md-12" style="height:200px"></div>
-			  <div id="plot_active" class="col-md-12" style="height:200px"></div>
-		      </div>
-		      
-		  </div>
-	      </div>
-	      <div class="row" style="display: flex; align-items: center">
-		  <div class="col-md-10">
-		      <div id="rasterplot"></div>
-		      <form class="form-inline" id="bin_form">
-			  <div class="form-group">
-			      <label for="nr_bins">Time per bin in seconds</label>
-			      <input type="text" class="form-control" id="time_per_bin" value="1.0">
-			  </div>
-			  <button type="submit" id="bin_button" class="btn btn-default">Update</button>
-		      </form>
-		  </div>
-		  
-		  <div class="col-md-2">
-		      <button class="btn btn-primary" id="save_button" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Saving Plots">Save to NAS </button>
-		  </div>
-	      </div>
-	      <div class="row">
-		  <div class="col-md-12">
-		      <div id="correlation-heatmap"
-			   style="width: 1000px; height: 1000px; margin: auto;"></div>
-		  </div>
-	      </div>
-	      <div class="row">
-		  <div class="col-md-12">
-		      <div id="correlation-function"
-			   style="width: 600px; height: 600px; margin: auto;"></div>
-		  </div>
-	      </div>
-	    <hr>
-	  </div>
-	  
-	  <div id="infoline" style="text-align: center;"></div>
-      </div>
-  </body>
+
+	    <!--------------------------------------------------------------------------
+	       --
+	       -- Segmentation
+	       --
+	       -------------------------------------------------------------------------->
+	    <div id="segmentation" style="display: none;">
+		<h2 style="text-align: center">Segmentation</h2>
+		<p>
+		    In this step we find the neurons in the video. We assume they do not
+		    move and one localisation will work for all of the movie.
+		</p>
+		<div class="row">
+		    <div class="col-md-6">
+			<h3>Source image</h3>
+			<p style="text-align: justify;">Choose what data to use for segmentation. Mean is bad if some neurons are rarely active, but filters noise very well. Variance should yield good results, but might also show noise.</p>
+			<canvas id="source_image" width="400" height="450" class="col-md-8"></canvas>
+			<div class="col-md-4">
+			    <form>
+				<label for="seg_select">Source for segmentation: </label>
+				<input type="radio" name="segmentation_source" value="first_frame" id="seg_source_first_frame" onclick="segmentation_parameters_changed()">First frame<br>
+				<input type="radio" name="segmentation_source" value="mean" id="seg_source_mean" onclick="segmentation_parameters_changed()" checked>Mean of frames<br>
+				<input type="radio" name="segmentation_source" value="variance" id="seg_source_variance" onclick="segmentation_parameters_changed()">Variance of pixels<br>
+			    </form>
+			</div>
+		    </div>
+		    <div class="col-md-6">
+			<h3>Gauss filtering</h3>
+			<p style="text-align: justify;">Here we filter noise, so random light pixels do not appear as small neurons. Increase, if axons are recognised as neurons<br>
+			    Decrease, if small neurons disappear
+			</p>
+			<canvas id="filtered_image" width="400" height="450" class="col-md-8"></canvas>
+			<div class="col-md-4">
+			    <label for="gauss_radius"> Sigma radius: </label>
+			    <div class="form-inline">
+				<input type="text" class="form-control" id="gauss_radius" name="gauss_radius" value="2.0" style="width: 100%">
+				<input type="submit" class="form-control" onclick="segmentation_parameters_changed()" value="go">
+			    </div>
+			</div>
+		    </div>
+		</div>
+		<div class="row">
+		    <div class="col-md-6">
+			<h3>Thresholding</h3>
+			<p style="text-align: justify;">The image is divided into background and neurons by defining a threshold. Every pixel brighter than the threshold will belong to foreground and every pixel darker to the background. There are several algorithms to choose an appropriate threshold. Click the buttons to use a value provided by an algorithm or define one manually.
+			</p>
+		    </div>
+		    <div class="col-md-6">
+			<h3>Segmentation Result</h3>
+			<p style="text-align: justify;">Last we apply an algorithm to seperate neurons, which are overlapping. To just use every continuous region as one neuron, select 'fill'.
+			</p>
+		    </div>
+		</div>
+		<div class="row">
+		    <div class="col-md-6">
+			<canvas id="thresholded_image" width="400" height="450" class="col-md-8"></canvas>
+			<div class="col-md-4">
+			    <label for="threshold">Threshold(Percent of dynamic range):</label>
+			    <input type="text" class="form-control" id="threshold" name="threshold" value="li">
+			    <div class="form-group btn-group">
+				<input class="btn btn-default" type="submit" onclick="apply_li()" value="Li">
+				<input class="btn btn-default" type="submit" onclick="apply_otsu()" value="Otsu">
+				<input class="btn btn-default" type="submit" onclick="apply_yen()" value="Yen">
+			    </div>
+			    <input type="submit" onclick="segmentation_parameters_changed()" value="go" class="btn btn-primary">
+			</div>
+		    </div>
+		    <div class="col-md-6">
+			<canvas id="segmented_image" width="400" height="450" class="col-md-8"></canvas>
+			<div class="col-md-4">
+			    <form>
+				<label for="seg_algo">Algorithm: </label>
+				<div class="form-group" id="seg_algo">
+				    <input type="radio" name="segmentation_algorithm" value="watershed" id="seg_algo_watershed" onclick="segmentation_parameters_changed()" checked>Watershed<br>
+				    <input type="radio" name="segmentation_algorithm" value="randomwalker" id="seg_algo_randomwalk" onclick="segmentation_parameters_changed()">Random walk<br>
+				    <input type="radio" name="segmentation_algorithm" value="label" id="seg_algo_fill" onclick="segmentation_parameters_changed()">Fill<br>
+				</div>
+			    </form>
+			</div>
+		    </div>
+		</div>
+		<h2 style="text-align: center">Spike Detection</h2>
+		<div class="row">
+		    <div class="col-md-8">
+			<form>
+			    <label for="spike_algo" class="col-sm-offset-1 col-sm-11">Algorithm: </label>
+			    <div class="form-horizontal" id="spike_algo">
+				<div class="form-group">
+				    <div class="col-sm-offset-1 col-sm-11">
+					<input type="radio" name="spike_algorithm" id="spike_algo_wavelet" value="wdm" onclick="segmentation_parameters_changed()"> Wavelet spike detection<br>
+
+					<input type="radio" name="spike_algorithm" id="spike_algo_nSD" value="ntimesstd" onclick="segmentation_parameters_changed()"> N times standard deviation
+				    </div>
+				</div>
+				<div class="form-group" >
+				    <label for="nSD_n" class="col-sm-1 control-label"> n:   </label>
+				    <div class="col-sm-11">
+					<input type="text" class="form-control" id="nSD_n" value="1.0" onchange="segmentation_parameters_changed()">
+				    </div>
+				</div>
+				<br>
+			    </div>
+			</form>
+		    </div>
+		</div>
+		<div class="row">
+		    <div class="col-md-4"></div>
+		    <div class="col-md-4" style="text-align: center;">
+			<button class="btn-lg btn-primary" data-toggle="modal" data-target="#batchFolderChooser">
+			    Use settings for batch processing
+			</button>
+		    </div>
+		    <div class="col-md-4"></div>
+		</div>
+		<hr>
+	    </div>
+
+	    <div class="modal fade" id="batchFolderChooser" role="dialog">
+		<div class="modal-dialog">
+		    <div class="modal-content">
+			<div class="modal-header">
+			    <button type="button" class="close" data-dismiss="modal">&times;</button>
+			    <h4 class="modal-title">Choose folder to run batch on</h4>
+			</div>
+			<div class="modal-body">
+			    <div id="batchTree"></div>
+			</div>
+			<div class="modal-footer">
+			    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+			    <button id="batch-start-button" type="button" class="btn btn-success"
+				    onclick="start_batch_clicked()">Run batch</button>
+			</div>
+		    </div>
+		</div>
+	    </div>
+
+	    <!--------------------------------------------------------------------------
+	       --
+	       -- ROI Editor
+	       --
+	       -------------------------------------------------------------------------->
+	    <div id="roi_editor" style="display: none">
+		<h2 style="text-align: center">ROI editor</h2>
+		<p>
+		    In this step the segmentation can be edited for better results.
+		</p>
+		<div class="row">
+		    <div class="col-md-9">
+			<div id="editor_view" style="position: relative; width:800px; height:800px"
+			     tabindex="1">
+			    <canvas id='editor_layer0' width="800" height="800"
+				    style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
+			    <canvas id='editor_layer1' width="800" height="800"
+				    style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+			</div>
+		    </div>
+		    <div class="col-md-3">
+			<div class="well well-lg" style="display:inline-block; height: 100%; vertical-align: top">
+			    Click on a neuron to choose it.<br>
+			    <table>
+				<tr>
+				    <td style="vertical-align: top; padding: 3px;">
+					<strong>d</strong>
+				    </td>
+				    <td style="vertical-align: top; padding: 3px;">
+					Delete the chosen neuron.
+				    </td>
+				</tr>
+				<tr>
+				    <td style="vertical-align: top; padding: 3px;">
+					<strong>m</strong>
+				    </td>
+				    <td style="vertical-align: top; padding: 3px;">
+					Hover over a second neuron and press this key to merge the two neurons.
+				    </td>
+				</tr>
+				<tr>
+				    <td style="vertical-align: top; padding: 3px;">
+					<strong>u</strong>
+				    </td>
+				    <td style="vertical-align: top; padding: 3px;">
+					Undo the last operation.
+				    </td>
+				</tr>
+			    </table>
+			    <button id="editor_save" class="btn btn-success" onclick="editor_save()"
+				    style="display: inline;">Changes saved</button>
+			</div>
+		    </div>
+		</div>
+		<hr>
+	    </div>
+	    <!--------------------------------------------------------------------------
+	       --
+	       -- Statistics
+	       --
+	       -------------------------------------------------------------------------->
+	    <div id="statistics-button-container" style="display: none;">
+		<div class="row">
+		    <div class="col-md-12">
+			<button id="statistics-button" class="btn btn-primary" style="text-align: center" onclick="calculate_statistics_clicked()">
+			    Calculate statistics
+			</button>
+		    </div>
+		</div>
+		<hr>
+	    </div>
+	    <div id="statistics" style="display: none;">
+		<h2 style="text-align: center">Statistics</h2>
+		<div class="row">
+		    <div class="col-md-5">
+			<div id="overview" style="position: relative; width:400px; height:450px">
+			    <canvas id='statistics_layer0' width="400px" height="450px"
+				    style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
+			    <canvas id='statistics_layer1' width="400px" height="400px"
+				    style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+			</div>
+		    </div>
+		    <div class="col-md-7">
+			<div class="row">
+			    <div id="plot_hovered" class="col-md-12" style="height:200px"></div>
+			    <div id="plot_active" class="col-md-12" style="height:200px"></div>
+			</div>
+		    </div>
+		</div>
+		<div class="row" style="display: flex; align-items: center">
+		    <div class="col-md-10">
+			<div id="rasterplot"></div>
+			<form class="form-inline" id="bin_form">
+			    <div class="form-group">
+				<label for="nr_bins">Time per bin in seconds</label>
+				<input type="text" class="form-control" id="time_per_bin" value="1.0">
+			    </div>
+			    <button type="submit" id="bin_button" class="btn btn-default">Update</button>
+			</form>
+		    </div>
+		    <div class="col-md-2">
+			<button class="btn btn-primary" id="download_button">Download results</button>
+			<br><br>
+			<button class="btn btn-primary" id="save_button" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Saving Plots">Save to NAS</button>
+		    </div>
+		</div>
+		<div class="row">
+		    <div class="col-md-12">
+			<div id="correlation-heatmap"
+			     style="width: 1000px; height: 1000px; margin: auto;"></div>
+		    </div>
+		</div>
+		<div class="row">
+		    <div class="col-md-12">
+			<div id="correlation-function"
+			     style="width: 600px; height: 600px; margin: auto;"></div>
+		    </div>
+		</div>
+		<hr>
+	    </div>
+	    <div id="infoline" style="text-align: center;"></div>
+	</div>
+    </body>
 </html>

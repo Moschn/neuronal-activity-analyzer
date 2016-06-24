@@ -199,6 +199,16 @@ $(document).ready(function() {
     });
 });
 
+$(document).ready(function() {
+    $('#download_button').on('click', function() {
+	var btn = $(this).button('loading');
+	$.post('/save_plots/' + videoname + "/" + run, function(){
+	    window.location.href = "/download/" + videoname + "-analysis";
+	    btn.button('reset');
+	});
+    });
+});
+
 function plot_active_neurons() {
     data = new Array();
     statistics_active_neurons.forEach(function (neuron) {
