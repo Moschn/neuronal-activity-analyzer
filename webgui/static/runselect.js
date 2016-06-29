@@ -91,3 +91,32 @@ function delete_run_clicked() {
     }
     return false;
 }
+
+
+var timestarted = undefined;
+$(function () {
+    'use strict';
+    $('#fileupload').fileupload({
+	url: '/upload',
+        dataType: 'json',
+        done: function (e, data) {
+            $.each(data.result.files, function (index, file) {
+                $('<p/>').text(file.name).appendTo(document.body);
+            });
+        },
+	progressall: function (e, data) {
+	    if (timestarted == undefined) {
+		timestarted = new Date().getTime();
+	    }
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .progress-bar').css(
+                'width',
+                progress + '%'
+            );
+	    $('#progress-content').html(progress + '%');
+	    var speed = data.loaded / (new Date().getTime() - timestarted) / 8;
+	    $('#speed').html(speed + "KB/s");
+        }
+    });//.prop('disabled', !$.support.fileInput)
+       // .parent().addClass($.support.fileInput ? undefined : 'disabled');
+});
