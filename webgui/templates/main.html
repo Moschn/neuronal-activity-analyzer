@@ -2,10 +2,17 @@
 <html>
     <head>
 	<title>Neuronal activity analyzer</title>
-	<script src="{{ url_for('static', filename='jquery-2.2.3.min.js') }}"></script>
-	<script src="{{ url_for('static', filename='d3.min.js') }}"></script>
+	<script src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" crossorigin="anonymous"></script>
 	<script src="{{ url_for('static', filename='mpld3.v0.2.js') }}"></script>
-	<script src="{{ url_for('static', filename='bootstrap-treeview.js') }}"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-treeview/1.2.0/bootstrap-treeview.min.js"></script>
+
+	<script src="{{ url_for('static', filename='jqueryUploader/js/vendor/jquery.ui.widget.js') }}"></script>
+	<script src="{{ url_for('static', filename='jqueryUploader/js/jquery.iframe-transport.js') }}"></script>
+	<script src="{{ url_for('static', filename='jqueryUploader/js/jquery.fileupload.js') }}"></script>
+	<link rel="stylesheet" href="{{ url_for('static', filename='jqueryUploader/css/jquery.fileupload.css') }}">
+	
+	
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 	<script src="https://code.highcharts.com/modules/heatmap.js"></script>
 	<script src="http://code.highcharts.com/modules/exporting.js"></script>
@@ -101,8 +108,23 @@
 		            <div class="form-inline">
 				<button id="convert-button" class="btn btn-success" disabled="1" onclick="convert_clicked()">
 				    Convert to tif</button>
+				
 			    </div>
 			    <br>
+			    
+			    <div class="row">
+				<div class="col-md-4">
+				    <input id="fileupload" type="file" name="files[]">
+				</div>
+				<div class="col-md-8">
+				    <div id="progress" class="progress" style="min-width: 2em;">
+					<div id="progress-content" class="progress-bar progress-bar-success"></div>
+				    </div>
+				</div>
+			    </div>
+			    
+			    <br>
+			    <span id="speed"> </span>
 			    <div id="tree"></div>
 			</div>
 		    </div>
@@ -120,7 +142,7 @@
 			    </button>
 			</div>
 			<select id="runselect" name="runselect" size="10"
-				class="form-control" style="margin-top:10px" disabled>
+class="form-control" style="margin-top:10px" disabled>
 			</select>
 		    </div>
 		</div>
