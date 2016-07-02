@@ -27,6 +27,7 @@ def create_app():
 
     # Create folders if they don't exist
     folders = [app.config['VIDEO_FOLDER'],
+               app.config['UPLOAD_FOLDER'],
                app.config['DATA_FOLDER']]
     for folder in folders:
         if not os.path.isdir(folder):

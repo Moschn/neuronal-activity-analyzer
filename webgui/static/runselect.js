@@ -103,6 +103,9 @@ $(function () {
             $.each(data.result.files, function (index, file) {
                 $('<p/>').text(file.name).appendTo(document.body);
             });
+	    if (data.result.files.error != undefined) {
+		alert(data.result.files.error);
+	    }
         },
 	progressall: function (e, data) {
 	    if (timestarted == undefined) {

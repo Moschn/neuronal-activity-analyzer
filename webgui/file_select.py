@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 import analyzer
 from .runs import Run
 from .segmentation import generate_segmentation
-from .util import make_tree
+from .util import make_tree, folder_size
 
 ALLOWED_EXTENSIONS = set(['tif', '.cxd'])
 
@@ -126,13 +126,35 @@ def upload():
         return jsonify(response)
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(current_app.config['UPLOAD_FOLDER'],
-                               "upload",
-                               filename))
+        fn = os.path.join(current_app.config['UPLOAD_FOLDER'],
+                          filename)
+        file.save(fn)
+
+        # check if quota in the upload folder has been reached
+        if folder_size(current_app.config['UPLOAD_FOLDER']) \
+           > current_app.config['UPLOAD_MAX_SIZE']:
+            os.remove(fn)
+            response = {}
+            response['files'] = {}
+            response['files']['name'] = 'empty'
+            response['files']['size'] = '0'
+            response['files']['error'] = ('The maximum quota in the upload ' +
+                                          'folder has been reached. try ' +
+                                          'again in a few days')
+            return jsonify(response)
+
+        else:                   # sucess
+            response = {}
+            response['files'] = {}
+            response['files']['name'] = filename
+            response['files']['size'] = os.stat(fn)
+            response['files']['url'] = '/download/' + filename
+            # response['files']['thumbnailUrl'] = '/favicon.ico'
+            return jsonify(response)
+    else:
         response = {}
         response['files'] = {}
-        response['files']['name'] = filename
-        response['files']['size'] = os.stat(filename)
-        response['files']['url'] = '/download/' + filename
-        # response['files']['thumbnailUrl'] = '/favicon.ico'
+        response['files']['name'] = 'empty'
+        response['files']['size'] = '0'
+        response['files']['error'] = 'Extension not allowed'
         return jsonify(response)

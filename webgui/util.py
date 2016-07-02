@@ -34,3 +34,15 @@ def make_tree(path_arg):
     if not tree['nodes']:
         return {}
     return tree
+
+""" This functions returns the size of the given folder in bytes """
+def folder_size(path):
+    lst = os.scandir(path)
+    size = 0
+    for entry in lst:
+        fn = os.path.join(path, entry.name)
+        if os.path.isdir(fn):
+            size += folder_size(fn)
+        else:
+            size += os.path.getsize(fn)
+    return size
