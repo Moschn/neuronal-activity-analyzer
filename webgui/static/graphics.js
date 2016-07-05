@@ -128,16 +128,208 @@ function draw_scale_bar(canvas, img_width, pixel_per_um) {
     ctx.fillText(bar_width_um + 'um', 0, canvas.height - 20);
 }
 
+/*
+ * Drawing numbers onto an image
+ */
+
+function line_intersection(x1, y1, x2, y2, x3, y3, x4, y4) {
+    // from https://jsfiddle.net/justin_c_rounds/Gd2S2/
+    // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+    var denominator, a, b, numerator1, numerator2, result = {
+        x: null,
+        y: null,
+        onLine1: false,
+        onLine2: false
+    };
+    denominator = ((y4 - y3) * (x2 - x1)) - ((x4 - x3) * (y2 - y1));
+    if (denominator == 0) {
+        return result;
+    }
+    a = y1 - y3;
+    b = x1 - x3;
+    numerator1 = ((x4 - x3) * a) - ((y4 - y3) * b);
+    numerator2 = ((x2 - x1) * a) - ((y2 - y1) * b);
+    a = numerator1 / denominator;
+    b = numerator2 / denominator;
+
+    // if we cast these lines infinitely in both directions, they intersect here:
+    result.x = x1 + (a * (x2 - x1));
+    result.y = y1 + (a * (y2 - y1));
+
+    // if line1 is a segment and line2 is infinite, they intersect if:
+    if (a > 0 && a < 1) {
+        result.onLine1 = true;
+    }
+    // if line2 is a segment and line1 is infinite, they intersect if:
+    if (b > 0 && b < 1) {
+        result.onLine2 = true;
+    }
+    // if line1 and line2 are segments, they intersect if both of the above are true
+    return result;
+};
+
+function intersect_line_rect(rx, ry, w, h, x1, y1, x2, y2) {
+    /* find the intersection of a line and a rectangle given the line has one
+     * end in the rectangle
+     */
+    var intersect = line_intersection(rx, ry, rx + w, ry, x1, y1, x2, y2);
+    if(intersect.onLine1 && intersect.onLine2)
+	return [intersect.x, intersect.y];
+    var intersect = line_intersection(rx + w, ry, rx + w, ry + h, x1, y1, x2, y2);
+    if(intersect.onLine1 && intersect.onLine2)
+	return [intersect.x, intersect.y];
+    var intersect = line_intersection(rx + w, ry + h, rx, ry + h, x1, y1, x2, y2);
+    if(intersect.onLine1 && intersect.onLine2)
+	return [intersect.x, intersect.y];
+    var intersect = line_intersection(rx, ry + h, rx, ry, x1, y1, x2, y2);
+    if(intersect.onLine1 && intersect.onLine2)
+	return [intersect.x, intersect.y];
+
+    // No intersection, just return original end
+    return [x2, y2];
+}
+
+function is_rect_empty(occupation, occ_w, occ_h, x, y, w, h) {
+    // Check if on screen
+    if(x < 0 || y < 0 || x + w > occ_w || y + h > occ_h)
+	return false;
+
+    for(var i = x; i < x + w; i++)
+	for(var j = y; j < y + h; j++)
+	    if(occupation[i + j*occ_w] != 0)
+		return false;
+    return true;
+}
+
+function fill_rect(occupation, occ_w, occ_h, x, y, w, h) {
+    for(var i = x; i < x + w; i++)
+	for(var j = y; j < y + h; j++)
+	    occupation[i + j*occ_w] = 1;
+}
+
+function find_empty_rect_on_line(occupation, occ_w, occ_h, x1, y1, x2, y2, w, h) {
+    var steps = 10; // How many points we try on the line
+
+    for(var i = 0; i < steps; i++) {
+	var x = Math.round(x1 + (x2 - x1) * (i / steps));
+	var y = Math.round(y1 + (y2 - y1) * (i / steps));
+	if(is_rect_empty(occupation, occ_w, occ_h, x, y, w, h))
+	    return [x, y];
+    }
+
+    return false;
+}
+
+function alloc_rect_near(occupation, occ_w, occ_h, x, y, w, h) {
+    /* Find a free rectangle of size w x h near the coordinates (x,y) and occupy
+     * it. Return the center of the area.
+     */
+    var dist = Math.max(w, h); // Start with a distance big enough to not overlap with the center
+
+    while(dist < occ_w && dist < occ_h) {
+	var coords = find_empty_rect_on_line(occupation, occ_w, occ_h,
+					     x - dist, y - dist,
+					     x + dist, y - dist,
+					     w, h);
+	if(coords !== false)
+	    break;
+
+	coords = find_empty_rect_on_line(occupation, occ_w, occ_h,
+					 x + dist, y - dist,
+					 x + dist, y + dist,
+					 w, h);
+	if(coords !== false)
+	    break;
+
+	coords = find_empty_rect_on_line(occupation, occ_w, occ_h,
+					 x + dist, y + dist,
+					 x - dist, y + dist,
+					 w, h);
+	if(coords !== false)
+	    break;
+
+	coords = find_empty_rect_on_line(occupation, occ_w, occ_h,
+					 x - dist, y + dist,
+					 x - dist, y - dist,
+					 w, h);
+	if(coords !== false)
+	    break;
+
+	dist += 3; // Try at a 3 pixel bigger distance
+    }
+
+    if(coords === false) {
+	// No suitable location was found, just give the center back
+	return [x, y];
+    }
+
+    fill_rect(occupation, occ_w, occ_h, coords[0], coords[1], w, h);
+    return coords;
+}
+
 function draw_image_neurons_number(canvas, roi, width, height, c_w, c_h) {
+    var n_neurons = arrayMax(roi);
+
+    // Start by finding all neuron centers
+    var neurons_xsum = new Array(n_neurons + 1).fill(0);
+    var neurons_ysum = new Array(n_neurons + 1).fill(0);
+    var neurons_pixel_count = new Array(n_neurons + 1).fill(0);
+
+    for(var x = 0; x < width; x++)
+	for(var y = 0; y < height; y++) {
+	    var neuron = roi[y * width + x];
+	    neurons_xsum[neuron] += x;
+	    neurons_ysum[neuron] += y;
+	    neurons_pixel_count[neuron] += 1;
+	}
+
+    var neuron_centers = new Array(n_neurons + 1);
+    for(var n = 0; n <= n_neurons; n++) {
+	neuron_centers[n] = [neurons_xsum[n] / neurons_pixel_count[n],
+			     neurons_ysum[n] / neurons_pixel_count[n]];
+    }
+
+    // Make a map of occupied space
+    var occupation = roi.slice();
+
+    // Now draw numbers and make lines to the centers of the neurons
     var ctx = canvas.getContext('2d');
     ctx.save();
     ctx.fillStyle = 'white';
-    for (var i = 1; i <= arrayMax(roi); i++) {
-	var idx = roi.indexOf(i);
-	var x = (idx % width) * c_w/width + 10;
-	var y = (Math.floor(idx / width)) * c_h/height + 10;
+    ctx.textBaseline = 'top';
+    for (var n = 1; n <= n_neurons; n++) {
+	// Find location to draw the number
+	var number_size = ctx.measureText(n);
+	var number_coord = alloc_rect_near(occupation, width, height,
+					   neuron_centers[n][0], neuron_centers[n][1],
+					   number_size.width + 10, 25 // We assume 20 pixels height of font
+					  );
+
+	// Show the allocated area
+	//ctx.strokeStyle="#FF0000";
+	//ctx.strokeRect(number_coord[0]/width*c_w, number_coord[1]/height*c_h, (number_size.width + 10)/width*c_w, 25/height*c_h);
+
+	// Draw line from center to label
+	var num_center_x = number_coord[0] + (number_size.width + 10) / 2;
+	var num_center_y = number_coord[1] + 12;
+
+	var end_point = intersect_line_rect(number_coord[0] + 3, number_coord[1] + 2,
+					    number_size.width, 20,
+					    neuron_centers[n][0], neuron_centers[n][1],
+					    num_center_x, num_center_y);
+
+	ctx.beginPath();
+	ctx.strokeStyle = "#FFFFFF";
+	ctx.moveTo(neuron_centers[n][0] / width * c_w,
+		   neuron_centers[n][1] / height * c_h);
+	ctx.lineTo(end_point[0] / width * c_w, end_point[1] / height * c_h);
+	ctx.stroke();
+
+	// Draw the label
+	ctx.fillText(n, (number_coord[0] + 3) / width * c_w,
+		     (number_coord[1] + 2) / height * c_h);
+
 	
-	ctx.fillText(i, x, y);
     }
     ctx.restore();
 }
