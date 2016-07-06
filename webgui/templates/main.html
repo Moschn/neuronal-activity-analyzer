@@ -72,6 +72,20 @@
 
 	    <!--------------------------------------------------------------------------
 	       --
+	       -- Progress indicator
+	       --
+	       -------------------------------------------------------------------------->
+
+	    <div id="progress-popup" style="float: right; position: fixed; bottom: 20px; right: 20px;">
+	      <div class="modal-content">
+		<div class="modal-body" style="text-align: center;">
+		  <img style="width: 50px;" src="{{ url_for('static', filename='inprogress.gif') }}">
+		</div>
+	      </div>
+	    </div>
+
+	    <!--------------------------------------------------------------------------
+	       --
 	       -- Batch status
 	       --
 	       -------------------------------------------------------------------------->
@@ -351,6 +365,14 @@ class="form-control" style="margin-top:10px" disabled>
 			<button id="statistics-button" class="btn btn-primary" style="text-align: center" onclick="calculate_statistics_clicked()">
 			    Calculate statistics
 			</button>
+		    </div>
+		</div>
+		<hr>
+	    </div>
+	    <div id="statistics-progress-indicator" style="display: none;">
+		<div class="row">
+		    <div class="col-md-12">
+			<img style="margin: 0 auto; display: block;" src="{{ url_for('static', filename='inprogress.gif') }}">
 		    </div>
 		</div>
 		<hr>

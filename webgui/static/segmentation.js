@@ -62,6 +62,7 @@ function receive_segmentations(data) {
 
     draw_editor();
     redraw_editor_overlay();
+    hide_progress_indicator();
 }
 
 function apply_li() {
@@ -104,4 +105,5 @@ function segmentation_parameters_changed() {
 	       nSD_n: nSD_n
 	   },
 	   receive_segmentations, 'json');
+    show_progress_indicator();
 }

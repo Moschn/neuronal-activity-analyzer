@@ -45,21 +45,25 @@ function show_up_to(stage) {
 	$('#segmentation')[0].style.display = 'none';
 	$('#roi_editor')[0].style.display = 'none';
 	$('#statistics-button-container')[0].style.display = 'none';
+	$('#statistics-progress-indicator')[0].style.display = 'none';
 	$('#statistics')[0].style.display = 'none';
     } else if (stage =='segmentation') {
 	$('#segmentation')[0].style.display = '';
 	$('#roi_editor')[0].style.display = 'none';
 	$('#statistics-button-container')[0].style.display = 'none';
+	$('#statistics-progress-indicator')[0].style.display = 'none';
 	$('#statistics')[0].style.display = 'none';
     } else if (stage =='roi_editor') {
 	$('#segmentation')[0].style.display = '';
 	$('#roi_editor')[0].style.display = '';
 	$('#statistics-button-container')[0].style.display = '';
+	$('#statistics-progress-indicator')[0].style.display = 'none';
 	$('#statistics')[0].style.display = 'none';
     } else if (stage =='statistics') {
 	$('#segmentation')[0].style.display = '';
 	$('#roi_editor')[0].style.display = '';
 	$('#statistics-button-container')[0].style.display = '';
+	$('#statistics-progress-indicator')[0].style.display = 'none';
 	$('#statistics')[0].style.display = '';
     }
 }
@@ -70,6 +74,14 @@ function enable(obj) {
 
 function disable(obj) {
     $(obj).attr('disabled', 'disabled');
+}
+
+function show_progress_indicator() {
+    $("#progress-popup")[0].style.display = '';
+}
+
+function hide_progress_indicator() {
+    $("#progress-popup")[0].style.display = 'none';
 }
 
 /*

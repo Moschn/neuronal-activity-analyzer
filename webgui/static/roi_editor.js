@@ -21,6 +21,7 @@ function changes_saved() {
     $('#editor_save')[0].className = 'btn btn-success';
     editor_saved = true;
     show_up_to('roi_editor');
+    hide_progress_indicator();
 }
 
 function editor_save() {
@@ -37,6 +38,7 @@ function editor_save() {
               function(data) { segmentation.borders = data; });
     var w = segmentation['width'];
     var h = segmentation['height'];
+    show_progress_indicator();
 }
 
 function draw_editor() {

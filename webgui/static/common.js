@@ -23,6 +23,7 @@ var treeData = undefined;
 
 function update_tree() {
     $.getJSON('/get_tree/', receive_tree);
+    show_progress_indicator();
 }
 $(document).ready(update_tree);
 
@@ -36,6 +37,7 @@ function receive_tree(data) {
     // Repeat for the batch path choosing tree
     $('#batchTree').treeview({data: treeData});
     $('#batchTree').treeview('collapseAll', { silent: true });
+    hide_progress_indicator();
 }
 
 function sort_tree(treeData) {

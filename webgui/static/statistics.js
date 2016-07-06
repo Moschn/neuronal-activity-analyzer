@@ -18,9 +18,8 @@ function calculate_statistics_clicked() {
     current_stage = 'statistics';
     $.getJSON('/get_statistics/' + videoname + '/' + run, receive_statistics);
     
-    var button = $('#statistics-button');
-    button.html('Calculating...');
-    button[0].disabled = 'disabled';
+    $('#statistics-button-container')[0].style.display = 'none';
+    $('#statistics-progress-indicator')[0].style.display = '';
 }
 
 $(document).ready(function() {

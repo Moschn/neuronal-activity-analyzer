@@ -14,6 +14,7 @@ function node_selected(event, node) {
 
     // Update the list of runs for that file
     $.getJSON('/get_runs/' + videoname, receive_runs);
+    show_progress_indicator();
 }
 
 function receive_runs(data) {
@@ -42,6 +43,7 @@ function receive_runs(data) {
     // Reset button text
     $('#create-run-button').html('Create run');
     enable($('#create-run-button'));
+    hide_progress_indicator();
 }
 
 function convert_clicked() {
@@ -51,6 +53,7 @@ function convert_clicked() {
     }, 'json');
     disable('#convert-button');
     $('#convert-button').html('Converting...');
+    show_progress_indicator();
 }
 
 
@@ -72,6 +75,7 @@ function run_clicked() {
 
     $.getJSON('/get_segmentation/' + videoname + '/' + run,
 	      receive_segmentations);
+    show_progress_indicator();
 }
 
 function create_run_clicked() {
@@ -80,7 +84,8 @@ function create_run_clicked() {
 	   receive_runs, 'json');
 
     disable('#create-run-button');
-    $('#create-run-button').html('Creating run...');    
+    $('#create-run-button').html('Creating run...');
+    show_progress_indicator();
 }
 
 function delete_run_clicked() {
@@ -88,6 +93,7 @@ function delete_run_clicked() {
 		      + run + '"?')) {
 	$.post('/delete_run/' + videoname + '/' + run, {},
 	       receive_runs, 'json');
+	show_progress_indicator();
     }
     return false;
 }
