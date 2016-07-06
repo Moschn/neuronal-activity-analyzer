@@ -26,7 +26,7 @@ def get_thresholds(image):
     """ Returns a dictionary of the li, otsu and yen thresholds for an image
     """
     result = {}
-    for k, v in thresholding_algorithms:
+    for k, v in thresholding_algorithms.items():
         thresholder = v()
         result[k.lower()] = thresholder.get_threshold(image)
     return result

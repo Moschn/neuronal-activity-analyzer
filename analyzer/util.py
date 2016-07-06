@@ -181,7 +181,7 @@ def find_impl(package, base_class, name):
 def list_implementations(package, base_class):
     """ Given a package(or a module containing modules) list all subclasses of
     base_class implemented in those submodules """
-    impls = []
+    impls = {}
     searchpath = package.__path__._path
 
     for _, mod_name, _ in pkgutil.iter_modules(searchpath):
@@ -195,6 +195,6 @@ def list_implementations(package, base_class):
             if(issubclass(attr, base_class) and
                attr != base_class and
                attr_name not in impls):
-                impls.append((attr_name, attr))
+                impls[attr_name] = attr
 
     return impls

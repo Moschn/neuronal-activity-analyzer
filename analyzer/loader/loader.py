@@ -114,11 +114,10 @@ class Loader(object):
         """ Register all loader class to automatically use for correct filetypes
         """
         load_classes = analyzer.util.list_implementations(analyzer.loader, cls)
-        for k, v in load_classes:
+        for k, v in load_classes.items():
             loader_types.append(v)
 
 loader_types = []
-
 
 
 def open(path, typ=None):
