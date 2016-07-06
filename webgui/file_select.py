@@ -59,10 +59,16 @@ def delete_run(videoname, runname):
 @file_select_blueprint.route('/convert/<path:videoname>', methods=['POST'])
 def convert(videoname):
     # We convert by opening the file
-    analyzer.open_video(
+    success = analyzer.loader.bioformat_loader.BioFormatLoader.convert_bg(
         os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
 
-    return jsonify({'success': True})
+    return jsonify({'success': success})
+
+
+@file_select_blueprint.route('/get_conversion_progress', methods=['GET'])
+def get_conversion_progress():
+    return jsonify(analyzer.loader.bioformat_loader
+                   .BioFormatLoader.get_conversion_progress())
 
 
 @file_select_blueprint.route('/get_tree/')

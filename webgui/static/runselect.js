@@ -2,6 +2,8 @@
  * Run management
  */
 
+var conversion_in_progress = false;
+
 function node_selected(event, node) {
     var new_videoname = get_selected_file_from_tree($('#tree'), node);
 
@@ -47,15 +49,56 @@ function receive_runs(data) {
 }
 
 function convert_clicked() {
-    $.post('/convert/' + videoname, {}, function() {
-	$('#convert-button').html('Convert');
-	update_tree();
+    $.post('/convert/' + videoname, {}, function (data) {
+	if(data.success) {
+	    update_conversion_progress();
+	    hide_progress_indicator();
+	} else {
+	    show_popup("Conversion failed", "Is it maybe already converted?");
+	    enable('#convert-button');
+	    $('#convert-button').html('Convert');
+	    hide_progress_indicator();
+	    conversion_in_progress = false;
+	}
     }, 'json');
     disable('#convert-button');
     $('#convert-button').html('Converting...');
     show_progress_indicator();
+    conversion_in_progress = true;
 }
 
+function update_conversion_progress() {
+    $.getJSON('/get_conversion_progress', receive_conversion_progress);
+}
+$(document).ready(update_conversion_progress);
+
+function receive_conversion_progress(data) {
+    if (data.finished !== true) {
+	// Conversion is running, show progress bar;
+	$('#conversion-progress-bar').css('width', data.progress+'%')
+	    .attr('aria-valuenow', data.progress);
+	$('#conversion-status-label').html('' + data.progress + '%');
+	$('#conversion-status').css('display', '');
+
+	disable('#convert-button');
+	$('#convert-button').html('Converting...');
+
+	setTimeout(update_conversion_progress, 2000);
+    } else {
+	if(data.error !== undefined) {
+	    show_popup("Could not convert file!", data.error);
+	}
+	$('#conversion-status').css('display', 'none');
+
+	if(conversion_in_progress) {
+	    // This is not executed when requesting after page loading
+	    enable('#convert-button');
+	    $('#convert-button').html('Convert');
+	    update_tree();
+	    conversion_in_progress = false;
+	}
+    }
+}
 
 $(document).ready(function(){
     $(document).on('click', '#runselect', run_clicked);

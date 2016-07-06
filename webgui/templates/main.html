@@ -119,10 +119,19 @@
 		<div class="row">
 		    <div class="col-md-6">
 			<div class="form-group">
-		            <div class="form-inline">
-				<button id="convert-button" class="btn btn-success" disabled="1" onclick="convert_clicked()">
-				    Convert to tif</button>
-				
+		            <div class="row" style="display: flex; align-items: center;">
+				<div class="col-md-4">
+				    <button id="convert-button" class="btn btn-success" disabled="1" onclick="convert_clicked()">
+					Convert to tif</button>
+				</div>
+				<div class="col-md-8">
+				    <div id="conversion-status" class="progress" style="display: none; text-align: center;">
+					<div id="conversion-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="70"
+					     aria-valuemin="0" aria-valuemax="100">
+					</div>
+					<span id="conversion-status-label" style="position: absolute; left: 0; right: 0;"></span>
+				    </div>
+				</div>
 			    </div>
 			    <br>
 			    
