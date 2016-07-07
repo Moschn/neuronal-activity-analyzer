@@ -32,9 +32,12 @@ function get_selected_file_from_tree(tree, node) {
  * Popups and display
  */
 
-function show_popup(title, content) {
+function show_popup(title, content, width) {
+    if(width == undefined)
+	width = 600;
     $('#popup-title').html(title);
     $('#popup-content').html(content);
+    $('#popup').children(".modal-dialog")[0].style.width = width;
     $('#popup').modal('toggle');
 }
 
@@ -82,6 +85,42 @@ function show_progress_indicator() {
 
 function hide_progress_indicator() {
     $("#progress-popup")[0].style.display = 'none';
+}
+
+/*
+ * Fullscreen plots
+ */
+
+var fullscreen_plot_old_parent = undefined;
+
+function fullscreen_plot(plotdiv) {
+    /* Displays the plot in the supplied div in a bootstrap modal */
+    fullscreen_plot_old_parent = plotdiv;
+    var highcharts_container = plotdiv.children(".highcharts-container");
+    var chart = plotdiv.highcharts();
+
+    // Show big popup
+    show_popup("Plot", "<div id=\"popup-plot\"></div>", '80%');
+    $("#popup-plot").height($(window).height() - 250);
+
+    // Move plot to the modal popup
+    highcharts_container.appendTo($("#popup-plot"));
+    chart.renderTo = $("#popup-plot")[0];
+    // Reflow the chart, when the modal animation finished
+    setTimeout(function (chart) { chart.reflow(); }, 200, chart);
+
+    // Set a handler to move the chart back when closing the modal
+    $("#popup").on("hide.bs.modal", function (e) {
+	$("#popup-plot").children(".highcharts-container")
+			.appendTo(fullscreen_plot_old_parent);
+	var chart = fullscreen_plot_old_parent.highcharts();
+	chart.renderTo = fullscreen_plot_old_parent[0];
+	chart.reflow();
+    });
+}
+
+function activate_dblclick_zoom(plotdiv) {
+    plotdiv.children(".highcharts-container").on("dblclick", fullscreen_plot.bind(undefined, plotdiv));
 }
 
 /*

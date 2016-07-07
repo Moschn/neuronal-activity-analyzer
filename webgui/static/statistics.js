@@ -259,6 +259,7 @@ function plot_active_neurons() {
 	},
         series: data
     });
+    activate_dblclick_zoom($("#plot_active"));
 
     var c_index = 0;
     statistics_active_neurons.forEach(function (neuron) {
@@ -322,6 +323,7 @@ function redraw_single_activity_plot() {
             data: points
         }]
     });
+    activate_dblclick_zoom($("#plot_hovered"));
     if (typeof spikes[neuron-1] != 'undefined')
     {
 	for(var i = 0; i < spikes[neuron-1].length; ++i) {
@@ -496,6 +498,7 @@ function draw_correlation_function(neuron1, neuron2) {
             data: data
         }]
     });
+    activate_dblclick_zoom($("#correlation-function"));
     chart.highcharts().xAxis[0].addPlotLine({
 	color: 'red',
 	value: correlation_maximas[neuron1-1][neuron2-1][0],
