@@ -115,7 +115,20 @@
 	       --
 	       -------------------------------------------------------------------------->
 	    <div id='file_select'>
-		<p>To analyze a file, choose it from the list or upload a new file.</p>
+		<p>Welcome to the Neuronal activity analyzer, a tool for automated statistical analysis of Calcium Imaging Data.
+		    This tool aids in interpreting data aquired with flourescence imaging of activity in small neuronal cultures.</p>
+		<p>Analysis is done in 3 steps. First a video file is uploaded and an analysis session is created. We call such an analysis session
+		    a run. Runs are saved and can be viewed again later. You can always close your browser window and continue where you left by
+		    selecting the same run again.</p>
+		<p>In the second step we localize the neurons, then a refinement of the localization can be made in a simple editor. Finally results
+		    can be viewed and downloaded.</p>
+		<p>To analyze a file, choose it from the list or upload a new file. The file needs to be loadable by the "pillow" library
+		    (see <a href="http://pillow.readthedocs.io/en/3.2.x/handbook/image-file-formats.html">here</a>), we recommend the
+		    tiff format. If the file is in the cxd format, it can be converted to tiff using the convert button.</p>
+		<p>The tool is Open Source software and can be used and extended freely. If you want to analyse your own data, we recommend running it
+		    locally or on a server you have a fast connection to.
+		    <a href="https://github.com/Moschn/neuronal-activity-analyzer">The source code and documentation can be found on Github</a>.
+		<hr>
 		<div class="row">
 		    <div class="col-md-6">
 			<div class="form-group">
@@ -186,7 +199,28 @@ class="form-control" style="margin-top:10px" disabled>
 		<div class="row">
 		    <div class="col-md-6">
 			<h3>Source image</h3>
-			<p style="text-align: justify;">Choose what data to use for segmentation. Mean is bad if some neurons are rarely active, but filters noise very well. Variance should yield good results, but might also show noise.</p>
+			<p style="text-align: justify;">
+			    Choose what data to use for segmentation.
+			</p>
+			<p style="text-align: justify;">
+			    To make it simple, we create one image, which should contain all neurons. The primitive solution is to take the first frame.
+			    However in that frame some neurons might not be visible. For better results choose to use the mean of all frames or the variance.
+			    Those two modes will apply the statistic for the complete video and try to make all neurons visible this way.
+			</p>
+			<p style="text-align: justify;">
+			    Mean is bad if some neurons are rarely active, but filters noise very well. Variance should yield good results, but might also show noise.
+			</p>
+		    </div>
+		    <div class="col-md-6">
+			<h3>Gauss filtering</h3>
+			<p style="text-align: justify;">Here we filter noise, so random light pixels do not appear as small neurons.<br>
+			    Increase, if axons are recognised as neurons<br>
+			    Decrease, if small neurons disappear
+			</p>
+		    </div>
+		</div>
+		<div class="row">
+		    <div class="col-md-6">
 			<div class="col-md-8">
 			    <canvas id="source_image" width="400" height="450" style="margin: 0 auto; display: block;"></canvas>
 			</div>
@@ -200,10 +234,6 @@ class="form-control" style="margin-top:10px" disabled>
 			</div>
 		    </div>
 		    <div class="col-md-6">
-			<h3>Gauss filtering</h3>
-			<p style="text-align: justify;">Here we filter noise, so random light pixels do not appear as small neurons. Increase, if axons are recognised as neurons<br>
-			    Decrease, if small neurons disappear
-			</p>
 			<div class="col-md-8">
 			    <canvas id="filtered_image" width="400" height="450" style="margin: 0 auto; display: block;"></canvas>
 			</div>
@@ -221,10 +251,15 @@ class="form-control" style="margin-top:10px" disabled>
 			<h3>Thresholding</h3>
 			<p style="text-align: justify;">The image is divided into background and neurons by defining a threshold. Every pixel brighter than the threshold will belong to foreground and every pixel darker to the background. There are several algorithms to choose an appropriate threshold. Click the buttons to use a value provided by an algorithm or define one manually.
 			</p>
+			<p style="text-align: justify;">The values "li", "otsu" and "yen" and any number are valid values. If you use the batch processing feature li, otsu and yen thresholds will be calculated for each video individually if given as the algorithm name.</p>
 		    </div>
 		    <div class="col-md-6">
 			<h3>Segmentation Result</h3>
-			<p style="text-align: justify;">Last we apply an algorithm to seperate neurons, which are overlapping. To just use every continuous region as one neuron, select 'fill'.
+			<p style="text-align: justify;">
+			    Last we apply an algorithm to seperate neurons, which are overlapping.
+			</p>
+			<p style="text-align: justify;">
+			    To just use every continuous region as one neuron, select 'fill'. More information about the <a href="https://en.wikipedia.org/wiki/Watershed_(image_processing)">watershed</a> and <a href="https://en.wikipedia.org/wiki/Random_walker_algorithm">random walker</a> algorithms can be found for example on wikipedia.
 			</p>
 		    </div>
 		</div>
@@ -261,6 +296,8 @@ class="form-control" style="margin-top:10px" disabled>
 		    </div>
 		</div>
 		<h2 style="text-align: center">Spike Detection</h2>
+		<p>We will try to detect spikes in the activity. Currently two methods are available. The easy way is to call everything brighter than a certain threshold a spike. We do this in terms of standard deviations. For this algorithm you need to provide a threshold to use. Good values are probably somewhere in the range 1 to 5.</p>
+		<p>The more advanced method is to use wavelets to detect spikes. A function which is supposed to look like a normal spike is matched with the signal at different offsets and scaling factors. Regions of high similarity are recognized as spikes. For more details see the <a href="https://github.com/Moschn/neuronal-activity-analyzer/blob/master/docs/automated_analysis_of_neuronal_cultures.pdf">report on Github</a>.</p>
 		<div class="row">
 		    <div class="col-md-8">
 			<form>
@@ -287,6 +324,7 @@ class="form-control" style="margin-top:10px" disabled>
 		<div class="row">
 		    <div class="col-md-4"></div>
 		    <div class="col-md-4" style="text-align: center;">
+			<p>If you have many similar files, you can try to run the settings set above on all files in a folder with this button.</p>
 			<button class="btn-lg btn-primary" data-toggle="modal" data-target="#batchFolderChooser">
 			    Use settings for batch processing
 			</button>
@@ -323,7 +361,7 @@ class="form-control" style="margin-top:10px" disabled>
 	    <div id="roi_editor" style="display: none">
 		<h2 style="text-align: center">ROI editor</h2>
 		<p>
-		    In this step the segmentation can be edited for better results.
+		    In this step the segmentation can be edited for better results. See the controls on the right.
 		</p>
 		<div class="row">
 		    <div class="col-md-9">
@@ -402,6 +440,7 @@ class="form-control" style="margin-top:10px" disabled>
 	    </div>
 	    <div id="statistics" style="display: none;">
 		<h2 style="text-align: center">Statistics</h2>
+		<p>Now we hope to present some interesting results! <b>Click and drag on a plot to zoom in or double click to enlarge it!</b></p>
 		<div class="row">
 		    <div class="col-md-5">
 			<div id="overview" style="position: relative; width:400px; height:450px; display: block; margin: 0 auto;">
