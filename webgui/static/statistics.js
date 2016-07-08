@@ -8,6 +8,8 @@ var statistics_last_hovered_neuron = 1;
 
 var statistics_overlay = undefined;
 
+var initiated_calculation = false;
+
 function calculate_statistics_clicked() {
     if(!editor_saved) {
 	if(!confirm('You have unsaved changes in the ROI editor? Calculate statistics anyway?')) {
@@ -17,6 +19,7 @@ function calculate_statistics_clicked() {
     
     current_stage = 'statistics';
     $.getJSON('/get_statistics/' + videoname + '/' + run, receive_statistics);
+    initiated_calculation = true;
 
     setTimeout(update_statistics_progress, 500);
     disable($("#statistics-button"));
@@ -27,9 +30,7 @@ function update_statistics_progress() {
 }
 
 function receive_statistics_progress(data) {
-    if(data.finished === true) {
-	enable($("#statistics-button"));
-    } else {
+    if(data.running === true) {
 	$('#statistics-button-container')[0].style.display = 'none';
 	$('#statistics-progress-indicator')[0].style.display = '';
 
@@ -47,6 +48,12 @@ function receive_statistics_progress(data) {
 	$('#statistics-progress-label').html(label);
 
 	setTimeout(update_statistics_progress, 500);
+    } else {
+	enable($("#statistics-button"));
+	if(data.finished && !initiated_calculation) {
+	    // pull the results
+	    $.getJSON('/get_statistics/' + videoname + '/' + run, receive_statistics);
+	}
     }
 }
 
@@ -159,6 +166,10 @@ $(document).ready(function() {
 });
 
 function receive_statistics(data) {
+    // reset initiated_calculation
+    initiated_calculation = false;
+    current_stage = 'statistics';
+
     if (data.success !== undefined) {
 	// Save the data
 	activities = data.activities;

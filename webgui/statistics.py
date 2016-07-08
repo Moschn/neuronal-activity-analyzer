@@ -82,9 +82,6 @@ def get_statistics(videoname, runname):
                                          segmentation['source'],
                                          loader.pixel_per_um)
 
-        with running_calculations_lock:
-            del running_calculations[videoname][runname]
-
         # Build response
         response = {}
         response['activities'] = activities.tolist()
@@ -109,6 +106,9 @@ def get_statistics(videoname, runname):
             # Set initial binsize to 1
             run['time_per_bin'] = 1
 
+        with running_calculations_lock:
+            del running_calculations[videoname][runname]
+
         return jsonify(**response)
     except Exception:
         return jsonify(fail=traceback.format_exc())
@@ -118,9 +118,14 @@ def get_statistics_progress(videoname, runname):
     with running_calculations_lock:
         if (videoname not in running_calculations or
             runname not in running_calculations[videoname]):
-            return jsonify(finished=True)
+            # It is not running, check if we have results
+            with Run(videoname, runname) as run:
+                stats = run['statistics']
+                if stats is not None:
+                    return jsonify(running=False, finished=True)
+            return jsonify(running=False, finished=False)
 
-        response = {'finished': False}
+        response = {'running': True, 'finished': False}
         state = running_calculations[videoname][runname]['state']
         response['progress'] = state
         if state == 'Processing frames':

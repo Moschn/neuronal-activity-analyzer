@@ -63,6 +63,8 @@ function receive_segmentations(data) {
     draw_editor();
     redraw_editor_overlay();
     hide_progress_indicator();
+
+    update_statistics_progress();
 }
 
 function apply_li() {
