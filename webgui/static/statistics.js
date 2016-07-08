@@ -39,10 +39,15 @@ $(document).ready(function() {
 
 function statistics_draw_overview() {
     var layer0 = $('#statistics_layer0')[0];
+    var layer1 = $('#statistics_layer1')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
 
     var canvas_size = fit_canvas_to_image(layer0, w, h, 50);
+    fit_canvas_to_image(layer1, w, h, 0);
+    // Empty div width must be set using CSS, as it will not show when using
+    // HTML attributes. Therefore we can't use fit_element_to_image
+    $("#overview").width(canvas_size[0]);
     draw_image_rgb_scaled(layer0,
 			  greyscale16_to_normrgb(segmentation.source, w, h),
 			  w, h, canvas_size[0], canvas_size[1] - 50);
@@ -58,7 +63,6 @@ function statistics_redraw_overview_overlays() {
     var layer1 = $('#statistics_layer1')[0];
     var w = segmentation['width'];
     var h = segmentation['height'];
-    var canvas_size = fit_canvas_to_image(layer1, w, h, 0);
     
     var layer1_ctx = layer1.getContext('2d');
     layer1_ctx.clearRect(0, 0, layer1.width, layer1.height);
@@ -68,7 +72,7 @@ function statistics_redraw_overview_overlays() {
 						   statistics_hovered_neuron,
 						   255, 255, 255, 120);
 	draw_image_rgba_scaled(layer1, statistics_overlay, w, h,
-			       canvas_size[0], canvas_size[1]);
+			       layer1.width, layer1.height);
     }
     statistics_active_neurons.forEach(function (neuron) {
 	statistics_overlay = roi_highlight_overlay(statistics_overlay,
@@ -76,7 +80,7 @@ function statistics_redraw_overview_overlays() {
 						   neuron,
 						   255, 255, 255, 80);
 	draw_image_rgba_scaled(layer1, statistics_overlay, w, h,
-			       canvas_size[0], canvas_size[1]);
+			       layer1.width, layer1.height);
     })
 }
 

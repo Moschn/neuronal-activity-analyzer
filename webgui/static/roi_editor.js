@@ -49,6 +49,9 @@ function draw_editor() {
 
     var canvas_size = fit_canvas_to_image(layer0, w, h, 0);
     fit_canvas_to_image(layer1, w, h, 0);
+    // Empty div width must be set using CSS, as it will not show when using
+    // HTML attributes. Therefore we can't use fit_element_to_image
+    $("#editor_view").width(canvas_size[0]);
     draw_image_rgb_scaled(layer0,
 			  greyscale16_to_normrgb(segmentation.source, w, h),
 			  w, h, canvas_size[0], canvas_size[1]);

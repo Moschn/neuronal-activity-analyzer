@@ -187,7 +187,9 @@ class="form-control" style="margin-top:10px" disabled>
 		    <div class="col-md-6">
 			<h3>Source image</h3>
 			<p style="text-align: justify;">Choose what data to use for segmentation. Mean is bad if some neurons are rarely active, but filters noise very well. Variance should yield good results, but might also show noise.</p>
-			<canvas id="source_image" width="400" height="450" class="col-md-8"></canvas>
+			<div class="col-md-8">
+			    <canvas id="source_image" width="400" height="450" style="margin: 0 auto; display: block;"></canvas>
+			</div>
 			<div class="col-md-4">
 			    <form>
 				<label for="seg_select">Source for segmentation: </label>
@@ -202,7 +204,9 @@ class="form-control" style="margin-top:10px" disabled>
 			<p style="text-align: justify;">Here we filter noise, so random light pixels do not appear as small neurons. Increase, if axons are recognised as neurons<br>
 			    Decrease, if small neurons disappear
 			</p>
-			<canvas id="filtered_image" width="400" height="450" class="col-md-8"></canvas>
+			<div class="col-md-8">
+			    <canvas id="filtered_image" width="400" height="450" style="margin: 0 auto; display: block;"></canvas>
+			</div>
 			<div class="col-md-4">
 			    <label for="gauss_radius"> Sigma radius: </label>
 			    <div class="form-inline">
@@ -226,7 +230,9 @@ class="form-control" style="margin-top:10px" disabled>
 		</div>
 		<div class="row">
 		    <div class="col-md-6">
-			<canvas id="thresholded_image" width="400" height="450" class="col-md-8"></canvas>
+			<div class="col-md-8">
+			    <canvas id="thresholded_image" width="400" height="450" style="margin: 0 auto; display: block;"></canvas>
+			</div>
 			<div class="col-md-4">
 			    <label for="threshold">Threshold(Percent of dynamic range):</label>
 			    <input type="text" class="form-control" id="threshold" name="threshold" value="li">
@@ -239,7 +245,9 @@ class="form-control" style="margin-top:10px" disabled>
 			</div>
 		    </div>
 		    <div class="col-md-6">
-			<canvas id="segmented_image" width="400" height="450" class="col-md-8"></canvas>
+			<div class="col-md-8">
+			    <canvas id="segmented_image" width="400" height="450" style="margin: 0 auto; display: block;"></canvas>
+			</div>
 			<div class="col-md-4">
 			    <form>
 				<label for="seg_algo">Algorithm: </label>
@@ -319,7 +327,7 @@ class="form-control" style="margin-top:10px" disabled>
 		</p>
 		<div class="row">
 		    <div class="col-md-9">
-			<div id="editor_view" style="position: relative; width:800px; height:800px"
+			<div id="editor_view" style="position: relative; width:800px; height:800px; display: block; margin: 0 auto;"
 			     tabindex="1">
 			    <canvas id='editor_layer0' width="800" height="800"
 				    style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
@@ -390,10 +398,10 @@ class="form-control" style="margin-top:10px" disabled>
 		<h2 style="text-align: center">Statistics</h2>
 		<div class="row">
 		    <div class="col-md-5">
-			<div id="overview" style="position: relative; width:400px; height:450px">
-			    <canvas id='statistics_layer0' width="400px" height="450px"
+			<div id="overview" style="position: relative; width:400px; height:450px; display: block; margin: 0 auto;">
+			    <canvas id='statistics_layer0' width="400" height="450"
 				    style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
-			    <canvas id='statistics_layer1' width="400px" height="400px"
+			    <canvas id='statistics_layer1' width="400" height="400"
 				    style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
 			</div>
 		    </div>
