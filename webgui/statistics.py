@@ -2,6 +2,7 @@ from flask import Blueprint, current_app, jsonify, request
 import os.path
 import time
 import traceback
+from threading import Lock
 
 from .runs import Run
 import analyzer
@@ -13,6 +14,8 @@ import mpld3
 statistics_blueprint = Blueprint('statistics', __name__,
                                  template_folder='templates')
 
+running_calculations = {}
+running_calculations_lock = Lock()
 
 @statistics_blueprint.route('/get_statistics/<path:videoname>/<runname>')
 def get_statistics(videoname, runname):
@@ -28,26 +31,48 @@ def get_statistics(videoname, runname):
             exposure_time = run['exposure_time']
 
         # Load the file
+        with running_calculations_lock:
+            running_calculations[videoname] = {}
+            running_calculations[videoname][runname] = {}
+            running_calculations[videoname][runname]['state'] = 'Loading'
         loader = analyzer.open_video(
             os.path.join(current_app.config['VIDEO_FOLDER'], videoname))
 
         # Calculate the activities
         integration_start = time.time()
-        activities = analyzer.calculate_activities(
-            loader, segmentation['editor'], config)
-        activities = normalize(activities)
+        integrater_class = analyzer.util.find_impl(
+            analyzer.integrater,
+            analyzer.integrater.integrater.Integrater,
+            config['integrater'])
+
+        integrater = integrater_class(segmentation['editor'])
+        with running_calculations_lock:
+            running_calculations[videoname][runname]['state'] = 'Processing frames'
+            running_calculations[videoname][runname]['integrater'] = integrater
+        activities = integrater.process_parallel_frames(loader)
         integration_time = time.time() - integration_start
 
+        with running_calculations_lock:
+            del running_calculations[videoname][runname]['integrater']
+            running_calculations[videoname][runname]['state'] = 'Normalizing'
+        activities = normalize(activities)
+
         # Detect spikes in the activities
+        with running_calculations_lock:
+            running_calculations[videoname][runname]['state'] = 'Spike Detection'
         spike_detection_start = time.time()
         spikes = analyzer.detect_spikes(activities, config, exposure_time)
         spike_detection_time = time.time() - spike_detection_start
 
         # Calculate correlation functions
+        with running_calculations_lock:
+            running_calculations[videoname][runname]['state'] = 'Correlation'
         correlations_start = time.time()
         correlations = correlate_activities(activities, config, exposure_time)
         correlation_time = time.time() - correlations_start
 
+        with running_calculations_lock:
+            running_calculations[videoname][runname]['state'] = 'Plotting'
         # Generate the rasterplot of the spikes
         fig_raster = analyzer.plot.plot_rasterplot(spikes,
                                                    exposure_time,
@@ -56,6 +81,9 @@ def get_statistics(videoname, runname):
         fig_roi = analyzer.plot.plot_roi(segmentation['editor'],
                                          segmentation['source'],
                                          loader.pixel_per_um)
+
+        with running_calculations_lock:
+            del running_calculations[videoname][runname]
 
         # Build response
         response = {}
@@ -85,6 +113,24 @@ def get_statistics(videoname, runname):
     except Exception:
         return jsonify(fail=traceback.format_exc())
 
+@statistics_blueprint.route('/get_statistics_progress/<path:videoname>/<runname>')
+def get_statistics_progress(videoname, runname):
+    with running_calculations_lock:
+        if (videoname not in running_calculations or
+            runname not in running_calculations[videoname]):
+            return jsonify(finished=True)
+
+        response = {'finished': False}
+        state = running_calculations[videoname][runname]['state']
+        response['progress'] = state
+        if state == 'Processing frames':
+            frames_done, frames_total = (
+                running_calculations[videoname][runname]['integrater']
+                .get_progress())
+            response['frames_done'] = frames_done
+            response['frames_total'] = frames_total
+
+        return jsonify(response)
 
 @statistics_blueprint.route(
     '/get_statistics_rasterplot/<path:videoname>/<runname>',

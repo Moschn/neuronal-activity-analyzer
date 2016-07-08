@@ -17,9 +17,37 @@ function calculate_statistics_clicked() {
     
     current_stage = 'statistics';
     $.getJSON('/get_statistics/' + videoname + '/' + run, receive_statistics);
-    
-    $('#statistics-button-container')[0].style.display = 'none';
-    $('#statistics-progress-indicator')[0].style.display = '';
+
+    setTimeout(update_statistics_progress, 500);
+    disable($("#statistics-button"));
+}
+
+function update_statistics_progress() {
+    $.getJSON('/get_statistics_progress/' + videoname + '/' + run, receive_statistics_progress);
+}
+
+function receive_statistics_progress(data) {
+    if(data.finished === true) {
+	enable($("#statistics-button"));
+    } else {
+	$('#statistics-button-container')[0].style.display = 'none';
+	$('#statistics-progress-indicator')[0].style.display = '';
+
+	var value = 100;
+	var label = data.progress;
+	if(data.progress == 'Loading' || data.progress == 'Processing frames')
+	    value = 0;
+	if(data.frames_done !== undefined) {
+	    value = 100 * data.frames_done / data.frames_total;
+	    label += '(' + data.frames_done + '/' + data.frames_total + ')';
+	}
+
+	$('#statistics-progress-bar').css('width', value + "%")
+	    .attr('aria-valuenow', value);
+	$('#statistics-progress-label').html(label);
+
+	setTimeout(update_statistics_progress, 500);
+    }
 }
 
 $(document).ready(function() {

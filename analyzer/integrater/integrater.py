@@ -23,15 +23,27 @@ class Integrater(object):
 
         raise NotImplemented
 
+    def get_progress(self):
+        """ Get the progress while process_parallel_frames is running """
+        if not hasattr(self, 'progress_lock'):
+            return (0, 0)
+
+        with self.progress_lock:
+            return (self.progress_frames, self.frame_count)
+
     def process_parallel_frames(self, loader):
         try:  # python 3.5
             from concurrent.futures import ThreadPoolExecutor
-            frame_count = loader.frame_count()
-            activities = numpy.zeros((frame_count, numpy.amax(self.roi)))
+            self.frame_count = loader.frame_count()
+            activities = numpy.zeros((self.frame_count, numpy.amax(self.roi)))
             loader.lock = Lock()
+
+            self.progress_lock = Lock()
+            self.progress_frames = 0
+
             with ThreadPoolExecutor(max_workers=THREAD_COUNT) as executor:
                 futures = [executor.submit(self._load_process_frame, loader, i)
-                           for i in range(0, frame_count)]
+                           for i in range(0, self.frame_count)]
                 for future in futures:
                     (index, activity) = future.result()
                     activities[index, :] = activity
@@ -48,4 +60,8 @@ class Integrater(object):
     def _load_process_frame(self, loader, idx):
         with loader.lock:
             frame = loader.get_frame(idx)
-        return (idx, self.process_frame(frame))
+        processed = self.process_frame(frame)
+        if(hasattr(self, 'progress_lock')):
+            with self.progress_lock:
+                self.progress_frames += 1
+        return (idx, processed)
