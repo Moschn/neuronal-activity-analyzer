@@ -59,9 +59,9 @@ class BioFormatLoader(PILLoader):
             return {'finished': True}
 
         if returncode != None:
-            cls.convert_process = None
             print("Conversion failed with output %s!"
                   % cls.convert_process.stderr.read())
+            cls.convert_process = None
             return {'finished': True, 'error': "Conversion process failed!"}
 
         # The progress is of the format (x%) in the last line of output
