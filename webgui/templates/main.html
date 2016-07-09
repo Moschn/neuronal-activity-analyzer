@@ -222,7 +222,7 @@ class="form-control" style="margin-top:10px" disabled>
 		<div class="row">
 		    <div class="col-md-6">
 			<div class="col-md-8">
-			    <canvas id="source_image" width="400" height="450" style="margin: 0 auto; display: block;"></canvas>
+			    <canvas id="source_image" width="400"  style="margin: 0 auto; display: block;"></canvas>
 			</div>
 			<div class="col-md-4">
 			    <form>
@@ -235,7 +235,7 @@ class="form-control" style="margin-top:10px" disabled>
 		    </div>
 		    <div class="col-md-6">
 			<div class="col-md-8">
-			    <canvas id="filtered_image" width="400" height="450" style="margin: 0 auto; display: block;"></canvas>
+			    <canvas id="filtered_image" width="400"  style="margin: 0 auto; display: block;"></canvas>
 			</div>
 			<div class="col-md-4">
 			    <label for="gauss_radius"> Sigma radius: </label>
@@ -266,7 +266,7 @@ class="form-control" style="margin-top:10px" disabled>
 		<div class="row">
 		    <div class="col-md-6">
 			<div class="col-md-8">
-			    <canvas id="thresholded_image" width="400" height="450" style="margin: 0 auto; display: block;"></canvas>
+			    <canvas id="thresholded_image" width="400"  style="margin: 0 auto; display: block;"></canvas>
 			</div>
 			<div class="col-md-4">
 			    <label for="threshold">Threshold(Percent of dynamic range):</label>
@@ -281,7 +281,7 @@ class="form-control" style="margin-top:10px" disabled>
 		    </div>
 		    <div class="col-md-6">
 			<div class="col-md-8">
-			    <canvas id="segmented_image" width="400" height="450" style="margin: 0 auto; display: block;"></canvas>
+			    <canvas id="segmented_image" width="400"  style="margin: 0 auto; display: block;"></canvas>
 			</div>
 			<div class="col-md-4">
 			    <form>
@@ -365,11 +365,11 @@ class="form-control" style="margin-top:10px" disabled>
 		</p>
 		<div class="row">
 		    <div class="col-md-9">
-			<div id="editor_view" style="position: relative; width:800px; height:800px; display: block; margin: 0 auto;"
+			<div id="editor_view" style="position: relative; width:100%; display: block; margin: 0 auto;"
 			     tabindex="1">
-			    <canvas id='editor_layer0' width="800" height="800"
+			    <canvas id='editor_layer0'
 				    style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
-			    <canvas id='editor_layer1' width="800" height="800"
+			    <canvas id='editor_layer1'
 				    style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
 			</div>
 		    </div>
@@ -444,7 +444,7 @@ class="form-control" style="margin-top:10px" disabled>
 		<div class="row">
 		    <div class="col-md-5">
 			<div id="overview" style="position: relative; width:400px; height:450px; display: block; margin: 0 auto;">
-			    <canvas id='statistics_layer0' width="400" height="450"
+			    <canvas id='statistics_layer0' width="400" 
 				    style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
 			    <canvas id='statistics_layer1' width="400" height="400"
 				    style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>

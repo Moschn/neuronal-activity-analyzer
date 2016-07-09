@@ -77,11 +77,45 @@ function fit_canvas_to_image(canvas, img_w, img_h, bottom_padding) {
        Returns:
            Size of the canvas after fitting: [w, h]
      */
-    var c_h = canvas.height;
-
+    var c_w_full = parseInt($(canvas).parent().css('width'), 10);
+    var c_w_padding_left = parseInt($(canvas).parent().css('padding-left'), 10);
+    var c_w_padding_right = parseInt($(canvas).parent().css('padding-right'), 10);
+    var c_w = c_w_full - c_w_padding_left - c_w_padding_right;
+    
     // Resize canvas to correct aspect ratio
     var aspect_ratio = img_w / img_h;
-    var c_w = (c_h - bottom_padding) * aspect_ratio;
+    var c_h = c_w / aspect_ratio + bottom_padding;
+    if (c_h -bottom_padding > c_w) {
+	c_h = c_w + bottom_padding;
+	c_w = (c_h - bottom_padding) * aspect_ratio;
+    }
+    canvas.height = c_h;
+    canvas.width = c_w;
+    return [c_w, c_h];
+}
+
+function fit_canvas_to_image_grandparent(canvas, img_w, img_h, bottom_padding) {
+    /* Fit an image into a canvas by modifying the width of the canvas
+       First the bottom padding is reserved, then in the remaining space the
+       image is plotted. The width of the canvas is modified to be filled
+       while the height is kept.
+
+       Returns:
+           Size of the canvas after fitting: [w, h]
+     */
+    var c_w_full = parseInt($(canvas).parent().parent().css('width'), 10);
+    var c_w_padding_left = parseInt($(canvas).parent().parent().css('padding-left'), 10);
+    var c_w_padding_right = parseInt($(canvas).parent().parent().css('padding-right'), 10);
+    var c_w = c_w_full - c_w_padding_left - c_w_padding_right;
+    
+    // Resize canvas to correct aspect ratio
+    var aspect_ratio = img_w / img_h;
+    var c_h = c_w / aspect_ratio + bottom_padding;
+    if (c_h -bottom_padding > c_w) {
+	c_h = c_w + bottom_padding;
+	c_w = (c_h - bottom_padding) * aspect_ratio;
+    }
+    canvas.height = c_h;
     canvas.width = c_w;
     return [c_w, c_h];
 }
