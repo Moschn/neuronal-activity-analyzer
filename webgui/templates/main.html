@@ -323,6 +323,7 @@ class="form-control" style="margin-top:10px" disabled>
 			</form>
 		    </div>
 		</div>
+		{% if not config.DEMO_MODE %}
 		<div class="row">
 		    <div class="col-md-4"></div>
 		    <div class="col-md-4" style="text-align: center;">
@@ -333,6 +334,7 @@ class="form-control" style="margin-top:10px" disabled>
 		    </div>
 		    <div class="col-md-4"></div>
 		</div>
+		{% endif %}
 		<hr>
 	    </div>
 
@@ -472,8 +474,10 @@ class="form-control" style="margin-top:10px" disabled>
 		    </div>
 		    <div class="col-md-2">
 			<button class="btn btn-primary" id="download_button">Download results</button>
+			{% if not config.DEMO_MODE %}
 			<br><br>
 			<button class="btn btn-primary" id="save_button" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Saving Plots">Save to NAS</button>
+			{% endif %}
 		    </div>
 		</div>
 		<div class="row">
