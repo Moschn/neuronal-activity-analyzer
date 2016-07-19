@@ -25,7 +25,7 @@ A virtual environment can be created and all dependencies installed using:
 
 An easy way to use the tool is by running the development server with:
 
-    ./guidevserver.py
+    ./flask_server.py
 
 Note that you have to activate the environment again, if you left the shell after installation, by running:
 
@@ -34,19 +34,19 @@ Note that you have to activate the environment again, if you left the shell afte
 ## Deployment
 Using the standard webserver of flask (werkzeug):
 
-    python3 guidevserver.py
+    python3 flask_server.py
 
 or
 
-    ./guidevserver.py
+    ./flask_server.py
 
 For the gevent server:
 
-    python3 server.py
+    python3 gevent_server.py
 
 or
 
-    ./server.py
+    ./gevent_server.py
 
 ## Dependencies
 
