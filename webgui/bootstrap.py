@@ -18,11 +18,11 @@ def disable_cache(response):
     return response
 
 
-def create_app():
+def create_app(configpath):
     app = Flask('Neuronal activity analyzer',
                 template_folder='templates',
                 static_folder='webgui/static')
-    app.config.from_pyfile('webconfig.py')
+    app.config.from_pyfile(configpath)
     app.secret_key = app.config['SECRET_KEY']
 
     # Create folders if they don't exist
