@@ -36,7 +36,12 @@ class PILLoader(Loader):
         return numpy.array(self.im)
 
     def frame_count(self):
-        return self.im.n_frames
+        try:
+            metadata = self.im.tag_v2[270].split("\n")
+            if metadata[1].startswith("images="):
+                return int(metadata[1][7:])
+        except:
+            return self.im.n_frames
 
     # def get_metadata(self):
     #     f = open(self.path, 'rb')
