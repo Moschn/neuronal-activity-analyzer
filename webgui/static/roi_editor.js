@@ -31,10 +31,10 @@ function editor_save() {
     $('#rasterplot').html('');
     $('#plot').html('');
     statistics_active_neurons = [];
-    $.post('/set_edited_segmentation/' + videoname + '/' + run,
+    $.post('set_edited_segmentation/' + videoname + '/' + run,
 	   { edited_segmentation: encoded_data },
 	   changes_saved);
-    $.getJSON('/get_borders/' + videoname + '/' + run,
+    $.getJSON('get_borders/' + videoname + '/' + run,
               function(data) { segmentation.borders = data; });
     var w = segmentation['width'];
     var h = segmentation['height'];

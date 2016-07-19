@@ -7,7 +7,7 @@ function start_batch_clicked() {
 	$('#batchTree'),
 	$('#batchTree').treeview('getSelected')[0]);
     
-    $.post('/start_batch/' + videoname + '/' + run, {batch_folder: batch_path},
+    $.post('start_batch/' + videoname + '/' + run, {batch_folder: batch_path},
 	   receive_batch_started, 'json');
 
     $('#batch-start-button').html('Starting batch...');
@@ -33,7 +33,7 @@ function receive_batch_started(data) {
 }
 
 function stop_batch_clicked() {
-    $.post('/stop_batch', {}, receive_batch_stopping, 'json');
+    $.post('stop_batch', {}, receive_batch_stopping, 'json');
     
     $('#batch-stop-button').html('Stopping batch...');
     $('#batch-stop-button').attr('disabled', 'disabled');
@@ -54,7 +54,7 @@ function receive_batch_stopping(data) {
 }
 
 function update_batch_progress() {
-    $.getJSON('/get_batch_progress', receive_batch_progress);
+    $.getJSON('get_batch_progress', receive_batch_progress);
 
     setTimeout(update_batch_progress, 3000);
 }

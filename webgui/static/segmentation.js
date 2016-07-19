@@ -97,7 +97,7 @@ function segmentation_parameters_changed() {
 	show_up_to('roi_editor');
     }
     
-    $.post('/set_segmentation_params/' + videoname + '/' + run,
+    $.post('set_segmentation_params/' + videoname + '/' + run,
 	   {
 	       segmentation_source: source,
 	       gauss_radius: gauss_radius,

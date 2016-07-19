@@ -15,7 +15,7 @@ function node_selected(event, node) {
     show_up_to('file_select');
 
     // Update the list of runs for that file
-    $.getJSON('/get_runs/' + videoname, receive_runs);
+    $.getJSON('get_runs/' + videoname, receive_runs);
     show_progress_indicator();
 }
 
@@ -49,7 +49,7 @@ function receive_runs(data) {
 }
 
 function convert_clicked() {
-    $.post('/convert/' + videoname, {}, function (data) {
+    $.post('convert/' + videoname, {}, function (data) {
 	if(data.success) {
 	    update_conversion_progress();
 	    hide_progress_indicator();
@@ -68,7 +68,7 @@ function convert_clicked() {
 }
 
 function update_conversion_progress() {
-    $.getJSON('/get_conversion_progress', receive_conversion_progress);
+    $.getJSON('get_conversion_progress', receive_conversion_progress);
 }
 $(document).ready(update_conversion_progress);
 
@@ -116,14 +116,14 @@ function run_clicked() {
     
     show_up_to('roi_editor');
 
-    $.getJSON('/get_segmentation/' + videoname + '/' + run,
+    $.getJSON('get_segmentation/' + videoname + '/' + run,
 	      receive_segmentations);
     show_progress_indicator();
 }
 
 function create_run_clicked() {
     run_t = $('#runname').val();
-    $.post('/create_run/' + videoname + '/' + run_t, {},
+    $.post('create_run/' + videoname + '/' + run_t, {},
 	   receive_runs, 'json');
 
     disable('#create-run-button');
@@ -134,7 +134,7 @@ function create_run_clicked() {
 function delete_run_clicked() {
     if(window.confirm('Are you sure you want to delete the run "'
 		      + run + '"?')) {
-	$.post('/delete_run/' + videoname + '/' + run, {},
+	$.post('delete_run/' + videoname + '/' + run, {},
 	       receive_runs, 'json');
 	show_progress_indicator();
     }

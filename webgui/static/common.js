@@ -22,7 +22,7 @@ var treeData = undefined;
  */
 
 function update_tree() {
-    $.getJSON('/get_tree/', receive_tree);
+    $.getJSON('get_tree/', receive_tree);
     show_progress_indicator();
 }
 $(document).ready(update_tree);

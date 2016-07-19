@@ -18,7 +18,7 @@ function calculate_statistics_clicked() {
     }
     
     current_stage = 'statistics';
-    $.getJSON('/get_statistics/' + videoname + '/' + run, receive_statistics);
+    $.getJSON('get_statistics/' + videoname + '/' + run, receive_statistics);
     initiated_calculation = true;
 
     setTimeout(update_statistics_progress, 500);
@@ -26,7 +26,7 @@ function calculate_statistics_clicked() {
 }
 
 function update_statistics_progress() {
-    $.getJSON('/get_statistics_progress/' + videoname + '/' + run, receive_statistics_progress);
+    $.getJSON('get_statistics_progress/' + videoname + '/' + run, receive_statistics_progress);
 }
 
 function receive_statistics_progress(data) {
@@ -52,7 +52,7 @@ function receive_statistics_progress(data) {
 	enable($("#statistics-button"));
 	if(data.finished && !initiated_calculation) {
 	    // pull the results
-	    $.getJSON('/get_statistics/' + videoname + '/' + run, receive_statistics);
+	    $.getJSON('get_statistics/' + videoname + '/' + run, receive_statistics);
 	}
     }
 }
@@ -61,7 +61,7 @@ $(document).ready(function() {
     $('#bin_form').submit(function(event) {
 	event.preventDefault();
 	var time_per_bin = $('#time_per_bin').val();
-	$.post('/get_statistics_rasterplot/' + videoname + '/' + run,
+	$.post('get_statistics_rasterplot/' + videoname + '/' + run,
 	       {time_per_bin: time_per_bin},
 	       function( data ) {
 		   fig_raster = data['rasterplot'];
@@ -236,7 +236,7 @@ function receive_statistics(data) {
 $(document).ready(function() {
     $('#save_button').on('click', function() {
 	var btn = $(this).button('loading');
-	$.post('/save_plots/' + videoname + "/" + run, function(){
+	$.post('save_plots/' + videoname + "/" + run, function(){
 	    btn.button('reset');
 	});
     });
@@ -245,7 +245,7 @@ $(document).ready(function() {
 $(document).ready(function() {
     $('#download_button').on('click', function() {
 	var btn = $(this).button('loading');
-	$.post('/save_plots/' + videoname + "/" + run, function(){
+	$.post('save_plots/' + videoname + "/" + run, function(){
 	    window.location.href = "/download/" + videoname + "-analysis";
 	    btn.button('reset');
 	});
