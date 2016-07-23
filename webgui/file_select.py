@@ -53,7 +53,7 @@ def delete_run(videoname, runname):
         Run.remove(videoname, runname)
         return jsonify({'runs': Run.ls(videoname)})
     except Exception as e:
-        return jsonify({'fail': str(e)})
+        return jsonify(error=str(e))
 
 
 @file_select_blueprint.route('/convert/<path:videoname>', methods=['POST'])
