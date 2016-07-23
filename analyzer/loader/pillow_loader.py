@@ -41,7 +41,8 @@ class PILLoader(Loader):
             if metadata[1].startswith("images="):
                 return int(metadata[1][7:])
         except:
-            return self.im.n_frames
+            pass
+        return self.im.n_frames
 
     # def get_metadata(self):
     #     f = open(self.path, 'rb')
