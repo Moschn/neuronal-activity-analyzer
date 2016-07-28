@@ -25,7 +25,7 @@ function update_info_line() {
     }
 
     text += 'Developed at Laboratory for Biosensors and Bioelectronics';
-    text += ', ETH Zurich';
+    text += ', ETH Zurich, <a href="http://www.lbb.ethz.ch/people/PhD_Students/aemathia">Contact</a>';
 
     $('#infoline').html(text);
 }
