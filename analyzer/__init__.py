@@ -62,9 +62,11 @@ def segment(loader, config):
         source, config['gauss_radius'])
 
     # Parse threshold parameter
-    if config['threshold'] in ['li', 'otsu', 'yen']:
+    try:
+         config['threshold'] = float(config['threshold'])
+    except ValueError:
         config['threshold'] = get_thresholds(filtered)[config['threshold']]
-    config['threshold'] = float(config['threshold'])
+
 
     # Apply threshold
     thresholded = analyzer.threshold.threshold.Threshold.threshold(
