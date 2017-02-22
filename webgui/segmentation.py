@@ -42,7 +42,7 @@ def set_segmentation_params(videoname, runname):
             pixel_per_um = run['pixel_per_um']
             for key in ['segmentation_source', 'gauss_radius', 'threshold',
                         'segmentation_algorithm', 'spike_detection_algorithm',
-                        'nSD_n']:
+                        'nSD_n', 'threshold_applicator']:
                 config[key] = request.values.get(key, config[key])
                 run['config'] = config
 

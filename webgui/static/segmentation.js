@@ -83,6 +83,7 @@ function segmentation_parameters_changed() {
     var source = $("input[name='segmentation_source']:checked").val();
     var gauss_radius = $('#gauss_radius').val();
     var threshold = $('#threshold').val();
+    var threshold_applicator = $("input[name='threshold_applicator']:checked").val();
     var algorithm = $("input[name='segmentation_algorithm']:checked").val();
     var spike_algo = $("input[name='spike_algorithm']:checked").val();
     var nSD_n = $("#nSD_n").val();
@@ -102,6 +103,7 @@ function segmentation_parameters_changed() {
 	       segmentation_source: source,
 	       gauss_radius: gauss_radius,
 	       threshold: threshold,
+	       threshold_applicator: threshold_applicator,
 	       segmentation_algorithm: algorithm,
 	       spike_detection_algorithm: spike_algo,
 	       nSD_n: nSD_n

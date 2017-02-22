@@ -270,23 +270,25 @@ class="form-control" style="margin-top:10px" disabled>
 			    <canvas id="thresholded_image" width="400"  style="margin: 0 auto; display: block;"></canvas>
 			</div>
 			<div class="col-md-4">
-			    <label for="threshold">Threshold(Percent of dynamic range):</label>
-			    <input type="text" class="form-control" id="threshold" name="threshold" value="li">
-			    <div class="form-group btn-group">
-				<input class="btn btn-default" type="submit" onclick="apply_li()" value="Li">
-				<input class="btn btn-default" type="submit" onclick="apply_otsu()" value="Otsu">
-				<input class="btn btn-default" type="submit" onclick="apply_yen()" value="Yen">
-			    </div>
-
-          <form>
-				<label for="thresh_appl">Threshold Applicator: </label>
-				<div class="form-group" id="thresh_appl">
-				    <input type="radio" name="segmentation_algorithm" value="hardthreshold" id="thresh_appl_hardthreshold" onclick="thresh_appl_parameters_changed()" checked>Hard threshold<br>
-				    <input type="radio" name="segmentation_algorithm" value="dynamicthreshold" id="thresh_appl_dynamicthreshold" onclick="thresh_appl_parameters_changed()">Dynamic threshold<br>
+			    <div class="row">
+				<label for="threshold">Threshold<br />(Percent of dynamic range):</label>
+				<input type="text" class="form-control" id="threshold" name="threshold" value="li">
+				<div class="form-group btn-group">
+				    <input class="btn btn-default" type="submit" onclick="apply_li()" value="Li">
+				    <input class="btn btn-default" type="submit" onclick="apply_otsu()" value="Otsu">
+				    <input class="btn btn-default" type="submit" onclick="apply_yen()" value="Yen">
 				</div>
-			    </form>
-
-			    <input type="submit" onclick="segmentation_parameters_changed()" value="go" class="btn btn-primary">
+				<input type="submit" onclick="segmentation_parameters_changed()" value="go" class="btn btn-primary">
+			    </div>
+			    <div class="row" style="margin-top:30px;">
+				<form>
+				    <label for="thresh_appl">Threshold Applicator: </label>
+				    <div class="form-group" id="thresh_appl">
+					<input type="radio" name="threshold_applicator" value="hardthreshold" id="thresh_appl_hardthreshold" onclick="segmentation_parameters_changed()" checked>Hard threshold<br>
+					<input type="radio" name="threshold_applicator" value="dynamicthreshold" id="thresh_appl_dynamicthreshold" onclick="segmentation_parameters_changed()">Dynamic threshold<br>
+				    </div>
+				</form>
+			    </div>
 			</div>
 		    </div>
 		    <div class="col-md-6">
