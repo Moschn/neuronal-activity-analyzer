@@ -11,8 +11,8 @@
 	<script src="{{ url_for('static', filename='jqueryUploader/js/jquery.iframe-transport.js') }}"></script>
 	<script src="{{ url_for('static', filename='jqueryUploader/js/jquery.fileupload.js') }}"></script>
 	<link rel="stylesheet" href="{{ url_for('static', filename='jqueryUploader/css/jquery.fileupload.css') }}">
-	
-	
+
+
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 	<script src="https://code.highcharts.com/modules/heatmap.js"></script>
 	<script src="http://code.highcharts.com/modules/exporting.js"></script>
@@ -148,7 +148,7 @@
 				</div>
 			    </div>
 			    <br>
-			    
+
 			    <div class="row">
 				<div class="col-md-4">
 				    <input id="fileupload" type="file" name="file">
@@ -159,7 +159,7 @@
 				    </div>
 				</div>
 			    </div>
-			    
+
 			    <br>
 			    <span id="speed"> </span>
 			    <div id="tree"></div>
@@ -277,6 +277,15 @@ class="form-control" style="margin-top:10px" disabled>
 				<input class="btn btn-default" type="submit" onclick="apply_otsu()" value="Otsu">
 				<input class="btn btn-default" type="submit" onclick="apply_yen()" value="Yen">
 			    </div>
+
+          <form>
+				<label for="thresh_appl">Threshold Applicator: </label>
+				<div class="form-group" id="thresh_appl">
+				    <input type="radio" name="segmentation_algorithm" value="hardthreshold" id="thresh_appl_hardthreshold" onclick="thresh_appl_parameters_changed()" checked>Hard threshold<br>
+				    <input type="radio" name="segmentation_algorithm" value="dynamicthreshold" id="thresh_appl_dynamicthreshold" onclick="thresh_appl_parameters_changed()">Dynamic threshold<br>
+				</div>
+			    </form>
+
 			    <input type="submit" onclick="segmentation_parameters_changed()" value="go" class="btn btn-primary">
 			</div>
 		    </div>
@@ -447,7 +456,7 @@ class="form-control" style="margin-top:10px" disabled>
 		<div class="row">
 		    <div class="col-md-5">
 			<div id="overview" style="position: relative; width:400px; height:450px; display: block; margin: 0 auto;">
-			    <canvas id='statistics_layer0' width="400" 
+			    <canvas id='statistics_layer0' width="400"
 				    style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
 			    <canvas id='statistics_layer1' width="400" height="400"
 				    style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>

@@ -2,6 +2,8 @@ import analyzer.loader.loader
 from analyzer.loader.loader import Loader
 import analyzer.plot
 import analyzer.util
+import analyzer.apply_threshold
+import analyzer.apply_threshold.apply_threshold
 import analyzer.segmentation
 import analyzer.segmentation.segmentation
 import analyzer.threshold
@@ -67,10 +69,11 @@ def segment(loader, config):
     except ValueError:
         config['threshold'] = get_thresholds(filtered)[config['threshold']]
 
-
     # Apply threshold
-    thresholded = analyzer.threshold.threshold.Threshold.threshold(
-        filtered, config['threshold'])
+    threshold_applicator = analyzer.util.find_impl(
+        analyzer.apply_threshold, analyzer.apply_threshold.apply_threshold.ApplyThreshold,
+        config['threshold_applicator'])
+    thresholded = threshold_applicator().apply_threshold(filtered, config['threshold'])
 
     # Apply segmentation algorithm
     segmentation_class = analyzer.util.find_impl(
