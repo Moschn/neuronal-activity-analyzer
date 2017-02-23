@@ -4,6 +4,7 @@ default_config = {
     'segmentation_source': 'mean',  # name of implementation
     'gauss_radius': 2.,             # sigma for gauss filter in pixels
     'threshold': 'li',              # float from 0 to 1 or name of algorithm
+    'threshold_applicator': 'dynamicthreshold', # name of implementation
     'segmentation_algorithm': 'watershed',  # name of implementation
     'integrater': 'mean',           # name of implementation
     'spike_detection_algorithm': 'wdm',  # name of implementation

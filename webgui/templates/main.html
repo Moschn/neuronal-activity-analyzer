@@ -11,8 +11,8 @@
 	<script src="{{ url_for('static', filename='jqueryUploader/js/jquery.iframe-transport.js') }}"></script>
 	<script src="{{ url_for('static', filename='jqueryUploader/js/jquery.fileupload.js') }}"></script>
 	<link rel="stylesheet" href="{{ url_for('static', filename='jqueryUploader/css/jquery.fileupload.css') }}">
-	
-	
+
+
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 	<script src="https://code.highcharts.com/modules/heatmap.js"></script>
 	<script src="http://code.highcharts.com/modules/exporting.js"></script>
@@ -134,10 +134,16 @@
 		    <div class="col-md-6">
 			<div class="form-group">
 		            <div class="row" style="display: flex; align-items: center;">
-				<div class="col-md-4">
+
+        <div class="col-md-4">
+          {% if config.UPLOAD_ENABLE %}
 				    <button id="convert-button" class="btn btn-success" disabled="1" onclick="convert_clicked()">
 					Convert to tif</button>
+          {% else %}
+          <p>File upload is currently disabled</p>
+          {% endif %}
 				</div>
+
 				<div class="col-md-8">
 				    <div id="conversion-status" class="progress" style="display: none; text-align: center;">
 					<div id="conversion-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="70"
@@ -148,18 +154,23 @@
 				</div>
 			    </div>
 			    <br>
-			    
+
 			    <div class="row">
 				<div class="col-md-4">
+        {% if config.UPLOAD_ENABLE %}
 				    <input id="fileupload" type="file" name="file">
+        {% endif %}
 				</div>
+
 				<div class="col-md-8">
+        {% if config.UPLOAD_ENABLE %}
 				    <div id="progress" class="progress" style="min-width: 2em;">
 					<div id="progress-content" class="progress-bar progress-bar-success"></div>
 				    </div>
+        {% endif %}
 				</div>
 			    </div>
-			    
+
 			    <br>
 			    <span id="speed"> </span>
 			    <div id="tree"></div>
@@ -270,14 +281,25 @@ class="form-control" style="margin-top:10px" disabled>
 			    <canvas id="thresholded_image" width="400"  style="margin: 0 auto; display: block;"></canvas>
 			</div>
 			<div class="col-md-4">
-			    <label for="threshold">Threshold(Percent of dynamic range):</label>
-			    <input type="text" class="form-control" id="threshold" name="threshold" value="li">
-			    <div class="form-group btn-group">
-				<input class="btn btn-default" type="submit" onclick="apply_li()" value="Li">
-				<input class="btn btn-default" type="submit" onclick="apply_otsu()" value="Otsu">
-				<input class="btn btn-default" type="submit" onclick="apply_yen()" value="Yen">
+			    <div class="row">
+				<label for="threshold">Threshold<br />(Percent of dynamic range):</label>
+				<input type="text" class="form-control" id="threshold" name="threshold" value="li">
+				<div class="form-group btn-group">
+				    <input class="btn btn-default" type="submit" onclick="apply_li()" value="Li">
+				    <input class="btn btn-default" type="submit" onclick="apply_otsu()" value="Otsu">
+				    <input class="btn btn-default" type="submit" onclick="apply_yen()" value="Yen">
+				</div>
+				<input type="submit" onclick="segmentation_parameters_changed()" value="go" class="btn btn-primary">
 			    </div>
-			    <input type="submit" onclick="segmentation_parameters_changed()" value="go" class="btn btn-primary">
+			    <div class="row" style="margin-top:30px;">
+				<form>
+				    <label for="thresh_appl">Threshold Applicator: </label>
+				    <div class="form-group" id="thresh_appl">
+					<input type="radio" name="threshold_applicator" value="hardthreshold" id="thresh_appl_hardthreshold" onclick="segmentation_parameters_changed()" checked>Hard threshold<br>
+					<input type="radio" name="threshold_applicator" value="dynamicthreshold" id="thresh_appl_dynamicthreshold" onclick="segmentation_parameters_changed()">Dynamic threshold<br>
+				    </div>
+				</form>
+			    </div>
 			</div>
 		    </div>
 		    <div class="col-md-6">
@@ -447,7 +469,7 @@ class="form-control" style="margin-top:10px" disabled>
 		<div class="row">
 		    <div class="col-md-5">
 			<div id="overview" style="position: relative; width:400px; height:450px; display: block; margin: 0 auto;">
-			    <canvas id='statistics_layer0' width="400" 
+			    <canvas id='statistics_layer0' width="400"
 				    style="position: absolute; top: 0; left: 0; z-index: 0;"></canvas>
 			    <canvas id='statistics_layer1' width="400" height="400"
 				    style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
