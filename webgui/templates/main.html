@@ -134,10 +134,16 @@
 		    <div class="col-md-6">
 			<div class="form-group">
 		            <div class="row" style="display: flex; align-items: center;">
-				<div class="col-md-4">
+
+        <div class="col-md-4">
+          {% if config.UPLOAD_ENABLE %}
 				    <button id="convert-button" class="btn btn-success" disabled="1" onclick="convert_clicked()">
 					Convert to tif</button>
+          {% else %}
+          <p>File upload is currently disabled</p>
+          {% endif %}
 				</div>
+
 				<div class="col-md-8">
 				    <div id="conversion-status" class="progress" style="display: none; text-align: center;">
 					<div id="conversion-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="70"
@@ -151,12 +157,17 @@
 
 			    <div class="row">
 				<div class="col-md-4">
+        {% if config.UPLOAD_ENABLE %}
 				    <input id="fileupload" type="file" name="file">
+        {% endif %}
 				</div>
+
 				<div class="col-md-8">
+        {% if config.UPLOAD_ENABLE %}
 				    <div id="progress" class="progress" style="min-width: 2em;">
 					<div id="progress-content" class="progress-bar progress-bar-success"></div>
 				    </div>
+        {% endif %}
 				</div>
 			    </div>
 
