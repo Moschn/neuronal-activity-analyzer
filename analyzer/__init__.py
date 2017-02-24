@@ -73,7 +73,7 @@ def segment(loader, config):
     threshold_applicator = analyzer.util.find_impl(
         analyzer.apply_threshold, analyzer.apply_threshold.apply_threshold.ApplyThreshold,
         config['threshold_applicator'])
-    thresholded = threshold_applicator().apply_threshold(filtered, config['threshold'])
+    thresholded = threshold_applicator().apply_threshold(loader, filtered, config['threshold'])
 
     # Apply segmentation algorithm
     segmentation_class = analyzer.util.find_impl(

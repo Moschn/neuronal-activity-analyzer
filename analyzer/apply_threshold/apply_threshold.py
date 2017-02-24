@@ -7,5 +7,5 @@ import skimage.segmentation
 
 class ApplyThreshold(object):
 
-    def apply_threshold(self, image, threshold):
+    def apply_threshold(self, loader, image, threshold):
         raise NotImplemented()
