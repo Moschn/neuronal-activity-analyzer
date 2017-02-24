@@ -21,7 +21,7 @@ file_select_blueprint = Blueprint('file_select', __name__)
 @file_select_blueprint.route('/get_runs/<path:videoname>')
 def get_runs(videoname):
     try:
-        if videoname.endswith('.tif'):
+        if videoname.endswith('.tif') or videoname.endswith('.tiff'):
             return jsonify(runs=Run.ls(videoname))
         elif videoname.endswith('.cxd'):
             return jsonify(error='need_conversion')

@@ -29,7 +29,7 @@ def make_tree(path_arg):
                 if subtree:
                     tree['nodes'].append(subtree)
             else:
-                if entry.name.endswith(".tif") or entry.name.endswith(".cxd"):
+                if entry.name.endswith(".tif") or entry.name.endswith(".tiff") or entry.name.endswith(".cxd"):
                     tree['nodes'].append(dict(text=entry.name))
     if not tree['nodes']:
         return {}
