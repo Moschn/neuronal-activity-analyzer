@@ -263,7 +263,8 @@ class="form-control" style="margin-top:10px" disabled>
 			<h3>Thresholding</h3>
 			<p style="text-align: justify;">The image is divided into background and neurons by defining a threshold. Every pixel brighter than the threshold will belong to foreground and every pixel darker to the background. There are several algorithms to choose an appropriate threshold. Click the buttons to use a value provided by an algorithm or define one manually.
 			</p>
-			<p style="text-align: justify;">The values "li", "otsu" and "yen" and any number are valid values. If you use the batch processing feature li, otsu and yen thresholds will be calculated for each video individually if given as the algorithm name.</p>
+			<p style="text-align: justify;">The values "li", "otsu" and "yen" and any number are valid values. If you use the batch processing feature li, otsu and yen thresholds will be calculated for each video individually if given as the algorithm name. Hard threshold will apply the same threshold to the entire image while dynamic threshold will optimize the threshold for every region of interest. </p>
+
 		    </div>
 		    <div class="col-md-6">
 			<h3>Segmentation Result</h3>
@@ -293,7 +294,7 @@ class="form-control" style="margin-top:10px" disabled>
 			    </div>
 			    <div class="row" style="margin-top:30px;">
 				<form>
-				    <label for="thresh_appl">Threshold Applicator: </label>
+				    <label for="thresh_appl">Threshold applicator: </label>
 				    <div class="form-group" id="thresh_appl">
 					<input type="radio" name="threshold_applicator" value="hardthreshold" id="thresh_appl_hardthreshold" onclick="segmentation_parameters_changed()" checked>Hard threshold<br>
 					<input type="radio" name="threshold_applicator" value="dynamicthreshold" id="thresh_appl_dynamicthreshold" onclick="segmentation_parameters_changed()">Dynamic threshold<br>

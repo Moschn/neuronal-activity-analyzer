@@ -4,7 +4,7 @@ ROOT_DIR = abspath(dirname(__file__))
 
 VIDEO_FOLDER = join(ROOT_DIR, 'uploads')
 UPLOAD_FOLDER = join(VIDEO_FOLDER, 'upload')
-DATA_FOLDER = join(ROOT_DIR, '/home/mathias/NeuroAnalyzer/TestDataMovie/')
+DATA_FOLDER = join(ROOT_DIR, 'data')
 
 UPLOAD_MAX_SIZE = 200000000000  # 200gb
 

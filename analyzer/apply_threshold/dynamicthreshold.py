@@ -13,9 +13,9 @@ class DynamicThreshold(ApplyThreshold):
 
     def apply_threshold(self, loader, image, threshold):
         # Pixels per um for calculating contours
-        # Min cell diameter 3um => min cell area ~7um^2
+        # Min cell diameter 8um => min cell area ~5um^2
         # Max cell diameter 50um => max cell area ~2000um^2
-        cell_diameter_limits_um = [3.,50.]
+        cell_diameter_limits_um = [8.,50.]
         pixel_per_um = loader.pixel_per_um
         cell_area_limits_px = [np.pi*(d*pixel_per_um/2)**2 for d in cell_diameter_limits_um]
 
@@ -114,7 +114,6 @@ class DynamicThreshold(ApplyThreshold):
             color_range = np.amax(image) - np.amin(image)
             absolute_threshold = np.amin(image) + threshold*color_range
             t=absolute_threshold
-        print('Threshold: {}'.format(t))
         for m in np.arange(1,15,0.25):
             thresholded=np.zeros(np.shape(image))
             thresholded[image>m*t]=1
