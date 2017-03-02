@@ -115,7 +115,7 @@
 	       --
 	       -------------------------------------------------------------------------->
 	    <div id='file_select'>
-		<p>Welcome to the Neuronal activity analyzer, a tool for automated statistical analysis of Calcium Imaging Data.
+		<p>Welcome to the Neuronal activity analyzer, a tool for automated statistical analysis of calcium imaging data.
 		    This tool aids in interpreting data aquired with flourescence imaging of activity in small neuronal cultures.</p>
 		<p>Analysis is done in 3 steps. First a video file is uploaded and an analysis session is created. We call such an analysis session
 		    a run. Runs are saved and can be viewed again later. You can always close your browser window and continue where you left by
@@ -125,7 +125,7 @@
 		<p>To analyze a file, choose it from the list or upload a new file. The file needs to be loadable by the "pillow" library
 		    (see <a href="http://pillow.readthedocs.io/en/3.2.x/handbook/image-file-formats.html">here</a>), we recommend the
 		    tiff format. If the file is in the cxd format, it can be converted to tiff using the convert button.</p>
-		<p>The tool is Open Source software and can be used and extended freely. If you want to analyse your own data, we recommend running it
+		<p>The tool is open source software and can be used and extended freely. If you want to analyse your own data, we recommend running it
 		    locally or on a server you have a fast connection to.
 		    <a href="https://github.com/Moschn/neuronal-activity-analyzer">The source code and documentation can be found on Github</a>.</p>
 
@@ -140,7 +140,7 @@
 				    <button id="convert-button" class="btn btn-success" disabled="1" onclick="convert_clicked()">
 					Convert to tif</button>
           {% else %}
-          <p>File upload is currently disabled</p>
+          <p>File upload is currently disabled.</p>
           {% endif %}
 				</div>
 
@@ -226,8 +226,7 @@ class="form-control" style="margin-top:10px" disabled>
 		    <div class="col-md-6">
 			<h3>Gauss filtering</h3>
 			<p style="text-align: justify;">Here we filter noise, so random light pixels do not appear as small neurons.<br>
-			    Increase, if axons are recognised as neurons<br>
-			    Decrease, if small neurons disappear
+			    Increase, if axons are recognised as neurons. Decrease, if small neurons disappear.
 			</p>
 		    </div>
 		</div>
@@ -267,12 +266,12 @@ class="form-control" style="margin-top:10px" disabled>
 
 		    </div>
 		    <div class="col-md-6">
-			<h3>Segmentation Result</h3>
+			<h3>Segmentation result</h3>
 			<p style="text-align: justify;">
 			    Last we apply an algorithm to seperate neurons, which are overlapping.
 			</p>
 			<p style="text-align: justify;">
-			    To just use every continuous region as one neuron, select 'fill'. More information about the <a href="https://en.wikipedia.org/wiki/Watershed_(image_processing)">watershed</a> and <a href="https://en.wikipedia.org/wiki/Random_walker_algorithm">random walker</a> algorithms can be found for example on wikipedia.
+			    To just use every continuous region as one neuron, select 'fill'. More information about the <a href="https://en.wikipedia.org/wiki/Watershed_(image_processing)">watershed</a> and <a href="https://en.wikipedia.org/wiki/Random_walker_algorithm">random walker</a> algorithms can be found for example on Wikipedia.
 			</p>
 		    </div>
 		</div>
@@ -283,7 +282,7 @@ class="form-control" style="margin-top:10px" disabled>
 			</div>
 			<div class="col-md-4">
 			    <div class="row">
-				<label for="threshold">Threshold<br />(Percent of dynamic range):</label>
+				<label for="threshold">Threshold<br />(percent of dynamic range):</label>
 				<input type="text" class="form-control" id="threshold" name="threshold" value="li">
 				<div class="form-group btn-group">
 				    <input class="btn btn-default" type="submit" onclick="apply_li()" value="Li">
@@ -319,7 +318,7 @@ class="form-control" style="margin-top:10px" disabled>
 			</div>
 		    </div>
 		</div>
-		<h2 style="text-align: center">Spike Detection</h2>
+		<h2 style="text-align: center">Spike detection</h2>
 		<p>We will try to detect spikes in the activity. Currently two methods are available. The easy way is to call everything brighter than a certain threshold a spike. We do this in terms of standard deviations. For this algorithm you need to provide a threshold to use. Good values are probably somewhere in the range 1 to 5.</p>
 		<p>The more advanced method is to use wavelets to detect spikes. A function which is supposed to look like a normal spike is matched with the signal at different offsets and scaling factors. Regions of high similarity are recognized as spikes. For more details see the <a href="https://github.com/Moschn/neuronal-activity-analyzer/blob/master/docs/automated_analysis_of_neuronal_cultures.pdf">report on Github</a>.</p>
 		<div class="row">
@@ -351,7 +350,7 @@ class="form-control" style="margin-top:10px" disabled>
 		    <div class="col-md-4" style="text-align: center;">
 			<p>If you have many similar files, you can try to run the settings set above on all files in a folder with this button.</p>
 			<button class="btn-lg btn-primary" data-toggle="modal" data-target="#batchFolderChooser">
-			    Use settings for batch processing
+			    Use settings for batch processing.
 			</button>
 		    </div>
 		    <div class="col-md-4"></div>
@@ -365,7 +364,7 @@ class="form-control" style="margin-top:10px" disabled>
 		    <div class="modal-content">
 			<div class="modal-header">
 			    <button type="button" class="close" data-dismiss="modal">&times;</button>
-			    <h4 class="modal-title">Choose folder to run batch on</h4>
+			    <h4 class="modal-title">Choose folder to run batch on.</h4>
 			</div>
 			<div class="modal-body">
 			    <div id="batchTree"></div>
