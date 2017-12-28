@@ -1,9 +1,10 @@
-numpy
+numpy==1.11.3
 pillow
-matplotlib
+matplotlib==1.5.3
 scikit-image
-scipy
+scipy==0.18.1
 flask
 flask-compress
+werkzeug==0.12.2
 mpld3
 gevent
