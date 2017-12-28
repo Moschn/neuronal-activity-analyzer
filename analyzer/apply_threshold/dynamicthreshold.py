@@ -38,7 +38,7 @@ class DynamicThreshold(ApplyThreshold):
         # fill empty image with unique contours
         for i in range(len(entries)):
             bbPath = mplPath.Path(contours_list[entries[i]])
-            area = bbPath.contains_points(img_coords).reshape(im_width,im_width)
+            area = bbPath.contains_points(img_coords).reshape(im_width,im_height)
             segmented +=  area.astype(int)
 
         # Hack: set overlapping contour areas to 1
